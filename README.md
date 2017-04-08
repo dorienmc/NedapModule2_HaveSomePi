@@ -52,3 +52,5 @@ These protocols reside in the Data Link or Transport Layers of the OSI model.
 
 For more info see [Wikipedia](https://en.wikipedia.org/wiki/Automatic_repeat_request)
 
+# Tips
+- Log `System.out()` info to the pi terminal with `tail -f  /var/log/syslog`

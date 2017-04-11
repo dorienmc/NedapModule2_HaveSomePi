@@ -12,14 +12,14 @@ public enum Flag {
     this.value = (byte) value;
   }
 
-  public static byte setFlag(Flag flag, byte controlFlags){
+  public static int setFlag(Flag flag, int controlFlags){
     if(!isSet(flag, controlFlags)) {
       controlFlags += flag.value;
     }
     return controlFlags;
   }
 
-  public static boolean isSet(Flag flag, byte controlFlags){
+  public static boolean isSet(Flag flag, int controlFlags){
     return (controlFlags & flag.value) != 0;
   }
 

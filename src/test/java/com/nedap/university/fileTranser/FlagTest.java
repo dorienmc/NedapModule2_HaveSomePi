@@ -10,7 +10,7 @@ import org.junit.Test;
  */
 public class FlagTest {
   Flag flag;
-  byte flags;
+  int flags;
 
   @Before
   public void setup() throws Exception {

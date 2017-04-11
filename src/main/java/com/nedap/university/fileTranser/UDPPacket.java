@@ -1,43 +1,144 @@
 package com.nedap.university.fileTranser;
 
+import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
+import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.util.zip.Checksum;
+import java.util.zip.CRC32;
+
 /**
  * UDP packet with a datagram and some extra info.
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class UDPPacket {
-  int sourcePort; //Senders port                                2bytes
-  int destPort;   //Receivers port                              2bytes
-  int length;     //Length in bytes of UDP header + UDP data    2bytes
-  int checksum;   //User for error checking                     2bytes
-  int seqNumber;  //Used to ensure delivery guarantee           2bytes
-  int ackNumber;  //Used to ensure correct order                2bytes
-  int flags;      //Used to describe request type               1byte
-  int id;         //File id in case of fragmentation            1byte
-  int offset;     //Offset in bytes of fragment                 2byte
+  MyUDPHeader header;   //Header settings, in the MyUDPHeader format
+  byte[] data;          //Payload data
 
-  public UDPPacket(int sourcePort, int destPort, int seqNumber, int ackNumber) {
-    //TODO
-  }
-
+  /*
+  * Create UDPPacket
+   */
   public UDPPacket(int sourcePort, int destPort, int seqNumber, int ackNumber, int id, int offset) {
-    //TODO
+    data = new byte[0];
+    header = new MyUDPHeader(sourcePort,destPort,seqNumber,ackNumber,id,offset);
+    updateChecksum();
   }
 
-  public void setLength(int length) {
-    this.length = length;
+  /*
+  * Create UDPPacket
+   */
+  public UDPPacket(int sourcePort, int destPort, int seqNumber, int ackNumber) {
+    this(sourcePort,destPort,seqNumber,ackNumber,1,0);
   }
 
-  public void setChecksum(int checksum) {
-    this.checksum = checksum;
+  /*
+  * Create UDPPacket from DatagramPacket.
+   */
+  public UDPPacket(DatagramPacket packet) throws ArrayIndexOutOfBoundsException {
+    header = new MyUDPHeader();
+    byte[] packetData = packet.getData();
+    if(packetData.length < header.getHeaderSize()) {
+      throw new ArrayIndexOutOfBoundsException(
+          "Expected at least " + header.getHeaderSize() + "bytes of data.");
+    }
+
+    //Split datagram packet into UDP header fields and data
+    byte[] headerFields = new byte[header.getHeaderSize()];
+    System.arraycopy(packetData,0,headerFields,0,headerFields.length);
+    header = new MyUDPHeader(headerFields);
+
+
+    data = new byte[packet.getLength() - headerFields.length];
+    System.arraycopy(packetData,headerFields.length,data,0,data.length);
+
+//    //TODO check if checksum is correct?
+//    //TODO check if ack and seq are correct?
   }
 
+
+  /**
+   * Convert UDPPacket to Datagram.
+   */
+  public DatagramPacket toDatagram(InetAddress destAddress) {
+    DatagramPacket packet = new DatagramPacket(this.getPkt(),0,getLength(),
+        destAddress, header.getField(HeaderField.DEST_PORT));
+    return packet;
+  }
+
+  /****** Flag methods *****/
   public void setFlags(int flags) {
-    this.flags = flags;
+    header.setField(HeaderField.FLAGS,flags);
+    updateChecksum();
+  }
+
+  public boolean isFlagSet(Flag flag) {
+    return Flag.isSet(flag, header.getField(HeaderField.FLAGS));
+  }
+
+  public int getFlags() {
+    return header.getField(HeaderField.FLAGS);
+  }
+
+  /****** Getters and Setters *****/
+  public void setData(byte[] data) {
+    this.data = data;
+    setLength(data.length + header.getHeaderSize());
+    updateChecksum();
+  }
+
+  private void setLength(int length) {
+    header.setField(HeaderField.LENGTH,length);
   }
 
   public byte[] getData() {
-    //TODO
-    return new byte[0];
+    return data;
   }
-  
+
+  public short getSourcePort() {
+    return (short)header.getField(HeaderField.SOURCE_PORT);
+  }
+
+  public int getLength() {
+    return header.getField(HeaderField.LENGTH);
+  }
+
+  private byte[] getPkt() {
+    ByteBuffer buffer = ByteBuffer.allocate(getLength());
+    buffer.put(header.getHeader());
+    if(data.length > 0) {
+      buffer.put(data);
+    }
+
+    return buffer.array();
+  }
+
+  /****** Checksum methods *****/
+  /* Warning updates the checksum field */
+  public int updateChecksum() {
+    Checksum checksum = new CRC32();
+
+    header.setField(HeaderField.CHECKSUM,0);
+    checksum.update(getPkt(),0,header.getField(HeaderField.LENGTH));
+
+    int checksumValue = (short)checksum.getValue();
+    header.setField(HeaderField.CHECKSUM,checksumValue);
+
+    return checksumValue;
+  }
+
+  private boolean checkChecksum() {
+    Checksum checksum = new CRC32();
+
+    checksum.update(getPkt(),0,header.getField(HeaderField.LENGTH));
+    return checksum.getValue() == 0;
+  }
+
+  @Override
+  public String toString() {
+    String result = "Packet representation in Hex.\n";
+    result += "Header: " + HexBin.encode(header.getHeader());
+    result += "\nData: " + HexBin.encode(data);
+    return result;
+  }
 }

@@ -9,8 +9,15 @@ public class MyUDPHeader {
   private ByteBuffer buffer;
 
   public enum HeaderField {
-    SOURCE_PORT(0,2), DEST_PORT(2,2), LENGTH(4,2), CHECKSUM(6,4), SEQ_NUMBER(10,2), ACK_NUMBER(12,2),
-    FLAGS(14,1), FILE_ID(15,1), OFFSET(16,2);
+    SOURCE_PORT(0,2), //Port of sender
+    DEST_PORT(2,2),   //Port of receiver
+    LENGTH(4,2),      //Length of UDP packet, eg. datagrampacket.getData()
+    CHECKSUM(6,4),    //Checksum for UDP packet
+    SEQ_NUMBER(10,2), //Sequence number
+    ACK_NUMBER(12,2), //Expected sequence number of next response
+    FLAGS(14,1),      //Option flags (see fileTransfer.Flag)
+    FILE_ID(15,1),    //File id, for fragmented files
+    OFFSET(16,2);     //Offset in fragmented files (in bytes) //TODO count in bigger chunks? Otherwise this field is to small
 
     private int length;
     private int startIndex;
@@ -59,6 +66,15 @@ public class MyUDPHeader {
     setField(HeaderField.ACK_NUMBER,ackNumber);
     setField(HeaderField.FILE_ID, id);
     setField(HeaderField.OFFSET, offset);
+  }
+
+  public MyUDPHeader(byte[] headerFields) throws ArrayIndexOutOfBoundsException {
+    if (headerFields.length != getHeaderSize()) {
+      throw new ArrayIndexOutOfBoundsException(
+          String.format("Expected %d bytes but got %d", HeaderField.values().length, headerFields.length));
+    }
+
+    buffer = ByteBuffer.allocate(getHeaderSize()).put(headerFields);
   }
 
   public int getHeaderSize() {

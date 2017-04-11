@@ -13,7 +13,7 @@ public class MyUDPHeaderTest {
   MyUDPHeader header;
   int sourcePort = 9297;
   int destPort = 5353;
-  int length = 16;
+  int length = 18;
   int checksum = 0;
   int seqNumber = 13;
   int ackNumber = 255;
@@ -45,14 +45,14 @@ public class MyUDPHeaderTest {
     assertEquals(HeaderField.values().length, expectedValues.length);
 
     for(int i = 0; i < expectedValues.length; i++) {
-      assertEquals(String.format("Value of %s should be %s",HeaderField.values()[i],expectedValues[i]),
+      assertEquals(String.format("Value of %s should be %s (Note: -1 means value is not parsed!)",HeaderField.values()[i],expectedValues[i]),
           expectedValues[i],header.getField(HeaderField.values()[i]));
     }
   }
 
   @Test
   public void getHeader() throws Exception {
-    byte[] expected = {36,81,20,(byte) 233,0,16,0,0,0,13,0,(byte) 255,0,1,0,0};
+    byte[] expected = {36,81,20,(byte) 233,0,(byte)length,0,0,0,0,0,13,0,(byte) 255,0,1,0,0};
     assertArrayEquals(expected, header.getHeader());
   }
 

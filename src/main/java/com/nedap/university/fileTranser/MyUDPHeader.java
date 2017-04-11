@@ -9,8 +9,8 @@ public class MyUDPHeader {
   private ByteBuffer buffer;
 
   public enum HeaderField {
-    SOURCE_PORT(0,2), DEST_PORT(2,2), LENGTH(4,2), CHECKSUM(6,2), SEQ_NUMBER(8,2), ACK_NUMBER(10,2),
-    FLAGS(12,1), FILE_ID(13,1), OFFSET(14,2);
+    SOURCE_PORT(0,2), DEST_PORT(2,2), LENGTH(4,2), CHECKSUM(6,4), SEQ_NUMBER(10,2), ACK_NUMBER(12,2),
+    FLAGS(14,1), FILE_ID(15,1), OFFSET(16,2);
 
     private int length;
     private int startIndex;
@@ -75,6 +75,10 @@ public class MyUDPHeader {
         buffer.putShort(field.startIndex, (short) value);
         break;
       }
+      case 4: {
+        buffer.putInt(field.startIndex,value);
+        break;
+      }
     }
   }
 
@@ -86,6 +90,9 @@ public class MyUDPHeader {
       }
       case 2: {
         return buffer.getShort(field.startIndex);
+      }
+      case 4: {
+        return buffer.getInt(field.startIndex);
       }
     }
     return -1;

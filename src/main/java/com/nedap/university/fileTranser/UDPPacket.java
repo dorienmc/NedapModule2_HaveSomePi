@@ -95,13 +95,22 @@ public class UDPPacket {
     return data;
   }
 
-  public short getSourcePort() {
-    return (short)header.getField(HeaderField.SOURCE_PORT);
+  public int getSourcePort() {
+    return header.getField(HeaderField.SOURCE_PORT);
+  }
+
+  public int getDestPort() {
+    return header.getField(HeaderField.DEST_PORT);
   }
 
   public int getLength() {
     return header.getField(HeaderField.LENGTH);
   }
+
+  public int getSequenceNumber() { return header.getField(HeaderField.SEQ_NUMBER);}
+
+  public int getAckNumber() { return header.getField(HeaderField.ACK_NUMBER);}
+
 
   private byte[] getPkt() {
     ByteBuffer buffer = ByteBuffer.allocate(getLength());

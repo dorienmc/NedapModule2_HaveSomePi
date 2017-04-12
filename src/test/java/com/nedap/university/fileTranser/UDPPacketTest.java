@@ -2,6 +2,7 @@ package com.nedap.university.fileTranser;
 
 import static org.junit.Assert.*;
 
+import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import org.junit.Before;
@@ -14,7 +15,7 @@ public class UDPPacketTest {
   UDPPacket packet;
   int sourcePort = 9297;
   int destPort = 5353;
-  int length = 18;
+  int length = HeaderField.getTotalLength();
   int checksum = 0;
   int seqNumber = 13;
   int ackNumber = 255;
@@ -33,8 +34,8 @@ public class UDPPacketTest {
     String textBeforeHeader = "Packet representation in Hex.\n" + "Header: ";
     String textAfterHeader = "\nData: ";
     String expected = "";
-    expected += HexToString(sourcePort,4);
-    expected += HexToString(destPort,4);
+    expected += HexToString(sourcePort,8);
+    expected += HexToString(destPort,8);
     expected += HexToString(length,4);
     expected += HexToString(checksum,8);
     expected += HexToString(seqNumber,4);
@@ -87,7 +88,7 @@ public class UDPPacketTest {
   @Test
   public void fromDatagram() throws Exception {
     DatagramPacket datagram = new DatagramPacket(new byte[100],100);
-    byte[] data = {36,81,20,(byte) 233,0,(byte)length,0,0,0,0,0,13,0,(byte) 255,
+    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)length,0,0,0,0,0,13,0,(byte) 255,
         Flag.LIST_FILES.getValue(),0,0,0,1,2,3,4}; //last 4 bytes are UDP data
     byte[] udpData = {1,2,3,4};
     datagram.setData(data);
@@ -104,7 +105,7 @@ public class UDPPacketTest {
   public void toDatagram() throws Exception {
     DatagramPacket expectedDatagram = new DatagramPacket(new byte[100],100);
     byte[] udpData = {1,2,3,4};
-    byte[] data = {36,81,20,(byte) 233,0,(byte)(length + udpData.length),0,0,0,0,0,13,0,(byte) 255,
+    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)(length + udpData.length),0,0,0,0,0,13,0,(byte) 255,
         Flag.LIST_FILES.getValue(),0,0,0,1,2,3,4}; //last 4 bytes are UDP data
     expectedDatagram.setData(data);
 

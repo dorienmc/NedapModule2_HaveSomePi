@@ -9,15 +9,15 @@ public class MyUDPHeader {
   private ByteBuffer buffer;
 
   public enum HeaderField {
-    SOURCE_PORT(0,2), //Port of sender
-    DEST_PORT(2,2),   //Port of receiver
-    LENGTH(4,2),      //Length of UDP packet, eg. datagrampacket.getData()
-    CHECKSUM(6,4),    //Checksum for UDP packet
-    SEQ_NUMBER(10,2), //Sequence number
-    ACK_NUMBER(12,2), //Expected sequence number of next response
-    FLAGS(14,1),      //Option flags (see fileTransfer.Flag)
-    FILE_ID(15,1),    //File id, for fragmented files
-    OFFSET(16,2);     //Offset in fragmented files (in bytes) //TODO count in bigger chunks? Otherwise this field is to small
+    SOURCE_PORT(0,4), //Port of sender
+    DEST_PORT(4,4),   //Port of receiver
+    LENGTH(8,2),      //Length of UDP packet, eg. datagrampacket.getData()
+    CHECKSUM(10,4),    //Checksum for UDP packet
+    SEQ_NUMBER(14,2), //Sequence number
+    ACK_NUMBER(16,2), //Expected sequence number of next response
+    FLAGS(18,1),      //Option flags (see fileTransfer.Flag)
+    FILE_ID(19,1),    //File id, for fragmented files
+    OFFSET(20,2);     //Offset in fragmented files (in bytes) //TODO count in bigger chunks? Otherwise this field is to small
 
     private int length;
     private int startIndex;

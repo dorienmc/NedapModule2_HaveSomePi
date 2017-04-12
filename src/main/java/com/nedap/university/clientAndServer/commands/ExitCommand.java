@@ -12,13 +12,7 @@ public class ExitCommand extends Command {
   }
 
   @Override
-  public void execute(Object parameters) {
-    if(parameters instanceof Client) {
-      ((Client) parameters).shutdown();
-    } else if(parameters instanceof Server) {
-      ((Server) parameters).shutdown();
-    } else if(parameters instanceof ClientHandler) {
-      ((ClientHandler) parameters).shutdown();
-    }
+  public void execute(Handler handler) {
+    handler.shutdown();
   }
 }

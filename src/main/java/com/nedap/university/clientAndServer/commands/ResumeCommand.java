@@ -1,5 +1,7 @@
 package com.nedap.university.clientAndServer.commands;
 
+import com.nedap.university.clientAndServer.Handler;
+
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
@@ -10,7 +12,7 @@ public class ResumeCommand extends Command{
   }
 
   @Override
-  public void execute(Object parameters) {
+  public void execute(Handler handler) {
     //TODO
   }
 

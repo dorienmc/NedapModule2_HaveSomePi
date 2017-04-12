@@ -1,5 +1,7 @@
 package com.nedap.university.clientAndServer.commands;
 
+import com.nedap.university.clientAndServer.Handler;
+
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
@@ -10,10 +12,8 @@ public class UploadCommand extends Command{
   }
 
   @Override
-  public void execute(Object parameters) {
-    if(parameters instanceof String) {//TODO; String with file name or actual file?
-      //TODO upload file with given name.
-    }
+  public void execute(Handler handler) {
+    //TODO get file/data that should be send
   }
 
 }

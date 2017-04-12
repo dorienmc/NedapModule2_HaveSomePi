@@ -1,6 +1,6 @@
 package com.nedap.university.clientAndServer.commands;
 
-import java.text.ParseException;
+import com.nedap.university.clientAndServer.Handler;
 import java.util.List;
 
 /**
@@ -12,30 +12,25 @@ public class HelpCommand extends Command {
   }
 
   @Override
-  public void execute(Object parameters){
-    if(parameters instanceof List && ((List) parameters).get(0) instanceof Command) {
-      List<Command> commands = (List) parameters;
-      Command exit = null;
+  public void execute(Handler handler) {
+    List<Command> commands = handler.getCommands();
+    Command exit = null;
 
-      System.out.println("--------------");
-      System.out.println("Commands: ");
+    System.out.println("--------------");
+    System.out.println("Commands: ");
 
-      for(Command command : commands) {
-        if(command.getKeyword().equals(Keyword.EXIT) ) {
-          exit = command;
-        } else if (!command.getKeyword().equals(Keyword.HELP)) {
-          System.out.println(command);
-        }
+    for(Command command : commands) {
+      if(command.getKeyword().equals(Keyword.EXIT) ) {
+        exit = command;
+      } else if (!command.getKeyword().equals(Keyword.HELP)) {
+        System.out.println(command);
       }
-
-      System.out.println(this);
-      if(exit != null) {System.out.println(exit);}
-
-      System.out.println("--------------");
-
     }
 
+    System.out.println(this);
+    if(exit != null) {System.out.println(exit);}
 
+    System.out.println("--------------");
   }
 
 }

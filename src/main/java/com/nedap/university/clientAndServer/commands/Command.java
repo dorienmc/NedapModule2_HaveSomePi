@@ -16,7 +16,7 @@ public abstract class Command {
     this.description =description;
   }
 
-  public abstract void execute(Object parameters);
+  public abstract void execute(Handler handler);
 
   public Keyword getKeyword() {
     return keyword;

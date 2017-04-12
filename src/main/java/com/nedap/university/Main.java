@@ -1,5 +1,7 @@
 package com.nedap.university;
 
+import com.nedap.university.clientAndServer.Client;
+import com.nedap.university.clientAndServer.Server;
 import java.util.Date;
 
 public class Main {
@@ -12,13 +14,20 @@ public class Main {
     public static void main(String[] args) {
         running = true;
         System.out.println("Hello, Nedap University!");
+        String name = (args.length > 0 ? args[0] : "Pi");
 
         initShutdownHook();
+
+        if(name.equals("Pi")) {
+            (new Server()).start();
+        } else {
+            (new Client()).start();
+        }
 
         while (keepAlive) {
             try {
                 // do useful stuff
-                System.out.println("Current time " + (new Date()));
+                //System.out.println("Current time " + (new Date()));
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

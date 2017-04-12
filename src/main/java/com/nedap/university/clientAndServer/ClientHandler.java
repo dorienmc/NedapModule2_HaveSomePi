@@ -1,7 +1,9 @@
 package com.nedap.university.clientAndServer;
 
+import com.nedap.university.clientAndServer.commands.*;
+import com.nedap.university.clientAndServer.commands.Keyword;
+import com.nedap.university.fileTranser.UDPPacket;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
@@ -9,30 +11,67 @@ import java.net.SocketException;
  * Handler for each client on a server.
  * Created by dorien.meijercluwen on 09/04/2017.
  */
-public class ClientHandler extends Thread {
+public class ClientHandler extends Handler {
   InetAddress address;
-  int port;
+  int inPort;
+  int outPort;
+  Server server;
 
-  DatagramSocket socket;
+  public ClientHandler(DatagramPacket connectPacket, int inPort, int outPort, Server server) throws SocketException {
+    super();
+    this.server = server;
 
-  public ClientHandler(DatagramPacket packet) {
-    this.address = packet.getAddress();
-    this.port = packet.getPort();
-    try {
-      socket = new DatagramSocket(port,address);
-    } catch (SocketException e) {
-      e.printStackTrace(); //TODO
+    //Add commands
+    addCommand(new ExitCommand());
+    addCommand(new ListFilesCommandServer());
+    addCommand(new DownloadCommand());
+    addCommand(new UploadCommand());
+    addCommand(new PauseCommand());
+    addCommand(new ResumeCommand());
+    //where does abort belong?
+
+    //TODO add more commands?
+
+    //Setup Reliable UDP channel and return acknowledgement of connection to client
+    (new ConnectCommandServer(connectPacket, inPort, outPort)).execute(this);
+
+
+
+  }
+
+  @Override
+  public void run() {
+    //Listen for new commands from this client
+    while (true) {
+      try {
+        UDPPacket requestPacket = getChannel().getNewRequest();
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+        shutdown();
+        return;
+      }
+
+      //Determine request
+      Keyword requestType = null;//TODO Convert flag to keyword
+
+      //Act on it
+      if(requestType != null) {
+        handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+      }
     }
+  }
+
+  public int getInPort() {
+    return inPort;
   }
 
   @Override
   public String toString() {
-    return address + ":" + port;
+    return "Client at " + address + ":" + inPort + "and :" + outPort;
   }
 
   public void shutdown() {
-    //TODO
+    server.removeClientHandler(this);
+    //TODO anything else?
   }
-
-  //TODO Methods for listening to packets and act on them.
 }

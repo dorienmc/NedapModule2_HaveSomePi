@@ -1,39 +1,55 @@
 package com.nedap.university.clientAndServer;
 
+import com.nedap.university.fileTranser.Flag;
+import com.nedap.university.fileTranser.UDPPacket;
+import com.nedap.university.fileTranser.ARQProtocol.Protocol;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Server that receives client commands via UDP.
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class Server extends Thread {
-  private DatagramSocket socket;
+  private MulticastSocket socket;
   public static final int MULTI_DNS_PORT = 5353;
-  public static final int MAX_BUFFER = 1500;
-  private List<ClientHandler> clients;
+  public static final int FIRST_RUDP_PORT = 8000;
+
+  private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
+  private InetAddress broadcastAddress;
+  private static InetAddress myAddress;
 
   public void run() {
     //Create socket to listen to broadcast messages from clients.
     try {
-      socket = new DatagramSocket(MULTI_DNS_PORT);
-    } catch (SocketException e) {
-      print("Could not create socket on " + MULTI_DNS_PORT + " " + e.getMessage());
+      socket = new MulticastSocket(MULTI_DNS_PORT);
+      broadcastAddress = InetAddress.getByName("192.168.40.255");
+      myAddress = InetAddress.getByName("192.168.40.8");
+    } catch (IOException e) {
+      shutdown();
+      print(String.format("Could not create socket on %s:%d", broadcastAddress,MULTI_DNS_PORT));
       return;
     }
 
     //Listen for clients
     print("Waiting for clients...");
     while(true) {
-      DatagramPacket packet = new DatagramPacket(new byte[1500],1500);
+      DatagramPacket packet = new DatagramPacket(new byte[Protocol.MAX_BUFFER],
+          Protocol.MAX_BUFFER);
 
       try {
         socket.receive(packet);
       } catch (IOException e) {
-        e.printStackTrace();
+        print("Lost connection to broadcast socket");
+        shutdown();
         //Drop packet
       }
 
@@ -42,21 +58,55 @@ public class Server extends Thread {
     }
   }
 
+  public static InetAddress getMyAddress() {
+    return myAddress;
+  }
+
+  private int getFreePort() {
+    for(int i = FIRST_RUDP_PORT; i < 9000; i += 2) {
+      if(clients.get(new Integer(i)) == null) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   /**
    * Create ClientHandler for client which sends the given connect request.
    * But do check if the connection request is valid.
    */
   private void addClientHandler(DatagramPacket packet) {
-    //TODO
-    //print("[Client " + client + " connected.]");
+    UDPPacket udpPacket = new UDPPacket(packet);
+    int inPort = getFreePort();
+    int outPort = inPort + 1;
+
+    //Reserve spot for client (so port is not free for others)
+    clients.put(new Integer(inPort), null);
+
+    if(udpPacket.isFlagSet(Flag.CONNECT)) {
+      ClientHandler client = null;
+      try {
+        client = new ClientHandler(packet, inPort, outPort, this);
+      } catch (SocketException e) {
+        clients.remove(new Integer(inPort));
+        print(String.format("Could not create client for %s:%s %s",packet.getAddress(), packet.getPort(), e.getMessage()));
+        return;
+      }
+
+      clients.put(new Integer(inPort), client);
+      client.start();
+      print("[Connected" + client + "]");
+    }
+
+    //TODO print warning if packet is incorrect?
   }
 
   /**
-   * Remove a ClientHandler from the collection of ClientHanlders.
+   * Remove a ClientHandler from the collection of ClientHandlers.
    * @param client ClientHandler that will be removed
    */
   public void removeClientHandler(ClientHandler client) {
-    if(clients.remove(client)) {
+    if(clients.remove(new Integer(client.getInPort())) != null) {
       print("Remove ClientHandler on " + client);
     }
   }
@@ -70,7 +120,15 @@ public class Server extends Thread {
   }
 
   public void shutdown() {
-    //TODO
+    print("Server is shutting down.");
+    for(ClientHandler client : clients.values()) {
+      client.shutdown();
+    }
+
+    Thread.currentThread().interrupt();
+
+    //close socket
+    socket.close();
   }
 
 }

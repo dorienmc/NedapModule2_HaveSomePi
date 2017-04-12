@@ -1,6 +1,6 @@
 package com.nedap.university.clientAndServer.commands;
 
-import com.nedap.university.clientAndServer.commands.Command.Keyword;
+import com.nedap.university.clientAndServer.Handler;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -12,11 +12,9 @@ public class DownloadCommand extends Command{
   }
 
   @Override
-  public void execute(Object parameters) {
-    if(parameters instanceof String) {
-      //TODO Download file with given name.
-      //Create Udp channel and give it the file, udp should fragment it.
-    }
+  public void execute(Handler handler) {
+    //TODO Download file with given name.
+    //Create Udp channel and give it the file, udp should fragment it.
   }
 
 }

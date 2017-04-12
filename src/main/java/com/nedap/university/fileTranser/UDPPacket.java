@@ -62,7 +62,7 @@ public class UDPPacket {
    */
   public DatagramPacket toDatagram(InetAddress destAddress) {
     DatagramPacket packet = new DatagramPacket(this.getPkt(),0,getLength(),
-        destAddress, header.getField(HeaderField.DEST_PORT));
+        destAddress, getDestPort());
     return packet;
   }
 
@@ -128,7 +128,7 @@ public class UDPPacket {
     Checksum checksum = new CRC32();
 
     header.setField(HeaderField.CHECKSUM,0);
-    checksum.update(getPkt(),0,header.getField(HeaderField.LENGTH));
+    checksum.update(getPkt(),0,getLength());
 
     int checksumValue = (short)checksum.getValue();
     header.setField(HeaderField.CHECKSUM,checksumValue);
@@ -139,7 +139,7 @@ public class UDPPacket {
   private boolean checkChecksum() {
     Checksum checksum = new CRC32();
 
-    checksum.update(getPkt(),0,header.getField(HeaderField.LENGTH));
+    checksum.update(getPkt(),0,getLength());
     return checksum.getValue() == 0;
   }
 

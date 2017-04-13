@@ -105,11 +105,11 @@ public class ConnectCommandClient extends Command {
       socketIn = new DatagramSocket(handler.getInPort());
       socketIn.setSoTimeout(5000);
     } catch (SocketException e) {
-      e.printStackTrace();
+      handler.print(e.getMessage());
     }
 
     //Wait for response from server
-    System.out.println("Waiting for response from server on port " + handler.getInPort());
+    handler.print("Waiting for response from server on port " + handler.getInPort());
     DatagramPacket response = new DatagramPacket(new byte[Protocol.MAX_BUFFER],Protocol.MAX_BUFFER);
 
     try {

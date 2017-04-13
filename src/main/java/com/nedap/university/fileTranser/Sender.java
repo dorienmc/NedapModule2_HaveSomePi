@@ -34,7 +34,6 @@ public class Sender extends Thread {
     this.destPort = destPort;
     this.sourcePort = sourcePort;
     this.currentSeqNumber = 0;
-    System.out.println(socket.getLocalPort());
   }
 
   public int getCurrentSeqNumber() {

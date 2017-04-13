@@ -72,7 +72,9 @@ public class ClientHandler extends Handler {
   }
 
   public void shutdown() {
-    getChannel().shutdown();
+    if(getChannel() != null) {
+      getChannel().shutdown();
+    }
     server.removeClientHandler(this);
 
     //TODO anything else?

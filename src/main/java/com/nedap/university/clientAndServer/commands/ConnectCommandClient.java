@@ -29,13 +29,15 @@ public class ConnectCommandClient extends Command {
 
   public ConnectCommandClient(){
     super(Keyword.CONNECT, "(Re)connect to PiServer");
-    this.hostName = readString("To which Pi do you want to connect? ");
   }
 
   @Override
   public void execute(Handler handler) {
     //Clear current RUDP channel
     handler.removeChannel();
+
+    //Ask for hostname
+    this.hostName = readString("To which Pi do you want to connect? ");
 
     //Create broadcast channel and send mDNS request.
     if(!sendBroadCast(handler)) {

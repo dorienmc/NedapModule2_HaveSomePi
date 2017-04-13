@@ -16,6 +16,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.Scanner;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
 
 /**
@@ -26,14 +27,16 @@ public class ConnectCommandClient extends Command {
   private InetAddress broadcastAddress;
   DatagramSocket socketIn;
 
-  public ConnectCommandClient(String hostName){
-    super(Keyword.CONNECT, "Connect to PiServer");
-    this.hostName = hostName;
+  public ConnectCommandClient(){
+    super(Keyword.CONNECT, "(Re)connect to PiServer");
+    this.hostName = readString("To which Pi do you want to connect? ");
   }
 
   @Override
   public void execute(Handler handler) {
-    //TODO use ReliableChannel?
+    //Clear current RUDP channel
+    handler.removeChannel();
+
     //Create broadcast channel and send mDNS request.
     if(!sendBroadCast(handler)) {
       return;
@@ -48,6 +51,10 @@ public class ConnectCommandClient extends Command {
 
     //Create Reliable UDP channel
     createReliableUDPchannel(response, handler); //TODO what if we got an exception?
+  }
+
+  public String getHostName() {
+    return hostName;
   }
 
   private boolean sendBroadCast(Handler handler) {
@@ -179,6 +186,25 @@ public class ConnectCommandClient extends Command {
     }
   }
 
+  /**
+   * Writes a prompt to standard out and tries to read an String value from
+   * standard in. This is repeated until an String value is entered.
+   * @param prompt the question to prompt the user
+   * @return the first String value which is entered by the user
+   */
+  public static String readString(String prompt) {
+    String answer;
+    @SuppressWarnings("resource")
+    Scanner line = new Scanner(System.in);
+
+    do {
+      System.out.print(prompt);
+      try (Scanner scannerLine = new Scanner(line.nextLine());) {
+        answer = scannerLine.hasNext() ? scannerLine.nextLine() : null;
+      }
+    } while (answer == null);
+    return answer;
+  }
 
 
 }

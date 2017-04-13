@@ -26,6 +26,7 @@ public class Client extends Handler {
     //Add commands
     addCommand(new ExitCommand());
     addCommand(new HelpCommand());
+    addCommand(new ConnectCommandClient());
     addCommand(new ListFilesCommandClient());
     addCommand(new DownloadCommand());
     addCommand(new UploadCommand());
@@ -36,14 +37,12 @@ public class Client extends Handler {
   @Override
   public void run() {
     while(getChannel() == null) {
-      //Ask for host
-      String hostName = readString("To which Pi do you want to connect? ");
-
       //Find host and create Reliable Udp Channel
-      (new ConnectCommandClient(hostName)).execute(this);
+      ConnectCommandClient connector = new ConnectCommandClient();
+      connector.execute(this);
 
       if (getChannel() == null) {
-        print("Could not connect to host " + hostName + ".");
+        print("Could not connect to host " + connector.getHostName() + ".");
         super.removeChannel();
       }
     }

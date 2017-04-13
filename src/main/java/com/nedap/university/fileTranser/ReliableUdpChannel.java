@@ -98,7 +98,7 @@ public class ReliableUdpChannel {
 
   /**
    *  Wait for new request
-   *  @throws TimeoutException if it takes more than 30000ms (30s)
+   *  @throws TimeoutException if it takes more than 300000ms (5min)
    *  @throws IOException if it could not reach the socket
    */
   public UDPPacket getNewRequest() throws IOException,TimeoutException {

@@ -19,7 +19,7 @@ public class Client extends Handler {
     addCommand(new HelpCommand());
     addCommand(new ConnectCommandClient());
     addCommand(new ListFilesCommandClient());
-    addCommand(new DownloadCommand());
+    addCommand(new DownloadCommandClient());
     addCommand(new UploadCommandClient());
     addCommand(new PauseCommand());
     addCommand(new ResumeCommand());
@@ -45,7 +45,7 @@ public class Client extends Handler {
 
     while(running) {
       //Wait for new user command
-      String command = readString("Please enter a command (type help for a menu)");
+      String command = Utils.readString("Please enter a command (type help for a menu) ");
 
       super.handleCommand(command);
     }
@@ -61,25 +61,5 @@ public class Client extends Handler {
 
   synchronized public boolean isRunning() {
     return running;
-  }
-
-  /**
-   * Writes a prompt to standard out and tries to read an String value from
-   * standard in. This is repeated until an String value is entered.
-   * @param prompt the question to prompt the user
-   * @return the first String value which is entered by the user
-   */
-  public static String readString(String prompt) {
-    String answer;
-    @SuppressWarnings("resource")
-    Scanner line = new Scanner(System.in);
-
-    do {
-      System.out.print(prompt);
-      try (Scanner scannerLine = new Scanner(line.nextLine());) {
-        answer = scannerLine.hasNext() ? scannerLine.nextLine() : null;
-      }
-    } while (answer == null);
-    return answer;
   }
 }

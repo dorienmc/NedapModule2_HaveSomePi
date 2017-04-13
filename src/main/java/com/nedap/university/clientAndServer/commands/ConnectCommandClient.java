@@ -2,9 +2,9 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
+import com.nedap.university.clientAndServer.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MDNSdata;
-import com.nedap.university.fileTranser.ReliableUdpChannel;
 import com.nedap.university.fileTranser.UDPPacket;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 import java.io.IOException;
@@ -14,10 +14,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Scanner;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -37,7 +33,7 @@ public class ConnectCommandClient extends Command {
     handler.removeChannel();
 
     //Ask for hostname
-    this.hostName = readString("To which Pi do you want to connect? ");
+    this.hostName = Utils.readString("To which Pi do you want to connect? ");
 
     //Create broadcast channel and send mDNS request.
     if(!sendBroadCast(handler)) {
@@ -183,26 +179,6 @@ public class ConnectCommandClient extends Command {
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s: %s",hostName, e.getMessage()));
     }
-  }
-
-  /**
-   * Writes a prompt to standard out and tries to read an String value from
-   * standard in. This is repeated until an String value is entered.
-   * @param prompt the question to prompt the user
-   * @return the first String value which is entered by the user
-   */
-  public static String readString(String prompt) {
-    String answer;
-    @SuppressWarnings("resource")
-    Scanner line = new Scanner(System.in);
-
-    do {
-      System.out.print(prompt);
-      try (Scanner scannerLine = new Scanner(line.nextLine());) {
-        answer = scannerLine.hasNext() ? scannerLine.nextLine() : null;
-      }
-    } while (answer == null);
-    return answer;
   }
 
 

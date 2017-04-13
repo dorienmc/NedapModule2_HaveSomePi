@@ -47,12 +47,14 @@ public class Client extends Handler {
       }
     }
 
-    while(running) {
+    if(running) {
       //List commands
       (new HelpCommand()).execute(this);
+    }
 
+    while(running) {
       //Wait for new user command
-      String command = readString("Please enter a command ");
+      String command = readString("Please enter a command (type help for a menu)");
 
       super.handleCommand(command);
     }

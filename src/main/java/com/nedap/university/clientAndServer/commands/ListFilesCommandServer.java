@@ -2,6 +2,7 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.ClientHandler;
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +25,7 @@ public class ListFilesCommandServer extends Command{
     ReliableUdpChannel channel = handler.getChannel();
 
     //List all files
-    File folder = new File("./files");
-    File[] files = folder.listFiles();
+    File[] files = new File("/home/pi/files").listFiles();
     String allFiles = "Files\n";
 
     for (File file : files) {

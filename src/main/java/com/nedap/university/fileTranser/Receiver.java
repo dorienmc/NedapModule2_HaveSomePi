@@ -64,6 +64,7 @@ public class Receiver extends Thread {
           socket.receive(response);
         } catch (IOException e) {
           System.out.println(String.format("Error in receiver: %s",e.getMessage()));
+          continue;
         }
 
         UDPPacket packet = new UDPPacket(response);
@@ -85,5 +86,6 @@ public class Receiver extends Thread {
 
   public void shutdown() {
     stop = true;
+    socket.close();
   }
 }

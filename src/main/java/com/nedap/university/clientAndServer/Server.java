@@ -1,6 +1,7 @@
 package com.nedap.university.clientAndServer;
 
 import com.nedap.university.fileTranser.Flag;
+import com.nedap.university.fileTranser.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +21,11 @@ import java.util.Map;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class Server extends Thread {
+  volatile boolean running = true;
   private MulticastSocket socket;
   public static final int MULTI_DNS_PORT = 5353;
   public static final int FIRST_RUDP_PORT = 8000;
+  public static final String HOSTNAME = "8";
 
   private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
   private InetAddress broadcastAddress;
@@ -53,8 +57,12 @@ public class Server extends Thread {
         //Drop packet
       }
 
-      print("Found client " + packet.getAddress() + ":" + packet.getPort());
-      addClientHandler(packet);
+      //Check is packet is a connecting packet and destined for this Server
+      //Otherwise drop it.
+      if(isConnectionPacket(packet)) {
+        print("Found client " + packet.getAddress() + ":" + packet.getPort());
+        addClientHandler(packet);
+      }
     }
   }
 
@@ -62,13 +70,50 @@ public class Server extends Thread {
     return myAddress;
   }
 
-  private int getFreePort() {
-    for(int i = FIRST_RUDP_PORT; i < 9000; i += 2) {
-      if(clients.get(new Integer(i)) == null) {
+  private static int getFreePort() {
+    for(int i = FIRST_RUDP_PORT; i < FIRST_RUDP_PORT + 1000; i += 2) {
+      if(isLocalPortFree(i)) {
         return i;
       }
     }
     return -1;
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  private boolean isConnectionPacket(DatagramPacket packet) {
+    UDPPacket udpPacket;
+    try {
+      udpPacket = new UDPPacket(packet);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      print(e.getMessage());
+      return false;
+    }
+
+    //Has connection flag set
+    if(!udpPacket.isFlagSet(Flag.CONNECT)) {
+      return false;
+    }
+
+    //Is asking for me
+    try {
+      MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
+      if(mdnSdata.getHostname() != null && mdnSdata.getHostname().equals(HOSTNAME)) {
+        return true;
+      }
+    } catch (IndexOutOfBoundsException e) {
+      print(e.getMessage());
+      return false;
+    }
+
+    return false;
   }
 
   /**
@@ -81,22 +126,23 @@ public class Server extends Thread {
     int outPort = inPort + 1;
 
     //Reserve spot for client (so port is not free for others)
-    clients.put(new Integer(inPort), null);
+    ClientHandler client = null;
+    clients.put(new Integer(inPort), client);
 
-    if(udpPacket.isFlagSet(Flag.CONNECT)) {
-      ClientHandler client = null;
-      try {
-        client = new ClientHandler(packet, inPort, outPort, this);
-      } catch (SocketException e) {
-        clients.remove(new Integer(inPort));
-        print(String.format("Could not create client for %s:%s %s",packet.getAddress(), packet.getPort(), e.getMessage()));
-        return;
-      }
 
-      clients.put(new Integer(inPort), client);
-      client.start();
-      print("[Connected" + client + "]");
+    try {
+      client = new ClientHandler(packet, inPort, outPort, this);
+    } catch (SocketException e) {
+      client.shutdown();
+      print(String.format("Could not create client for %s:%s %s",packet.getAddress(), packet.getPort(), e.getMessage()));
+      return;
     }
+
+    //Update client in 'clients'
+    clients.put(new Integer(inPort), client);
+    client.start();
+    print("[Connected " + client + "]");
+
 
     //TODO print warning if packet is incorrect?
   }
@@ -129,6 +175,11 @@ public class Server extends Thread {
 
     //close socket
     socket.close();
+    running = false;
+  }
+
+  synchronized public boolean isRunning() {
+    return running;
   }
 
 }

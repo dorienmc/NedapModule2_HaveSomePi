@@ -16,9 +16,6 @@ import java.net.SocketException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class ReliableUdpChannel { //TODO extend thread?
-  public static final int DEFAULT_PORT_IN = 9292;
-  public static final int DEFAULT_PORT_OUT = 9293;
-
   Protocol protocol;
   Sender sender;    //Class that sends UDP packets
   Receiver receiver;//Class that receives UDP packets
@@ -33,18 +30,25 @@ public class ReliableUdpChannel { //TODO extend thread?
    * @throws SocketException if one of the sockets could not be created.
    */
   public ReliableUdpChannel(DatagramSocket socketIn, DatagramSocket socketOut, InetAddress destAddress,
-      int serverPortIn, int serverPortOut, boolean isClient) throws SocketException {
-    this.receiver = new Receiver(socketIn,destAddress,DEFAULT_PORT_IN,serverPortOut); //receive from socketIn
-    this.sender = new Sender(socketOut,destAddress,DEFAULT_PORT_OUT, serverPortIn); //send over socketOut
+      int otherSidePortIn, int otherSidePortOut, boolean isClient) throws SocketException {
+    this.receiver = new Receiver(socketIn,destAddress,socketIn.getLocalPort(),otherSidePortOut); //receive from socketIn
+    this.sender = new Sender(socketOut,destAddress,socketOut.getLocalPort(), otherSidePortIn); //send over socketOut
     this.protocol = new NaiveProtocol(sender,receiver);
     sender.start();
     receiver.start();
     System.out.println(String.format("Set ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
-        destAddress,DEFAULT_PORT_OUT,serverPortIn,DEFAULT_PORT_IN,serverPortOut));
+        destAddress,socketOut.getLocalPort(),otherSidePortIn,socketIn.getLocalPort(),otherSidePortOut));
 
+    if(isClient) {
+      sendAckToOtherSide(socketOut.getLocalPort(), otherSidePortIn);
+    }
+
+  }
+
+  private void sendAckToOtherSide(int sourcePort, int destPort) {
     //Send ack to server (send 2 to be sure)
     System.out.println("Send ack to server");
-    UDPPacket connectionAck = new UDPPacket(DEFAULT_PORT_OUT, serverPortIn, 0,0);
+    UDPPacket connectionAck = new UDPPacket(sourcePort, destPort, 0,0);
     connectionAck.setFlags(Flag.CONNECT.getValue());
     System.out.println(connectionAck.getSourcePort());
     sender.forceSend(connectionAck);
@@ -64,7 +68,6 @@ public class ReliableUdpChannel { //TODO extend thread?
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }
-
   }
 
   /**
@@ -108,9 +111,15 @@ public class ReliableUdpChannel { //TODO extend thread?
     return protocol.receive();
   }
 
+  /* Send given data, with given flag */
+  public byte[] sendAndReceive(byte[] data, Flag flag) throws IOException{
+    protocol.send(data, flag.getValue());
+    return protocol.receive();
+  }
+
   /* Send given data */
   public byte[] sendAndReceive(byte[] data) throws IOException{
-    protocol.send(data);
+    protocol.send(data, 0);
     return protocol.receive();
   }
 
@@ -130,6 +139,9 @@ public class ReliableUdpChannel { //TODO extend thread?
 
   //Private methods
   public void shutdown() {
+    sender.shutdown();
+    receiver.shutdown();
+
     //Shutdown sender and receiver.
   }
   //TODO what else?

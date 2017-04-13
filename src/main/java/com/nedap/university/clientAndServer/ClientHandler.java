@@ -12,13 +12,10 @@ import java.net.SocketException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class ClientHandler extends Handler {
-  InetAddress address;
-  int inPort;
-  int outPort;
   Server server;
 
   public ClientHandler(DatagramPacket connectPacket, int inPort, int outPort, Server server) throws SocketException {
-    super();
+    super(inPort, outPort);
     this.server = server;
 
     //Add commands
@@ -33,9 +30,7 @@ public class ClientHandler extends Handler {
     //TODO add more commands?
 
     //Setup Reliable UDP channel and return acknowledgement of connection to client
-    (new ConnectCommandServer(connectPacket, inPort, outPort)).execute(this);
-
-
+    (new ConnectCommandServer(connectPacket)).execute(this);
 
   }
 
@@ -61,17 +56,15 @@ public class ClientHandler extends Handler {
     }
   }
 
-  public int getInPort() {
-    return inPort;
-  }
-
   @Override
   public String toString() {
-    return "Client at " + address + ":" + inPort + "and :" + outPort;
+    return "Client at " + super.getAddress() + ":" + super.getInPort() + " and :" + super.getOutPort();
   }
 
   public void shutdown() {
+    getChannel().shutdown();
     server.removeClientHandler(this);
+
     //TODO anything else?
   }
 }

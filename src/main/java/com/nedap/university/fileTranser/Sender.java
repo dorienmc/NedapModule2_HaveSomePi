@@ -110,6 +110,7 @@ public class Sender extends Thread {
 
   public void shutdown() {
     stop = true;
+    socket.close();
   }
 
 

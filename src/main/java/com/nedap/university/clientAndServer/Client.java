@@ -17,9 +17,11 @@ import java.util.Scanner;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class Client extends Handler {
+  volatile boolean running;
 
-  public Client() {
-    super();
+  public Client(int inPort, int outPort) {
+    super(inPort, outPort);
+    running = true;
 
     //Add commands
     addCommand(new ExitCommand());
@@ -36,13 +38,17 @@ public class Client extends Handler {
 
   @Override
   public void run() {
-    while(getChannel() == null) {
-      //Ask for host
-      String hostName = readString("To which Pi do you want to connect? ");
+    //Ask for host
+    String hostName = readString("To which Pi do you want to connect? ");
 
-      //Find host and create Reliable Udp Channel
-      (new ConnectCommandClient(hostName)).execute(this);
+    //Find host and create Reliable Udp Channel
+    (new ConnectCommandClient(hostName)).execute(this);
+
+    if(getChannel() == null) {
+      print("Could not connect to host " + hostName + ".");
+      shutdown();
     }
+
 
     System.out.println("TODO implement more stuff");
     shutdown();
@@ -51,7 +57,12 @@ public class Client extends Handler {
   }
 
   public void shutdown() { //TODO add more?
-    System.exit(0);
+    running = false;
+    //System.exit(0);
+  }
+
+  synchronized public boolean isRunning() {
+    return running;
   }
 
   /**

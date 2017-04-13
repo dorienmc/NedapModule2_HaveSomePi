@@ -17,9 +17,30 @@ import java.util.Map;
 public abstract class Handler extends Thread {
   ReliableUdpChannel channel;
   Map<Keyword,Command> commands;
+  int inPort;
+  int outPort;
+  InetAddress address;
 
-  public Handler() {
+  public Handler(int inPort, int outPort) {
+    this.inPort = inPort;
+    this.outPort = outPort;
     commands = new HashMap<>();
+  }
+
+  public int getInPort() {
+    return inPort;
+  }
+
+  public int getOutPort() {
+    return outPort;
+  }
+
+  public InetAddress getAddress() {
+    return address;
+  }
+
+  public void setAddress(InetAddress address) {
+    this.address = address;
   }
 
   /**
@@ -29,7 +50,7 @@ public abstract class Handler extends Thread {
    */
   public void setChannel(DatagramSocket socketIn, DatagramSocket socketOut, InetAddress destAddress,
       int serverPortIn, int serverPortOut, boolean isClient) throws SocketException {
-    this.channel = new ReliableUdpChannel(socketIn, socketOut, destAddress, serverPortIn, serverPortOut, true);
+    this.channel = new ReliableUdpChannel(socketIn, socketOut, destAddress, serverPortIn, serverPortOut, isClient);
   }
 
   /**

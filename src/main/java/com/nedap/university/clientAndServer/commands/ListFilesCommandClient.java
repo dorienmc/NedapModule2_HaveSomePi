@@ -4,6 +4,7 @@ import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
+import java.io.IOException;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -24,7 +25,12 @@ public class ListFilesCommandClient extends Command{
 
     if(channel != null) {
       //Send request and wait for response.
-      String response = new String(channel.sendAndReceive(Keyword.LS));
+      String response = null;
+      try {
+        response = new String(channel.sendAndReceive(Keyword.LS));
+      } catch (IOException e) {
+        handler.print(e.getMessage());
+      }
 
       //Print files
       handler.print(response);

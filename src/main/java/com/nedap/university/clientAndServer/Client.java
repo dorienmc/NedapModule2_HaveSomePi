@@ -19,8 +19,8 @@ import java.util.Scanner;
 public class Client extends Handler {
   volatile boolean running;
 
-  public Client(int inPort, int outPort) {
-    super(inPort, outPort);
+  public Client() {
+    super(9292,9293);
     running = true;
 
     //Add commands
@@ -31,34 +31,40 @@ public class Client extends Handler {
     addCommand(new UploadCommand());
     addCommand(new PauseCommand());
     addCommand(new ResumeCommand());
-
-    //TODO add more commands?
-
   }
 
   @Override
   public void run() {
-    //Ask for host
-    String hostName = readString("To which Pi do you want to connect? ");
+    while(getChannel() == null) {
+      //Ask for host
+      String hostName = readString("To which Pi do you want to connect? ");
 
-    //Find host and create Reliable Udp Channel
-    (new ConnectCommandClient(hostName)).execute(this);
+      //Find host and create Reliable Udp Channel
+      (new ConnectCommandClient(hostName)).execute(this);
 
-    if(getChannel() == null) {
-      print("Could not connect to host " + hostName + ".");
-      shutdown();
+      if (getChannel() == null) {
+        print("Could not connect to host " + hostName + ".");
+        super.removeChannel();
+      }
+    }
+
+    while(running) {
+      //List commands
+      (new HelpCommand()).execute(this);
+
+      //Wait for new user command
+      String command = readString("Please enter a command ");
+
+      super.handleCommand(command);
     }
 
 
-    System.out.println("TODO implement more stuff");
-    shutdown();
-    //List commands
-    //Wait for new user command
   }
 
   public void shutdown() { //TODO add more?
+    super.removeChannel();
     running = false;
-    //System.exit(0);
+    System.exit(0);
   }
 
   synchronized public boolean isRunning() {

@@ -32,7 +32,7 @@ public class ConnectCommandServer extends Command{
     createReliableUDPchannel(handler);
 
     //If the RUDP is setup, create an mDNS message (portIn + portOut) for the client
-    if(handler != null) {
+    if(handler.getChannel() != null) {
       try {
         MDNSdata mdnSdata = new MDNSdata(handler.getInPort(),
             handler.getOutPort(), "Client");
@@ -65,13 +65,9 @@ public class ConnectCommandServer extends Command{
       return;
     }
 
-    //Create sockets
+    //Create Reliable Udp channel
     try {
-      DatagramSocket socketIn = new DatagramSocket(handler.getInPort());
-      DatagramSocket socketOut = new DatagramSocket(handler.getOutPort());
-
-      //Create Reliable Udp channel
-      handler.setChannel(socketIn, socketOut, address, clientPortIn, clientPortOut, false);
+      handler.setChannel(handler.getInPort(), handler.getOutPort(), address, clientPortIn, clientPortOut, false);
 
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s on ports %d and %d, %s",address, clientPortIn, clientPortOut, e.getMessage()));

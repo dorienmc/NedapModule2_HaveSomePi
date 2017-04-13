@@ -2,6 +2,7 @@ package com.nedap.university.clientAndServer;
 
 import com.nedap.university.clientAndServer.commands.*;
 import com.nedap.university.clientAndServer.commands.Keyword;
+import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -37,22 +38,29 @@ public class ClientHandler extends Handler {
   @Override
   public void run() {
     //Listen for new commands from this client
+    UDPPacket requestPacket;
     while (true) {
       try {
-        UDPPacket requestPacket = getChannel().getNewRequest();
+        requestPacket = getChannel().getNewRequest();
       } catch (Exception e) {
         System.out.println(e.getMessage());
         shutdown();
         return;
       }
 
-      //Determine request
-      Keyword requestType = null;//TODO Convert flag to keyword
+      if(requestPacket != null) {
+        //Determine request
+        Flag flag = Flag.fromByte((byte) requestPacket.getFlags());
+        Keyword requestType = flag.toKeyword();
 
-      //Act on it
-      if(requestType != null) {
-        handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+        //Act on it
+        if (requestType != null) {
+          handleCommand(
+              requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+        }
       }
+
+      System.out.println("Wait for request");
     }
   }
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -20,8 +21,8 @@ public class Receiver extends Thread {
   boolean stop;
   int currentAckNumber; //Sequence number of next expected packet from receiver.
 
-  public Receiver(DatagramSocket socket, InetAddress address, int portIn, int portOut) {
-    this.socket = socket;
+  public Receiver(InetAddress address, int portIn, int portOut) throws SocketException{
+    this.socket = new DatagramSocket(portIn);
     this.receiveBuffer = new ConcurrentLinkedDeque<>();
     this.isBlocked = false;
     this.stop = false;
@@ -39,8 +40,12 @@ public class Receiver extends Thread {
     return portIn;
   }
 
+  public int getPortOut() {
+    return portOut;
+  }
+
   /* Retrieve next packet from the receiveBuffer, null there are none.
-    * Note: also removes this packet from the buffer! */
+      * Note: also removes this packet from the buffer! */
   public UDPPacket retrievePacket() {
     return receiveBuffer.pollFirst();
   }

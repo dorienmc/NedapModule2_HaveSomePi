@@ -3,6 +3,7 @@ package com.nedap.university.fileTranser;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -23,8 +24,8 @@ public class Sender extends Thread {
   /*
   * Create new sender, starts blocked
    */
-  public Sender(DatagramSocket socket, InetAddress address, int sourcePort, int destPort) {
-    this.socket = socket;
+  public Sender(InetAddress address, int sourcePort, int destPort) throws SocketException {
+    this.socket = new DatagramSocket(sourcePort);
     this.sendBuffer = new ConcurrentLinkedDeque<>();
     this.unAckedPackets = new ConcurrentHashMap<>();
     this.isBlocked = true;

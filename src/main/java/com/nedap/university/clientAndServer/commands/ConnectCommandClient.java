@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
 public class ConnectCommandClient extends Command {
   String hostName;
   private InetAddress broadcastAddress;
+  DatagramSocket socketIn;
 
   public ConnectCommandClient(String hostName){
     super(Keyword.CONNECT, "Connect to PiServer");
@@ -31,7 +32,25 @@ public class ConnectCommandClient extends Command {
   }
 
   @Override
-  public void execute(Handler handler) { //TODO use ReliableChannel?
+  public void execute(Handler handler) {
+    //TODO use ReliableChannel?
+    //Create broadcast channel and send mDNS request.
+    if(!sendBroadCast(handler)) {
+      return;
+    }
+
+    DatagramPacket response = getResponse(handler);
+    socketIn.close();
+    if(response == null) {
+      handler.removeChannel();
+      return;
+    }
+
+    //Create Reliable UDP channel
+    createReliableUDPchannel(response, handler); //TODO what if we got an exception?
+  }
+
+  private boolean sendBroadCast(Handler handler) {
     //Create DatagramSocket for multicast, with a time out of 10 sec. (10000ms)
     MulticastSocket socket = null;
     try {
@@ -41,7 +60,8 @@ public class ConnectCommandClient extends Command {
     } catch (IOException e) {
       handler.print(String.format("Could not create socket on %s:%d, %s",
           broadcastAddress,Server.MULTI_DNS_PORT));
-      return;
+      socket.close();
+      return false;
     }
 
     //Shout out over multicast
@@ -61,15 +81,18 @@ public class ConnectCommandClient extends Command {
     } catch (SocketTimeoutException e) {
       handler.print("Socket TimeOut: Could not find host.");
       socket.close();
-      return;
+      return false;
     } catch (IOException e) {
       handler.print("IO Expection: Could not find host.");
       socket.close();
-      return;
+      return false;
     }
 
+    return true;
+  }
+
+  private DatagramPacket getResponse(Handler handler) {
     //Create socket for receiving data.
-    DatagramSocket socketIn = null;
     try {
       socketIn = new DatagramSocket(handler.getInPort());
       socketIn.setSoTimeout(5000);
@@ -78,36 +101,57 @@ public class ConnectCommandClient extends Command {
     }
 
     //Wait for response from server
-    System.out.println("Waiting for response from server on port " + socketIn.getLocalPort());
+    System.out.println("Waiting for response from server on port " + handler.getInPort());
     DatagramPacket response = new DatagramPacket(new byte[Protocol.MAX_BUFFER],Protocol.MAX_BUFFER);
 
     try {
       socketIn.receive(response);
     } catch (SocketTimeoutException e) {
       handler.print(String.format("Time out exceeded"));
-      socketIn.close();
-      socket.close();
-      return;
+      return null;
     } catch (IOException e) {
       handler.print(String.format("Could not create connection to %s %s",hostName, e.getMessage()));
-      socketIn.close();
-      socket.close();
-      return;
+      return null;
     }
 
     //Check if response packet is an mDSN packet
-    //TODO
-
     System.out.println("Response: " + new UDPPacket(response));
+    if(isConnectionPacket(response,handler)) {
+      return response;
+    }
 
-    //Create Reliable UDP channel
-    createReliableUDPchannel(response, handler, socketIn); //TODO what if we got an exception?
-
-    //Close 'broadcast' channel
-    socket.close();
+    return null;
   }
 
-  private void createReliableUDPchannel(DatagramPacket response, Handler handler, DatagramSocket socketIn){
+  private boolean isConnectionPacket(DatagramPacket packet, Handler handler) {
+    UDPPacket udpPacket;
+    try {
+      udpPacket = new UDPPacket(packet);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      handler.print(e.getMessage());
+      return false;
+    }
+
+    //Has connection flag set
+    if(!udpPacket.isFlagSet(Flag.CONNECT)) {
+      return false;
+    }
+
+    //Is asking for me
+    try {
+      MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
+      if(mdnSdata.getHostname() != null && mdnSdata.getHostname().equals("Client")) {
+        return true;
+      }
+    } catch (IndexOutOfBoundsException e) {
+      handler.print(e.getMessage());
+      return false;
+    }
+
+    return false;
+  }
+
+  private void createReliableUDPchannel(DatagramPacket response, Handler handler){
     //Retrieve address and portIn/portOut of server
     UDPPacket input = new UDPPacket(response);
     int serverPortIn = 0;
@@ -126,13 +170,9 @@ public class ConnectCommandClient extends Command {
       return;
     }
 
-    //Create sockets
+    //Create Reliable Udp channel
     try {
-      DatagramSocket socketOut = new DatagramSocket(handler.getOutPort());
-      socketIn.setSoTimeout(0); //Set time out to inf. again
-
-      //Create Reliable Udp channel
-      handler.setChannel(socketIn, socketOut, address,serverPortIn, serverPortOut, true);
+      handler.setChannel(handler.getInPort(), handler.getOutPort(), address,serverPortIn, serverPortOut, true);
 
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s: %s",hostName, e.getMessage()));

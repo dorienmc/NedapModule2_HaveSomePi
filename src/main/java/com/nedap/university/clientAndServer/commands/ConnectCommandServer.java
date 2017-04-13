@@ -1,6 +1,8 @@
 package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.fileTranser.Flag;
+import com.nedap.university.fileTranser.MDNSdata;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
@@ -17,15 +19,11 @@ import java.nio.ByteBuffer;
  */
 public class ConnectCommandServer extends Command{
   DatagramPacket connectPacket;
-  int inPort;
-  int outPort;
   public static final String SERVER_ADDRESS = "192.168.40.8";
 
-  public ConnectCommandServer(DatagramPacket connectPacket, int inPort, int outPort) {
+  public ConnectCommandServer(DatagramPacket connectPacket) {
     super(Keyword.CONNECT, "Establish connection with client");
     this.connectPacket = connectPacket;
-    this.inPort = inPort;
-    this.outPort = outPort;
   }
 
   @Override
@@ -34,9 +32,12 @@ public class ConnectCommandServer extends Command{
     createReliableUDPchannel(handler);
 
     //If the RUDP is setup, create an mDNS message (portIn + portOut) for the client
-    if(handler != null) {
+    if(handler.getChannel() != null) {
       try {
-        handler.getChannel().sendAndReceive(createMDNSData(handler));
+        MDNSdata mdnSdata = new MDNSdata(handler.getInPort(),
+            handler.getOutPort(), "Client");
+        handler.print("mDNS data " + mdnSdata);
+        handler.getChannel().sendAndReceive(mdnSdata.getData(), Flag.CONNECT);
       } catch (IOException e) {
         handler.print(e.getMessage());
         handler.shutdown();
@@ -51,37 +52,27 @@ public class ConnectCommandServer extends Command{
     UDPPacket udpPacket = new UDPPacket(connectPacket);
     System.out.println("Create reliable UDP channel from" + udpPacket);
 
-    ByteBuffer buffer = ByteBuffer.allocate(udpPacket.getData().length).put(udpPacket.getData());
     InetAddress address = connectPacket.getAddress();
+    handler.setAddress(address);
     int clientPortIn = 0, clientPortOut = 0;
 
     try {
-      clientPortIn = buffer.getInt(0);
-      clientPortOut = buffer.getInt(4);
+      MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
+      clientPortIn = mdnSdata.getInPort();
+      clientPortOut = mdnSdata.getOutPort();
     } catch (IndexOutOfBoundsException e) {
-      handler.print("Could not parse " + udpPacket.getData() + " to mDNS data.");
+      handler.print(e.getMessage());
       return;
     }
 
-    //Create sockets
+    //Create Reliable Udp channel
     try {
-      DatagramSocket socketIn = new DatagramSocket(inPort);
-      DatagramSocket socketOut = new DatagramSocket(outPort);
-
-      //Create Reliable Udp channel
-      handler.setChannel(socketIn, socketOut, address, clientPortIn, clientPortOut);
+      handler.setChannel(handler.getInPort(), handler.getOutPort(), address, clientPortIn, clientPortOut, false);
 
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s on ports %d and %d, %s",address, clientPortIn, clientPortOut, e.getMessage()));
     }
 
-  }
-
-  private byte[] createMDNSData(Handler handler) {
-    ByteBuffer mDNSData = ByteBuffer.allocate(2 * 4);
-    mDNSData.putInt(handler.getChannel().getReceivePort());
-    mDNSData.putInt(handler.getChannel().getSendPort());
-    return mDNSData.array();
   }
 
 

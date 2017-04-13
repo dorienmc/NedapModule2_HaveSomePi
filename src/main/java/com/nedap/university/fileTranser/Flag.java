@@ -1,5 +1,7 @@
 package com.nedap.university.fileTranser;
 
+import com.nedap.university.clientAndServer.commands.Keyword;
+
 /**
  * Possible flags
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -37,6 +39,21 @@ public enum Flag {
       }
     }
     return null;
+  }
+
+  /* Convert to keyword, return null if not possible. */
+  public Keyword toKeyword() {
+    //HELP, EXIT, CONNECT, DOWNLOAD, UPLOAD, PAUSE, RESUME, ABORT, LS;
+    switch (this) {
+      case CONNECT:     return Keyword.CONNECT;
+      case LIST_FILES:  return Keyword.LS;
+      case DOWNLOAD:    return Keyword.DOWNLOAD;
+      case UPLOAD:      return Keyword.UPLOAD;
+      case PAUSE:       return Keyword.PAUSE;
+      case RESUME:      return Keyword.RESUME;
+      case ABORT:       return Keyword.ABORT;
+      default:          return null;
+    }
   }
 
 }

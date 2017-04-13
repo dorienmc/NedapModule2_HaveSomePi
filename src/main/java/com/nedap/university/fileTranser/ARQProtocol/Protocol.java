@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
+import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import com.nedap.university.fileTranser.Sender;
@@ -21,7 +22,6 @@ public abstract class Protocol {
   byte[] dataReceived;
   Sender sender;
   Receiver receiver;
-  public static final int TIMEOUT = 7000;
 
   int seqNumber; //Sequence number of next packet that is to be send.
   int ackNumber; //Sequence number of next expected packet from receiver.
@@ -36,7 +36,7 @@ public abstract class Protocol {
   //TODO split file into multiple UDP packets
 
   /* Send given data (in parts) and wait for acks if requested */
-  public abstract void send(byte[] data) throws IOException;
+  public abstract void send(byte[] data, int flags) throws IOException;
 
   /* Send packet over socket */
   protected void sendPacket(UDPPacket packet) {
@@ -44,7 +44,7 @@ public abstract class Protocol {
   }
 
   /* Wait for next packet over socket */
-  protected UDPPacket receivePacket() throws IOException,TimeoutException {
+  public UDPPacket receivePacket(int maxTimeOut) throws IOException,TimeoutException {
     UDPPacket response = receiver.retrievePacket();
     int time = 0;
 
@@ -57,8 +57,8 @@ public abstract class Protocol {
       }
 
       time += 10;
-      if(time > TIMEOUT) {
-        throw new TimeoutException("Exceeded time out, resend");
+      if(time > maxTimeOut) {
+        throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
       }
 
       response = receiver.retrievePacket();

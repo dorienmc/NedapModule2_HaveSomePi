@@ -6,6 +6,7 @@ import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,38 @@ import java.util.Map;
 public abstract class Handler extends Thread {
   ReliableUdpChannel channel;
   Map<Keyword,Command> commands;
+  int inPort;
+  int outPort;
+  InetAddress address;
 
-  public Handler() {
+  public Handler(int inPort, int outPort) {
+    this.inPort = inPort;
+    this.outPort = outPort;
     commands = new HashMap<>();
+  }
+
+  public void setInPort(int inPort) {
+    this.inPort = inPort;
+  }
+
+  public void setOutPort(int outPort) {
+    this.outPort = outPort;
+  }
+
+  public int getInPort() {
+    return inPort;
+  }
+
+  public int getOutPort() {
+    return outPort;
+  }
+
+  public InetAddress getAddress() {
+    return address;
+  }
+
+  public void setAddress(InetAddress address) {
+    this.address = address;
   }
 
   /**
@@ -27,17 +57,16 @@ public abstract class Handler extends Thread {
    * and sends them over 9293 (see ReliableUdpChannel DEFAULT_PORT_IN and DEFAULT_PORT_OUT.
    * @throws SocketException if one of the sockets could not be created.
    */
-  public void setChannel(DatagramSocket socketIn, DatagramSocket socketOut, InetAddress destAddress,
+  public void setChannel(int myPortIn, int myPortOut, InetAddress destAddress,
       int serverPortIn, int serverPortOut, boolean isClient) throws SocketException {
-    this.channel = new ReliableUdpChannel(socketIn, socketOut, destAddress, serverPortIn, serverPortOut, true);
+    this.channel = new ReliableUdpChannel(myPortIn, myPortOut, destAddress, serverPortIn, serverPortOut, isClient);
   }
 
-  /**
-   * Create a reliable udp channel from the given in/out sockets.
-   */
-  public void setChannel(DatagramSocket socketIn, DatagramSocket socketOut, InetAddress destAddress,
-      int clientPortIn, int clientPortOut) {
-    this.channel = new ReliableUdpChannel(socketIn,socketOut,destAddress,clientPortIn,clientPortOut);
+  public void removeChannel() {
+    if(channel != null) {
+      channel.shutdown();
+    }
+    channel = null;
   }
 
   public ReliableUdpChannel getChannel() {
@@ -60,7 +89,7 @@ public abstract class Handler extends Thread {
   }
 
   public List<Command> getCommands() {
-    return (List) commands.values();
+    return new ArrayList<>(commands.values());
   }
 
   public abstract void run();

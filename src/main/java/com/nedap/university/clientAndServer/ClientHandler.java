@@ -2,6 +2,7 @@ package com.nedap.university.clientAndServer;
 
 import com.nedap.university.clientAndServer.commands.*;
 import com.nedap.university.clientAndServer.commands.Keyword;
+import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -12,13 +13,10 @@ import java.net.SocketException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class ClientHandler extends Handler {
-  InetAddress address;
-  int inPort;
-  int outPort;
   Server server;
 
   public ClientHandler(DatagramPacket connectPacket, int inPort, int outPort, Server server) throws SocketException {
-    super();
+    super(inPort, outPort);
     this.server = server;
 
     //Add commands
@@ -33,45 +31,52 @@ public class ClientHandler extends Handler {
     //TODO add more commands?
 
     //Setup Reliable UDP channel and return acknowledgement of connection to client
-    (new ConnectCommandServer(connectPacket, inPort, outPort)).execute(this);
-
-
+    (new ConnectCommandServer(connectPacket)).execute(this);
 
   }
 
   @Override
   public void run() {
     //Listen for new commands from this client
+    UDPPacket requestPacket;
     while (true) {
       try {
-        UDPPacket requestPacket = getChannel().getNewRequest();
+        requestPacket = getChannel().getNewRequest();
       } catch (Exception e) {
         System.out.println(e.getMessage());
         shutdown();
         return;
       }
 
-      //Determine request
-      Keyword requestType = null;//TODO Convert flag to keyword
+      if(requestPacket != null) {
+        //Determine request
+        Flag flag = Flag.fromByte((byte) requestPacket.getFlags());
+        Keyword requestType = flag.toKeyword();
 
-      //Act on it
-      if(requestType != null) {
-        handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+        //Act on it
+        if (requestType != null) {
+          //Ignore connect requests
+          if(!requestType.equals(Keyword.CONNECT)) {
+            handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+          }
+        }
       }
-    }
-  }
 
-  public int getInPort() {
-    return inPort;
+      System.out.println("Wait for request");
+    }
   }
 
   @Override
   public String toString() {
-    return "Client at " + address + ":" + inPort + "and :" + outPort;
+    return "Client at " + super.getAddress() + ":" + super.getInPort() + " and :" + super.getOutPort();
   }
 
   public void shutdown() {
+    if(getChannel() != null) {
+      getChannel().shutdown();
+    }
     server.removeClientHandler(this);
+
     //TODO anything else?
   }
 }

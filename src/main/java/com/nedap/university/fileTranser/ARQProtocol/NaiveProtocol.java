@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
+import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -20,12 +21,13 @@ public class NaiveProtocol extends Protocol{
   }
 
   /* Send given data (in parts) and wait for response */
-  public void send(byte[] data) throws IOException {
+  public void send(byte[] data, int flags) throws IOException {
     resendCount = 0;
 
     //Send data in 1 go
     UDPPacket packet = new UDPPacket(sender.getSourcePort(), sender.getDestPort(), 0, 0);
     packet.setData(data);
+    packet.setFlags(flags);
 
     while(resendCount < MAX_RESEND) {
       sender.addPacketToBuffer(packet);
@@ -33,7 +35,7 @@ public class NaiveProtocol extends Protocol{
 
       //Wait for response
       try {
-        UDPPacket response = super.receivePacket();
+        UDPPacket response = super.receivePacket(7000);
 
         //Save data to 'dataReceived'
         super.addReceivedData(response.getData());

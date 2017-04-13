@@ -17,41 +17,57 @@ import java.util.Scanner;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class Client extends Handler {
+  volatile boolean running;
 
   public Client() {
-    super();
+    super(9292,9293);
+    running = true;
 
     //Add commands
     addCommand(new ExitCommand());
     addCommand(new HelpCommand());
+    addCommand(new ConnectCommandClient());
     addCommand(new ListFilesCommandClient());
     addCommand(new DownloadCommand());
     addCommand(new UploadCommand());
     addCommand(new PauseCommand());
     addCommand(new ResumeCommand());
-
-    //TODO add more commands?
-
   }
 
   @Override
   public void run() {
     while(getChannel() == null) {
-      //Ask for host
-      String hostName = readString("To which Pi do you want to connect? ");
-
       //Find host and create Reliable Udp Channel
-      (new ConnectCommandClient(hostName)).execute(this);
+      ConnectCommandClient connector = new ConnectCommandClient();
+      connector.execute(this);
+
+      if (getChannel() == null) {
+        print("Could not connect to host " + connector.getHostName() + ".");
+        super.removeChannel();
+      }
     }
 
-    System.out.println("TODO implement more stuff");
-    shutdown();
-    //List commands
-    //Wait for new user command
+    while(running) {
+      //List commands
+      (new HelpCommand()).execute(this);
+
+      //Wait for new user command
+      String command = readString("Please enter a command ");
+
+      super.handleCommand(command);
+    }
+
+
   }
 
   public void shutdown() { //TODO add more?
+    super.removeChannel();
+    running = false;
     System.exit(0);
+  }
+
+  synchronized public boolean isRunning() {
+    return running;
   }
 
   /**

@@ -102,7 +102,7 @@ public class ReliableUdpChannel {
    *  @throws IOException if it could not reach the socket
    */
   public UDPPacket getNewRequest() throws IOException,TimeoutException {
-    return protocol.receivePacket(30000);
+    return protocol.receivePacket(300000);
   }
 
   //Private methods

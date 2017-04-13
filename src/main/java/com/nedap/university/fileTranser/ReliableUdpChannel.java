@@ -120,18 +120,18 @@ public class ReliableUdpChannel { //TODO extend thread?
     return protocol.receive();
   }
 
-  /* Wait for new request */
-  public UDPPacket getNewRequest() throws Exception {
-    return protocol.receivePacket();
-    //return null;
+  /**
+   *  Wait for new request
+   *  @throws TimeoutException if it takes more than 30000ms (30s)
+   *  @throws IOException if it could not reach the socket
+   */
+  public UDPPacket getNewRequest() throws IOException,TimeoutException {
+    return protocol.receivePacket(30000);
   }
 
   //Private methods
   public void shutdown() {
     sender.shutdown();
     receiver.shutdown();
-
-    //Shutdown sender and receiver.
   }
-  //TODO what else?
 }

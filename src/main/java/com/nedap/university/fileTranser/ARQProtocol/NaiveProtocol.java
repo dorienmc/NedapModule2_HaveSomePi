@@ -35,7 +35,7 @@ public class NaiveProtocol extends Protocol{
 
       //Wait for response
       try {
-        UDPPacket response = super.receivePacket();
+        UDPPacket response = super.receivePacket(7000);
 
         //Save data to 'dataReceived'
         super.addReceivedData(response.getData());

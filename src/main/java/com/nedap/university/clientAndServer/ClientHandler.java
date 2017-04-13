@@ -5,7 +5,6 @@ import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.SocketException;
 
 /**
@@ -22,8 +21,8 @@ public class ClientHandler extends Handler {
     //Add commands
     addCommand(new ExitCommand());
     addCommand(new ListFilesCommandServer());
-    addCommand(new DownloadCommand());
-    addCommand(new UploadCommand());
+    addCommand(new DownloadCommandServer());
+    addCommand(new UploadCommandServer());
     addCommand(new PauseCommand());
     addCommand(new ResumeCommand());
     //where does abort belong?

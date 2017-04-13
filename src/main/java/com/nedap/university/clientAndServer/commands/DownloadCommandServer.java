@@ -5,9 +5,9 @@ import com.nedap.university.clientAndServer.Handler;
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class DownloadCommand extends Command{
+public class DownloadCommandServer extends Command{
 
-  public DownloadCommand() {
+  public DownloadCommandServer() {
     super(Keyword.DOWNLOAD, "Download specific file");
   }
 

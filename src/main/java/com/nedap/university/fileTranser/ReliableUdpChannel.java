@@ -122,8 +122,7 @@ public class ReliableUdpChannel { //TODO extend thread?
 
   /* Wait for new request */
   public UDPPacket getNewRequest() throws Exception {
-    System.out.println("TODO implement ReliableUdpChannel.getNewRequest()");
-    return null;
+    return protocol.receivePacket();
     //return null;
   }
 

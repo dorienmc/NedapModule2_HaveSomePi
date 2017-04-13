@@ -45,7 +45,7 @@ public abstract class Protocol {
   }
 
   /* Wait for next packet over socket */
-  protected UDPPacket receivePacket() throws IOException,TimeoutException {
+  public UDPPacket receivePacket() throws IOException,TimeoutException {
     UDPPacket response = receiver.retrievePacket();
     int time = 0;
 

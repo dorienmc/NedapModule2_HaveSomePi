@@ -55,8 +55,10 @@ public class ClientHandler extends Handler {
 
         //Act on it
         if (requestType != null) {
-          handleCommand(
-              requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+          //Ignore connect requests
+          if(!requestType.equals(Keyword.CONNECT)) {
+            handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
+          }
         }
       }
 

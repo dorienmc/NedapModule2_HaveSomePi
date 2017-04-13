@@ -20,51 +20,48 @@ public class NaiveProtocol extends Protocol{
     super(sender, receiver);
   }
 
-  /* Send given data (in parts) and wait for response */
-  public void send(byte[] data, int flags) throws IOException {
+  /* Send data in sender buffer, dont wait */
+  public void send() throws IOException {
     resendCount = 0;
 
-    //Send data in 1 go
-    UDPPacket packet = new UDPPacket(sender.getSourcePort(), sender.getDestPort(), 0, 0);
-    packet.setData(data);
-    packet.setFlags(flags);
-
-    while(resendCount < MAX_RESEND) {
-      sender.addPacketToBuffer(packet);
-      sender.unBlockSender();
-
-      //Wait for response
-      try {
-        UDPPacket response = super.receivePacket(7000);
-
-        //Save data to 'dataReceived'
-        super.addReceivedData(response.getData());
-        break;
-
-      } catch (TimeoutException e) {
-        System.out.println("TIME OUT " + resendCount);
-      }
-
-      resendCount++;
-    }
-
-    if(resendCount >= MAX_RESEND) {
-      throw new IOException("Resend limit of " + MAX_RESEND + " exceeded.");
-    }
-  }
-
-  /* Send ack */
-  public void sendAck(int flags) {
-    UDPPacket packet = new UDPPacket(sender.getSourcePort(), sender.getDestPort(), 0, 0);
-    sender.addPacketToBuffer(packet);
-    packet.setFlags(flags);
+    //Send complete buffer
     sender.unBlockSender();
 
-    //Wait shortly
-    try {
-      Thread.sleep(10);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+    while(sender.getBufferLength() > 0) {
+      //Wait some more until buffer is empty.
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
     }
+
+    sender.blockSender();
+
+
+//    while(resendCount < MAX_RESEND) {
+//      sender.addPacketToBuffer(packet);
+//      sender.unBlockSender();
+//
+//      //Wait for response
+//      try {
+//        UDPPacket response = super.receivePacket(7000);
+//
+//        //Save data to 'dataReceived'
+//        super.addReceivedData(response.getData());
+//        break;
+//
+//      } catch (TimeoutException e) {
+//        System.out.println("TIME OUT " + resendCount);
+//      }
+//
+//      resendCount++;
+//    }
+//
+//    if(resendCount >= MAX_RESEND) {
+//      throw new IOException("Resend limit of " + MAX_RESEND + " exceeded.");
+//    } else {
+//
+//    }
   }
 }

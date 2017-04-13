@@ -1,12 +1,19 @@
 package com.nedap.university.fileTranser;
 
 
+import static com.nedap.university.fileTranser.ARQProtocol.Protocol.MAX_BUFFER;
+
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ARQProtocol.NaiveProtocol;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
+import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -33,7 +40,7 @@ public class ReliableUdpChannel {
     System.out.println(String.format("Setup ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
         destAddress,sourceOutPort,destInPort,sourceInPort,destOutPort));
 
-    if(isClient) {
+    if(isClient) { //TODO should be done by protocol?
       sendAckToOtherSide(sourceOutPort, destInPort);
     }
   }
@@ -44,9 +51,6 @@ public class ReliableUdpChannel {
   private void sendAckToOtherSide(int sourceOutPort, int destInPort) {
     System.out.println("Send ack to server");
     sendAck(Flag.CONNECT.getValue());
-//    UDPPacket connectionAck = new UDPPacket(sourceOutPort, destInPort, 0,0);
-//    connectionAck.setFlags(Flag.CONNECT.getValue());
-//    sender.forceSend(connectionAck);
   }
 
   /* Change protocol, is currently Stop-and-wait by default */
@@ -54,46 +58,116 @@ public class ReliableUdpChannel {
     this.protocol = protocol;
   }
 
-  /* Send request without data */
-  public byte[] sendAndReceive(Keyword keyword) throws IOException {
+
+  /********** Send request ***********/
+
+  /* Send Request (type defined by flags) with extra parameters in data */
+  public byte[] sendRequest(byte[] data, int flags) throws IOException{
+    UDPPacket packet = sender.createEmptyPacket();
+    packet.setData(data);
+    packet.setFlags(flags);
+    sender.addPacketToBuffer(packet);
+
+    protocol.send();
+    return protocol.receive();
+  }
+
+  /* Send Request (type defined by Flag) with extra parameters in data */
+  public byte[] sendRequest(byte[] data, Flag flag) throws IOException{
+    return sendRequest(data, flag.getValue());
+  }
+
+  /* Send Request (type defined by Keyword) with extra parameters in data */
+  public byte[] sendRequest(Keyword keyword) throws IOException{
     Flag flag = keyword.toFlag();
     if(flag != null) {
-      protocol.send(new byte[0], flag.getValue());
-      return protocol.receive();
+      return sendRequest(new byte[0], flag);
     } else {
       return null;
     }
   }
 
+  /********** Send data/file **********/
+  /* Send data (not from file) */
+  public byte[] sendData(byte[] data) throws IOException {
+    UDPPacket packet = sender.createEmptyPacket();
+    packet.setData(data);
+    sender.addPacketToBuffer(packet);
+
+    protocol.send();
+    return protocol.receive();
+  }
+
   /* Send data in given file */
-  public byte[] sendAndReceive(String filename) {
-    //TODO
-    System.out.println("TODO implement ReliableUdpChannel.send(String filename)");
-    return protocol.receive();
+  public byte[] uploadFile(String filename) throws FileNotFoundException, IOException {
+    int fileId = 1; //TODO dynamically assign a number!
+    File file = new File("./files/filename");
+    if(!file.exists()) {
+      throw new FileNotFoundException("Could not find ./files/" + filename);
+    }
+
+    //Put uploadrequest (with file metadata) in the sender buffer
+    UDPPacket uploadRequest = sender.createEmptyPacket();
+    uploadRequest.setFlags(Flag.UPLOAD.getValue());
+    uploadRequest.setHeaderSetting(HeaderField.FILE_ID,fileId);
+    byte[] fileName = file.getName().getBytes();
+    ByteBuffer buffer = ByteBuffer.allocate(fileName.length + 8);
+    buffer.put(fileName);
+    buffer.putLong(file.length());
+    uploadRequest.setData(buffer.array());
+    sender.addPacketToBuffer(uploadRequest);
+
+    //Split file in packets
+    try (FileInputStream fileStream = new FileInputStream(file)) {
+      //Determine the number of packets that are needed
+      double nPackets = Math.ceil(file.length() / (double) MAX_BUFFER);
+      System.out.println("Splitting file in " + nPackets);
+
+      for (int packetId = 0; packetId < nPackets; packetId++) {
+        UDPPacket packet = sender.createEmptyPacket();
+        packet.setFlags(Flag.NOT_LAST.getValue());
+        packet.setHeaderSetting(HeaderField.FILE_ID,fileId);
+        packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_BUFFER
+
+        byte[] data = new byte[MAX_BUFFER];
+        if(fileStream.read(data) == -1) {
+          //NO more bytes to read, stop
+        } else {
+          packet.setData(data);
+
+          //Put each packet in the sender buffer
+          sender.addPacketToBuffer(packet);
+        }
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
+    //Tell protocol to start sending and wait until its done.
+    protocol.send();
+
+    return protocol.receive(); //TODO is there something to return?
   }
 
-  /* Send given data, with given flag */
-  public byte[] sendAndReceive(byte[] data, Flag flag) throws IOException{
-    protocol.send(data, flag.getValue());
-    return protocol.receive();
-  }
 
-  /* Send given data */
-  public byte[] sendAndReceive(byte[] data) throws IOException{
-    protocol.send(data, 0);
-    return protocol.receive();
-  }
 
-  /* Send request with data */
-  public byte[] sendAndReceive(Keyword requestType, String filename) {
+  /* Request data from given file */
+  public byte[] downloadFile(String filename) {
     //TODO
     System.out.println("TODO implement ReliableUdpChannel.send(Flag flag, String filename)");
     return protocol.receive();
   }
 
+
+
+
   /* Send ack with flags (set to 0 if not needed) */
   public void sendAck(int flags) {
-    protocol.sendAck(0);
+    try {
+      sendRequest(new byte[0], flags);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**

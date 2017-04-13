@@ -28,13 +28,10 @@ public class ListFilesCommandClient extends Command{
       //Send request and wait for response.
       String response = null;
       try {
-        response = new String(channel.sendAndReceive(Keyword.LS));
+        response = new String(channel.sendRequest(Keyword.LS));
       } catch (IOException e) {
         handler.print(e.getMessage());
       }
-
-      //Send ack
-      channel.sendAck(0);
 
       //Print files
       handler.print(response);

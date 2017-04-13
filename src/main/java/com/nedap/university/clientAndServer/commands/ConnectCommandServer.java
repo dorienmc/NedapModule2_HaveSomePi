@@ -37,7 +37,7 @@ public class ConnectCommandServer extends Command{
         MDNSdata mdnSdata = new MDNSdata(handler.getInPort(),
             handler.getOutPort(), "Client");
         handler.print("mDNS data " + mdnSdata);
-        handler.getChannel().sendAndReceive(mdnSdata.getData(), Flag.CONNECT);
+        handler.getChannel().sendRequest(mdnSdata.getData(), Flag.CONNECT);
       } catch (IOException e) {
         handler.print(e.getMessage());
         handler.shutdown();

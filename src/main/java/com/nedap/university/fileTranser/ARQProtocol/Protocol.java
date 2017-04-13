@@ -35,16 +35,8 @@ public abstract class Protocol {
 
   //TODO split file into multiple UDP packets
 
-  /* Send given data (in parts) and wait for acks if requested */
-  public abstract void send(byte[] data, int flags) throws IOException;
-
-  /* Send ack */
-  public abstract void sendAck(int flags);
-
-  /* Send packet over socket */
-  protected void sendPacket(UDPPacket packet) {
-    sender.addPacketToBuffer(packet);
-  }
+  /* Send data in sender buffer according to protocol */
+  public abstract void send() throws IOException;
 
   /* Wait for next packet over socket */
   public UDPPacket receivePacket(int maxTimeOut) throws IOException,TimeoutException {

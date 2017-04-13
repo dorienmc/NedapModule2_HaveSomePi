@@ -48,9 +48,9 @@ public class Sender extends Thread {
     return destPort;
   }
 
-  public void addPacketToBuffer(UDPPacket packet) { //TODO add sequence number here?
-    sendBuffer.add(packet);
-  }
+  /* Return the number of packets in the queue. */
+  public int getBufferLength() {return sendBuffer.size();}
+
 
   public void blockSender() {
     isBlocked = true;
@@ -97,6 +97,14 @@ public class Sender extends Thread {
       //Try to send
       socket.send(packet.toDatagram(address));
     }
+  }
+
+  public void addPacketToBuffer(UDPPacket packet) { //TODO add sequence number here?
+    sendBuffer.add(packet);
+  }
+
+  public UDPPacket createEmptyPacket(){
+    return new UDPPacket(sourcePort,destPort,0,0);
   }
 
   public void forceSend(UDPPacket packet) {

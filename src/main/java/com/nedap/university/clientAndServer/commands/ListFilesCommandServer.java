@@ -34,7 +34,7 @@ public class ListFilesCommandServer extends Command{
 
     //Send this to the client (includes waiting for client ack)
     try {
-      channel.sendAndReceive(allFiles.getBytes());
+      channel.sendData(allFiles.getBytes());
     } catch (IOException e) {
       e.printStackTrace();
     }

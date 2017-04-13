@@ -43,9 +43,10 @@ public class ReliableUdpChannel {
    */
   private void sendAckToOtherSide(int sourceOutPort, int destInPort) {
     System.out.println("Send ack to server");
-    UDPPacket connectionAck = new UDPPacket(sourceOutPort, destInPort, 0,0);
-    connectionAck.setFlags(Flag.CONNECT.getValue());
-    sender.forceSend(connectionAck);
+    sendAck(Flag.CONNECT.getValue());
+//    UDPPacket connectionAck = new UDPPacket(sourceOutPort, destInPort, 0,0);
+//    connectionAck.setFlags(Flag.CONNECT.getValue());
+//    sender.forceSend(connectionAck);
   }
 
   /* Change protocol, is currently Stop-and-wait by default */
@@ -88,6 +89,11 @@ public class ReliableUdpChannel {
     //TODO
     System.out.println("TODO implement ReliableUdpChannel.send(Flag flag, String filename)");
     return protocol.receive();
+  }
+
+  /* Send ack with flags (set to 0 if not needed) */
+  public void sendAck(int flags) {
+    protocol.sendAck(0);
   }
 
   /**

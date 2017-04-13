@@ -52,4 +52,19 @@ public class NaiveProtocol extends Protocol{
       throw new IOException("Resend limit of " + MAX_RESEND + " exceeded.");
     }
   }
+
+  /* Send ack */
+  public void sendAck(int flags) {
+    UDPPacket packet = new UDPPacket(sender.getSourcePort(), sender.getDestPort(), 0, 0);
+    sender.addPacketToBuffer(packet);
+    packet.setFlags(flags);
+    sender.unBlockSender();
+
+    //Wait shortly
+    try {
+      Thread.sleep(10);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
 }

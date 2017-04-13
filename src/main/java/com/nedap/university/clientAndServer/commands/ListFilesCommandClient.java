@@ -4,6 +4,7 @@ import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
+import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
 
 /**
@@ -31,6 +32,9 @@ public class ListFilesCommandClient extends Command{
       } catch (IOException e) {
         handler.print(e.getMessage());
       }
+
+      //Send ack
+      channel.sendAck(0);
 
       //Print files
       handler.print(response);

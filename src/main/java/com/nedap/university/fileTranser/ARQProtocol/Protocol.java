@@ -38,6 +38,9 @@ public abstract class Protocol {
   /* Send given data (in parts) and wait for acks if requested */
   public abstract void send(byte[] data, int flags) throws IOException;
 
+  /* Send ack */
+  public abstract void sendAck(int flags);
+
   /* Send packet over socket */
   protected void sendPacket(UDPPacket packet) {
     sender.addPacketToBuffer(packet);
@@ -76,7 +79,25 @@ public abstract class Protocol {
 
   /* Return received data */
   public byte[] receive() {
-    return dataReceived;
+    byte[] response = dataReceived.clone();
+    dataReceived = new byte[0];
+    return response;
+  }
+
+  public int getSeqNumber() {
+    return seqNumber;
+  }
+
+  public void setSeqNumber(int seqNumber) {
+    this.seqNumber = seqNumber;
+  }
+
+  public int getAckNumber() {
+    return ackNumber;
+  }
+
+  public void setAckNumber(int ackNumber) {
+    this.ackNumber = ackNumber;
   }
 }
 

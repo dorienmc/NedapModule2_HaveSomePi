@@ -58,6 +58,6 @@ public class MDNSdata {
 
   @Override
   public String toString() {
-    return String.format("Host: %s, ports %d, %d", hostname, inPort, outPort);
+    return String.format("Host %s, ports %d, %d", hostname, inPort, outPort);
   }
 }

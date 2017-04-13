@@ -87,9 +87,8 @@ public class Sender extends Thread {
 
   private void sendPacket(UDPPacket packet) throws IOException {
     if (packet != null) {
-      System.out.println("Try to send packet: " + packet);
-      System.out.println("To " + address + ":" + packet.getDestPort());
-      System.out.println(packet.getSourcePort());
+      System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
+
       //Update current seq number
       currentSeqNumber = packet.getSequenceNumber();
 

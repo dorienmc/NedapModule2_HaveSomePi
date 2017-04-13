@@ -52,7 +52,7 @@ public class ConnectCommandClient extends Command {
     }
 
     //Create Reliable UDP channel
-    createReliableUDPchannel(response, handler); //TODO what if we got an exception?
+    createReliableUDPchannel(response, handler);
   }
 
   public String getHostName() {
@@ -79,8 +79,7 @@ public class ConnectCommandClient extends Command {
     MDNSdata mdnSdata = new MDNSdata(handler.getInPort(), handler.getOutPort(), hostName);
     multiShout.setData(mdnSdata.getData());
     handler.print("Trying to connect to host " + hostName);
-    handler.print("Send mDNS packet " + multiShout);
-    handler.print("mDNS data " + mdnSdata);
+    handler.print("mDNS data: " + mdnSdata);
 
     try {
       DatagramPacket packet = multiShout.toDatagram(broadcastAddress);
@@ -124,7 +123,6 @@ public class ConnectCommandClient extends Command {
     }
 
     //Check if response packet is an mDSN packet
-    System.out.println("Response: " + new UDPPacket(response));
     if(isConnectionPacket(response,handler)) {
       return response;
     }
@@ -182,7 +180,6 @@ public class ConnectCommandClient extends Command {
     //Create Reliable Udp channel
     try {
       handler.setChannel(handler.getInPort(), handler.getOutPort(), address,serverPortIn, serverPortOut, true);
-
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s: %s",hostName, e.getMessage()));
     }

@@ -13,39 +13,39 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class Receiver extends Thread {
   DatagramSocket socket;
-  int portIn;
-  int portOut;
+  int destPort;
+  int sourcePort;
   InetAddress address;
   private ConcurrentLinkedDeque<UDPPacket> receiveBuffer; //Packets that have arrived
   boolean isBlocked;
   boolean stop;
   int currentAckNumber; //Sequence number of next expected packet from receiver.
 
-  public Receiver(InetAddress address, int portIn, int portOut) throws SocketException{
-    this.socket = new DatagramSocket(portIn);
+  public Receiver(InetAddress address, int sourcePort, int destPort) throws SocketException{
+    this.socket = new DatagramSocket(sourcePort);
     this.receiveBuffer = new ConcurrentLinkedDeque<>();
     this.isBlocked = false;
     this.stop = false;
     this.currentAckNumber = 0;
     this.address = address;
-    this.portIn = portIn;
-    this.portOut = portOut;
+    this.sourcePort = sourcePort;
+    this.destPort = destPort;
   }
 
   public int getCurrentAckNumber() {
     return currentAckNumber;
   }
 
-  public int getPortIn() {
-    return portIn;
+  public int getDestPort() {
+    return destPort;
   }
 
-  public int getPortOut() {
-    return portOut;
+  public int getSourcePort() {
+    return sourcePort;
   }
 
   /* Retrieve next packet from the receiveBuffer, null there are none.
-      * Note: also removes this packet from the buffer! */
+        * Note: also removes this packet from the buffer! */
   public UDPPacket retrievePacket() {
     return receiveBuffer.pollFirst();
   }

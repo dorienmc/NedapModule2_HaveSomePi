@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
  * and follow the Reliable Udp File Transfer Protocol.
  * Created by dorien.meijercluwen on 09/04/2017.
  */
-public class ReliableUdpChannel { //TODO extend thread?
+public class ReliableUdpChannel {
   Protocol protocol;
   Sender sender;    //Class that sends UDP packets
   Receiver receiver;//Class that receives UDP packets
@@ -30,7 +30,7 @@ public class ReliableUdpChannel { //TODO extend thread?
     this.protocol = new NaiveProtocol(sender,receiver);
     sender.start();
     receiver.start();
-    System.out.println(String.format("Set ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
+    System.out.println(String.format("Setup ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
         destAddress,sourceOutPort,destInPort,sourceInPort,destOutPort));
 
     if(isClient) {

@@ -1,8 +1,10 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.client;
 
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -99,13 +101,13 @@ public class ConnectCommandClient extends Command {
     //Create socket for receiving data.
     try {
       socketIn = new DatagramSocket(handler.getInPort());
-      socketIn.setSoTimeout(5000);
+      socketIn.setSoTimeout(20000);
     } catch (SocketException e) {
       handler.print(e.getMessage());
     }
 
     //Wait for response from server
-    handler.print("Waiting for response from server on port " + handler.getInPort());
+    handler.print("Waiting for response from server on port " + socketIn.getLocalPort());
     DatagramPacket response = new DatagramPacket(new byte[Protocol.MAX_BUFFER],Protocol.MAX_BUFFER);
 
     try {
@@ -175,7 +177,7 @@ public class ConnectCommandClient extends Command {
 
     //Create Reliable Udp channel
     try {
-      handler.setChannel(handler.getInPort(), handler.getOutPort(), address,serverPortIn, serverPortOut, true);
+      handler.setChannel(handler.getInPort(), handler.getOutPort(), address,serverPortIn, serverPortOut);
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s: %s",hostName, e.getMessage()));
     }

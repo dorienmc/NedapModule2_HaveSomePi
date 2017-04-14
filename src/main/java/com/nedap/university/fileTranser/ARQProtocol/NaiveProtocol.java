@@ -20,88 +20,44 @@ public class NaiveProtocol extends Protocol{
   public static final int MAX_RESEND = 10;
   private int resendCount;
 
-  public NaiveProtocol(Sender sender, Receiver receiver) {
-    super(sender, receiver);
+  public NaiveProtocol(Sender sender, Receiver receiver, byte requestId) {
+    super(sender, receiver, requestId);
   }
 
-  /* Send data in sender buffer, dont wait */
-  public void send() throws IOException {
-    resendCount = 0;
-
-    //Send complete buffer
-    sender.unBlockSender();
-
-    while(sender.getBufferLength() > 0) {
-      //Wait some more until buffer is empty.
-      Utils.sleep(10);
-    }
-
-    sender.blockSender();
-
-
-//    while(resendCount < MAX_RESEND) {
-//      sender.addPacketToBuffer(packet);
-//      sender.unBlockSender();
-//
-//      //Wait for response
-//      try {
-//        UDPPacket response = super.receivePacket(7000);
-//
-//        //Save data to 'dataReceived'
-//        super.addReceivedData(response.getData());
-//        break;
-//
-//      } catch (TimeoutException e) {
-//        System.out.println("TIME OUT " + resendCount);
-//      }
-//
-//      resendCount++;
-//    }
-//
-//    if(resendCount >= MAX_RESEND) {
-//      throw new IOException("Resend limit of " + MAX_RESEND + " exceeded.");
-//    } else {
-//
-//    }
-  }
-
-  /* Wait until complete file is received */
-  public void receiveFile(String filename, int fileId) {
-    //Add received packets to received data (dont care about order)
-    //Until a packet with NOT_LAST = false arrives.
-
-    while(true) {
-      try {
-        UDPPacket packet = super.receivePacket(0);
-        super.addReceivedData(packet.getData());
-        if(!packet.isFlagSet(Flag.NOT_LAST)) {
-          break;
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-      } catch (TimeoutException e) {
-        e.printStackTrace();
+  /**
+   *  Return next packet that should be send. Or null if there are none currently.
+   * Internally update the seq., add it to unacked, create timer etc.
+   **/
+  public UDPPacket getNextPacket() {
+    if (getStatus().equals(Status.RUNNING)) {
+      UDPPacket packet = sendBuffer.pollFirst();
+      if(packet != null) {
+        //TODO update seqnumber and ack number and more?
+        return packet;
       }
-
     }
-
-    //Create file //TODO do this for each received packet as soon as it is received.
-    //TODO move this somewhere else?
-    File file = new File("./files/" + filename);
-
-    try (FileOutputStream fileStream = new FileOutputStream(file)) {
-      fileStream.write(dataReceived);
-    } catch (FileNotFoundException e) {
-      System.out.println(e.getMessage());
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
-
+    return null;
   }
 
-  /* Tell if received packet is expected, if not it should be dropped .
-  * The naive protocol allows all packets.
-  * */
+  /**
+   *  Return true if protocol is still sending packets and/or waiting for acks
+   *  Naive protocol is busy as long as there are still packets in the sendBuffer
+   **/
+  public boolean busy() {
+    return sendBuffer.size() > 0;
+  }
+
+  /**
+   * Send data in sender buffer according to protocol
+   **/
+  public void send() throws IOException {
+    setStatus(Status.RUNNING);
+  }
+
+  /**
+   *  Tell if received packet is expected, if not it should be dropped .
+   *  The naive protocol allows all packets.
+   **/
   public boolean isExpected(UDPPacket packet) {
     return true;
   }

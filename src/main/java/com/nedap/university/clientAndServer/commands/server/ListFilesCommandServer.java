@@ -1,7 +1,10 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.server;
 
+import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.ClientHandler;
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class ListFilesCommandServer extends Command{
+public class ListFilesCommandServer extends Command {
 
   public ListFilesCommandServer(Handler handler, Byte requestId) {
     super(Keyword.LS, "List files", handler, requestId);
@@ -21,8 +24,6 @@ public class ListFilesCommandServer extends Command{
       return;
     }
 
-    ReliableUdpChannel channel = handler.getChannel();
-
     //List all files
     File[] files = new File("/home/pi/files").listFiles();
     String allFiles = "Files\n";
@@ -31,12 +32,17 @@ public class ListFilesCommandServer extends Command{
       allFiles += "\t" + file.getName();
     }
 
-    //Send this to the client (includes waiting for client ack)
+    //Send this to the client
     try {
-      channel.sendData(allFiles.getBytes());
+      protocol.sendData(allFiles.getBytes());
     } catch (IOException e) {
       e.printStackTrace();
     }
-    //TODO do something with response?
+
+    //Wait until protocol is not busy anymore.
+    while(protocol.busy()) {
+      Utils.sleep(10);
+    }
+    deregisterFromChannel();
   }
 }

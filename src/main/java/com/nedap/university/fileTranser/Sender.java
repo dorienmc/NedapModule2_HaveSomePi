@@ -31,6 +31,7 @@ public class Sender extends Thread {
     this.address = address;
     this.destPort = destPort;
     this.sourcePort = sourcePort;
+    this.handler = handler;
   }
 
   public int getDestPort() {

@@ -2,6 +2,7 @@ package com.nedap.university.clientAndServer;
 
 
 import com.nedap.university.clientAndServer.commands.*;
+import com.nedap.university.clientAndServer.commands.server.ListFilesCommandServer;
 
 /**
  * Created by dorien.meijercluwen on 14/04/2017.

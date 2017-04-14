@@ -109,7 +109,7 @@ public abstract class Handler extends Thread {
 
   /* Get requestId that is not in use */
   public Byte getFreeRequestId() {
-    for(byte i = 0; i < 256; i++) {
+    for(byte i = 1; i < 256; i++) {
       if(!runningCommands.containsKey(new Byte(i))) {
         return new Byte(i);
       }

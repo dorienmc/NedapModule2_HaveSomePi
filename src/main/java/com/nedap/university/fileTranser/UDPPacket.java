@@ -117,6 +117,7 @@ public class UDPPacket {
 
   public void setHeaderSetting(HeaderField field, int value) {
     header.setField(field, value);
+    updateChecksum();
   }
 
   private byte[] getPkt() {

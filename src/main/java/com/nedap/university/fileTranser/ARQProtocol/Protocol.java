@@ -71,13 +71,17 @@ public abstract class Protocol {
 
 
   /********** Add/Remove from Buffers **********/
-  public void addPacketToBuffer(UDPPacket packet) {
+  public void addPacketToSendBuffer(UDPPacket packet) {
     //TODO create timeout timer? Set sequence number and ack number?
     packet.setHeaderSetting(HeaderField.SEQ_NUMBER, seqNumber);
     packet.setHeaderSetting(HeaderField.ACK_NUMBER, ackNumber);
     seqNumber++;
     ackNumber++;
     sendBuffer.add(packet);
+  }
+
+  public void addPacketToReceiverBuffer(UDPPacket packet) {
+    receiveBuffer.add(packet);
   }
 
   /********** Send request ***********/
@@ -105,7 +109,7 @@ public abstract class Protocol {
     UDPPacket packet = createEmptyPacket();
     packet.setData(data);
     packet.setFlags(flags);
-    addPacketToBuffer(packet);
+    addPacketToSendBuffer(packet);
 
     send();
   }
@@ -115,7 +119,7 @@ public abstract class Protocol {
   public void sendData(byte[] data) throws IOException {
     UDPPacket packet = createEmptyPacket();
     packet.setData(data);
-    addPacketToBuffer(packet);
+    addPacketToSendBuffer(packet);
 
     send();
   }

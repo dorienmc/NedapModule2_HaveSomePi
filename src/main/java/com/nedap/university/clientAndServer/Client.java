@@ -44,6 +44,9 @@ public class Client extends Handler {
       String command = Utils.readString("Please enter a command (type help for a menu) ");
 
       super.handleCommand(command);
+
+      //Sleep shortly
+      Utils.sleep(1000);
     }
   }
 

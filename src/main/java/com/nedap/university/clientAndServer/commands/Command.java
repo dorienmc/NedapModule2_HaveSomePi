@@ -64,7 +64,7 @@ public abstract class Command extends Thread {
   public void addPacketToReceiveBuffer(UDPPacket packet) {
     //Let protocol decide if packet is expected (eg. sequence number could not confirm to sliding window)
     if(protocol.isExpected(packet)) {
-      protocol.addPacketToBuffer(packet);
+      protocol.addPacketToReceiverBuffer(packet);
     } else {
       //Drop packet.
       //TODO list ignored packets in statistics.
@@ -89,7 +89,7 @@ public abstract class Command extends Thread {
   }
 
   @Override
-  public String toString(){ return String.format("  %-10s %s", requestId.intValue(), this.getClass().getName());}
+  public String toString(){ return String.format("  %s(%d)", this.getClass().getName(), requestId.intValue());}
 
   public String getAsMenuItem()  {
     return String.format("  %-10s %s", keyword, description);

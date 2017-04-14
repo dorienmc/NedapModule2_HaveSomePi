@@ -30,8 +30,11 @@ public class NaiveProtocol extends Protocol{
    **/
   public UDPPacket getNextPacket() {
     if (getStatus().equals(Status.RUNNING)) {
-      UDPPacket packet = sendBuffer.pollFirst();
-      if(packet != null) {
+      if(sendBuffer.size() > 0) {
+        System.out.println("Send buffer size of command " + requestId + " " + sendBuffer.size());
+        UDPPacket packet = sendBuffer.pollFirst();
+        System.out.println("Send buffer size of command " + requestId + " " + sendBuffer.size());
+
         //TODO update seqnumber and ack number and more?
         return packet;
       }

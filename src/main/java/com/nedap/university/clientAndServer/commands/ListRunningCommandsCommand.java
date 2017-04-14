@@ -12,7 +12,7 @@ import com.nedap.university.fileTranser.UDPPacket;
 public class ListRunningCommandsCommand extends Command {
 
   public ListRunningCommandsCommand(Handler handler, Byte requestId) {
-    super(Keyword.LS, "List Running Commands", handler, requestId);
+    super(Keyword.LSRUNNING, "List Running Commands", handler, requestId);
   }
 
   @Override

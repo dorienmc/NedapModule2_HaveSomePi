@@ -27,8 +27,8 @@ public class HelpCommand extends Command {
       }
     }
 
-    System.out.println(this);
-    if(exit != null) {System.out.println(exit);}
+    System.out.println(this.getAsMenuItem());
+    if(exit != null) {System.out.println(exit.getAsMenuItem());}
 
     System.out.println("--------------");
   }

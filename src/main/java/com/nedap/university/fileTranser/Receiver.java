@@ -77,7 +77,7 @@ public class Receiver extends Thread {
   public void sendPacketToRequest(UDPPacket packet) {
     //Get requestId
     byte requestId = (byte) packet.getRequestId();
-    handler.print("Received packet for request " + requestId + " with sequence number" + packet
+    handler.print("Received packet for request " + requestId + " with sequence number " + packet
         .getSequenceNumber());
 
     //Determine to which request the packet belongs

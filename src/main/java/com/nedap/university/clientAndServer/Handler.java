@@ -5,6 +5,7 @@ import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public abstract class Handler extends Thread {
   public Handler(int inPort, int outPort) {
     this.inPort = inPort;
     this.outPort = outPort;
+    this.runningCommands = new HashMap<>();
   }
 
   /********** Setters and getters *********/
@@ -54,8 +56,9 @@ public abstract class Handler extends Thread {
    * @throws SocketException if one of the sockets could not be created.
    */
   public void setChannel(int myPortIn, int myPortOut, InetAddress destAddress,
-      int serverPortIn, int serverPortOut, boolean isClient) throws SocketException {
-    this.channel = new ReliableUdpChannel(myPortIn, myPortOut, destAddress, serverPortIn, serverPortOut, isClient);
+      int serverPortIn, int serverPortOut) throws SocketException {
+    this.channel = new ReliableUdpChannel(myPortIn, myPortOut, destAddress, serverPortIn,
+        serverPortOut, this);
   }
 
   public void removeChannel() {
@@ -68,6 +71,11 @@ public abstract class Handler extends Thread {
   public ReliableUdpChannel getChannel() {
     return channel;
   }
+
+  /**
+  * Handle it when sender or receiver breaks down because it cannot reach the socket.
+  **/
+  public abstract void handleSocketException (String errorMessage);
 
   /********** Command methods *********/
   public void handleCommand(String input) {
@@ -90,10 +98,11 @@ public abstract class Handler extends Thread {
   }
 
   /* Create new command using the given keyword and requestId */
-  public void startNewCommand(Keyword keyword, Byte requestId) {
+  public Command startNewCommand(Keyword keyword, Byte requestId) {
     Command command = commandFactory.createCommand(keyword, requestId);
     command.start();
     runningCommands.put(requestId, command);
+    return command;
   }
 
 

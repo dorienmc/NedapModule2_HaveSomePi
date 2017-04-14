@@ -28,7 +28,6 @@ public class Main {
             (new Server()).start();
         } else {
             client = new Client();
-            client.handleTerminalInput();
             client.start();
         }
 

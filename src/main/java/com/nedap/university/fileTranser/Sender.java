@@ -1,115 +1,78 @@
 package com.nedap.university.fileTranser;
 
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.commands.Command;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Created by dorien.meijercluwen on 12/04/2017.
  */
 public class Sender extends Thread {
+  Handler handler;
   DatagramSocket socket;
   int destPort;
   int sourcePort;
   InetAddress address;
-  private ConcurrentLinkedDeque<UDPPacket> sendBuffer; //Packets that still need to be send
-  private ConcurrentHashMap<Integer,UDPPacket> unAckedPackets; //Packets that are still unacked.
-  boolean isBlocked;
+  private ConcurrentHashMap<Byte, Command> requests; //Requests/commands which follow a specific protocol
   boolean stop;
-  int currentSeqNumber; //Sequence number of last packet that was send.
 
   /*
   * Create new sender, starts blocked
    */
-  public Sender(InetAddress address, int sourcePort, int destPort) throws SocketException {
+  public Sender(InetAddress address, int sourcePort, int destPort, Handler handler) throws SocketException {
     this.socket = new DatagramSocket(sourcePort);
-    this.sendBuffer = new ConcurrentLinkedDeque<>();
-    this.unAckedPackets = new ConcurrentHashMap<>();
-    this.isBlocked = true;
+    this.requests = new ConcurrentHashMap<>();
     this.stop = false;
     this.address = address;
     this.destPort = destPort;
     this.sourcePort = sourcePort;
-    this.currentSeqNumber = 0;
-  }
-
-  public int getCurrentSeqNumber() {
-    return currentSeqNumber;
-  }
-
-  public int getSourcePort() {
-    return sourcePort;
   }
 
   public int getDestPort() {
     return destPort;
   }
 
-  /* Return the number of packets in the queue. */
-  public int getBufferLength() {return sendBuffer.size();}
-
-
-  public void blockSender() {
-    isBlocked = true;
-  }
-
-  public void unBlockSender() {
-    isBlocked = false;
+  public int getSourcePort() {
+    return sourcePort;
   }
 
   @Override
   public void run() {
 
     while(!stop) {
-      //Send packets when there are packets in the queue and the sender is not blocked
-      if(!isBlocked) {
-        //Send packet from buffer
-        try {
-          sendPacket(sendBuffer.pollFirst());
-        } catch (IOException e) {
-          System.out.println("WARNING could not send packet with seq. number" + currentSeqNumber);
-          Thread.currentThread().interrupt();
+      if(requests.size() == 0) {
+        //Wait for new requests.
+        Utils.sleep(10);
+        continue;
+      }
+
+      //If there are requests, ask them for a next packet to send. (Round Robin)
+      for(Command request: requests.values()) {
+        UDPPacket packet = request.getNextPacket();
+        if(packet != null) {
+          try {
+            System.out.println("Send new packet for " + request);
+            sendPacket(packet);
+          } catch (IOException e) {
+            handler.handleSocketException(String.format("WARNING could not send packet from request %d with seq. number %d",
+                request.getRequestId(), packet.getSequenceNumber()));
+          }
         }
       }
 
-      //Wait
-      Utils.sleep(10);
     }
   }
 
   private void sendPacket(UDPPacket packet) throws IOException {
-    if (packet != null) {
-      System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
+    System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
 
-      //Update current seq number
-      currentSeqNumber = packet.getSequenceNumber();
-
-      //Add to unacked (and (re)set timeout?) //TODO reset timeout?
-      unAckedPackets.put(new Integer(packet.getSequenceNumber()), packet);
-
-      //Try to send
-      socket.send(packet.toDatagram(address));
-    }
-  }
-
-  public void addPacketToBuffer(UDPPacket packet) { //TODO add sequence number here?
-    sendBuffer.add(packet);
-  }
-
-  public UDPPacket createEmptyPacket(){
-    return new UDPPacket(sourcePort,destPort,0,0);
-  }
-
-  public void forceSend(UDPPacket packet) {
-    try {
-      sendPacket(packet);
-    } catch (IOException e) {
-      System.out.println("Warning, could not force send packet " + packet);
-    }
+    //Try to send
+    socket.send(packet.toDatagram(address));
   }
 
   public void shutdown() {
@@ -118,5 +81,21 @@ public class Sender extends Thread {
   }
 
 
+  public void register(Command request) {
+    requests.put(request.getRequestId(), request);
+  }
+
+
+  public void deregister(Command request) {
+    System.out.println("De register " + requests.remove(request.getRequestId()) + " from sender");
+  }
+
+  /**
+   * Log running commands.
+   */
+  public void log() {
+    //TODO
+    System.out.println("TODO log running commands in Sender");
+  }
 
 }

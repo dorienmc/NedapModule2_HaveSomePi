@@ -1,14 +1,8 @@
 package com.nedap.university.clientAndServer;
 
-import com.nedap.university.Utils;
-import com.nedap.university.clientAndServer.commands.*;
-import com.nedap.university.clientAndServer.commands.Keyword;
-import com.nedap.university.fileTranser.Flag;
-import com.nedap.university.fileTranser.UDPPacket;
-import java.io.IOException;
+import com.nedap.university.clientAndServer.commands.server.ConnectCommandServer;
 import java.net.DatagramPacket;
 import java.net.SocketException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Handler for each client on a server.
@@ -28,22 +22,15 @@ public class ClientHandler extends Handler {
 
   @Override
   public void run() {
-    handleSocketInput();
+    //handleSocketInput();
   }
 
-  private void handleSocketInput() {
-    //Wait until channel has started up
-    while(getChannel() == null) {
-      Utils.sleep(10);
-    }
-
-    //Let channel demux the incoming packets
-    try {
-      getChannel().handleReceivedPackets(this);
-    } catch (IOException|TimeoutException e) {
-      print("Could not receive over socket " + e.getMessage());
-      shutdown();
-    }
+  /**
+   * Handle it when sender or receiver breaks down because it cannot reach the socket.
+   **/
+  public void handleSocketException (String errorMessage) {
+    print(errorMessage);
+    shutdown();
   }
 
   @Override

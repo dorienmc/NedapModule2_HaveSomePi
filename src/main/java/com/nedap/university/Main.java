@@ -29,29 +29,25 @@ public class Main {
         } else {
             //int inPort = getFreePort();
             client = new Client();
-            (client).start();
+            client.handleTerminalInput();
+            client.start();
         }
 
         while (keepAlive) {
-            try {
-                // do useful stuff
-                if(server != null) {
-                    if(!server.isRunning()) {
-                        running = false;
-                    }
+            //Check if client/server is still running
+            if(server != null) {
+                if(!server.isRunning()) {
+                    running = false;
                 }
-
-                if(client != null) {
-                    if(!client.isRunning()) {
-                        running = false;
-                    }
-                }
-
-                //System.out.println("Current time " + (new Date()));
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
             }
+
+            if(client != null) {
+                if(!client.isRunning()) {
+                    running = false;
+                }
+            }
+
+            Utils.sleep(1000);
         }
 
         System.out.println("Stopped");

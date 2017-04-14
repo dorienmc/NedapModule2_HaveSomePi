@@ -1,7 +1,9 @@
 package com.nedap.university.clientAndServer;
 
+import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.*;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Client that handles user input on clientside and responds to this.
@@ -18,6 +20,10 @@ public class Client extends Handler {
 
   @Override
   public void run() {
+    handleSocketInput();
+  }
+
+  public void handleTerminalInput() {
     while(getChannel() == null) {
       //Find host and create Reliable Udp Channel
       ConnectCommandClient connector = new ConnectCommandClient(this, new Byte((byte)0));
@@ -40,8 +46,20 @@ public class Client extends Handler {
 
       super.handleCommand(command);
     }
+  }
 
+  private void handleSocketInput() {
+    while(getChannel() == null) {
+      Utils.sleep(10);
+    }
 
+    //Let channel demux the incoming packets
+    try {
+      getChannel().handleReceivedPackets(this);
+    } catch (IOException |TimeoutException e) {
+      print("Could not receive over socket " + e.getMessage());
+      //TODO what now? Restart connection?
+    }
   }
 
   public void shutdown() { //TODO add more?

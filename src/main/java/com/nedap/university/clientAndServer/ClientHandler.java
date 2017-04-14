@@ -1,11 +1,14 @@
 package com.nedap.university.clientAndServer;
 
+import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.*;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.UDPPacket;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handler for each client on a server.
@@ -25,32 +28,21 @@ public class ClientHandler extends Handler {
 
   @Override
   public void run() {
-    //Listen for new commands from this client
-    UDPPacket requestPacket;
-    while (true) {
-      try {
-        requestPacket = getChannel().getNewRequest();
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-        shutdown();
-        return;
-      }
+    handleSocketInput();
+  }
 
-      if(requestPacket != null) {
-        //Determine request
-        Flag flag = Flag.fromByte((byte) requestPacket.getFlags());
-        Keyword requestType = flag.toKeyword();
+  private void handleSocketInput() {
+    //Wait until channel has started up
+    while(getChannel() == null) {
+      Utils.sleep(10);
+    }
 
-        //Act on it
-        if (requestType != null) {
-          //Ignore connect requests
-          if(!requestType.equals(Keyword.CONNECT)) {
-            handleCommand(requestType); //TODO Handle command in new thread? Otherwise we cannot cancel stuff.
-          }
-        }
-      }
-
-      System.out.println("Wait for request");
+    //Let channel demux the incoming packets
+    try {
+      getChannel().handleReceivedPackets(this);
+    } catch (IOException|TimeoutException e) {
+      print("Could not receive over socket " + e.getMessage());
+      shutdown();
     }
   }
 

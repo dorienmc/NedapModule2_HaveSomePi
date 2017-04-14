@@ -5,6 +5,9 @@ import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
@@ -60,5 +63,46 @@ public class NaiveProtocol extends Protocol{
 //    } else {
 //
 //    }
+  }
+
+  /* Wait until complete file is received */
+  public void receiveFile(String filename, int fileId) {
+    //Add received packets to received data (dont care about order)
+    //Until a packet with NOT_LAST = false arrives.
+
+    while(true) {
+      try {
+        UDPPacket packet = super.receivePacket(0);
+        super.addReceivedData(packet.getData());
+        if(!packet.isFlagSet(Flag.NOT_LAST)) {
+          break;
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      } catch (TimeoutException e) {
+        e.printStackTrace();
+      }
+
+    }
+
+    //Create file //TODO do this for each received packet as soon as it is received.
+    //TODO move this somewhere else?
+    File file = new File("./files/" + filename);
+
+    try (FileOutputStream fileStream = new FileOutputStream(file)) {
+      fileStream.write(dataReceived);
+    } catch (FileNotFoundException e) {
+      System.out.println(e.getMessage());
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
+
+  }
+
+  /* Tell if received packet is expected, if not it should be dropped .
+  * The naive protocol allows all packets.
+  * */
+  public boolean isExpected(UDPPacket packet) {
+    return true;
   }
 }

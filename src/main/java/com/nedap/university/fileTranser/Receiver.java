@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser;
 
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -44,8 +45,10 @@ public class Receiver extends Thread {
     return sourcePort;
   }
 
-  /* Retrieve next packet from the receiveBuffer, null there are none.
-        * Note: also removes this packet from the buffer! */
+  /**
+  * Retrieve next packet from the receiveBuffer, null there are none.
+  * Note: also removes this packet from the buffer!
+  **/
   public UDPPacket retrievePacket() {
     return receiveBuffer.pollFirst();
   }
@@ -72,12 +75,29 @@ public class Receiver extends Thread {
           continue;
         }
 
-        UDPPacket packet = new UDPPacket(response);
+        //Try to parse received packet
+        UDPPacket packet = null;
+        try {
+          packet = new UDPPacket(response);
+        } catch (ArrayIndexOutOfBoundsException e) {
+          //Drop packet.
+          //TODO list ignored packets in statistics.
+          continue;
+        }
+
+        //Check if packet is valid (eg meant for this host, correct checksum and such)
+        //Note: a received packet comes from the 'destPort' and is received in the 'sourcePort' of this socket
+        if(!packet.isValid(destPort,sourcePort)) {
+          System.out.println("Warning packet not valid!");
+          //Drop packet.
+          //TODO list ignored packets in statistics.
+          //continue;
+        }
+
         System.out.println("Received new packet " + packet);
         currentAckNumber = packet.getAckNumber();
         receiveBuffer.add(packet);
-
-        //TODO handle acks?
+        //TODO handle acks? (Remove timer of corresponding send packet)
       }
 
       //Wait

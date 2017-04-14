@@ -17,7 +17,7 @@ public class UDPPacket {
   byte[] data;          //Payload data
 
   /*
-  * Create UDPPacket
+   * Create UDPPacket
    */
   public UDPPacket(int sourcePort, int destPort, int seqNumber, int ackNumber, int id, int offset) {
     data = new byte[0];
@@ -26,14 +26,14 @@ public class UDPPacket {
   }
 
   /*
-  * Create UDPPacket
+   * Create UDPPacket
    */
   public UDPPacket(int sourcePort, int destPort, int seqNumber, int ackNumber) {
     this(sourcePort,destPort,seqNumber,ackNumber,1,0);
   }
 
   /*
-  * Create UDPPacket from DatagramPacket.
+   * Create UDPPacket from DatagramPacket.
    */
   public UDPPacket(DatagramPacket packet) throws ArrayIndexOutOfBoundsException {
     header = new MyUDPHeader();
@@ -66,6 +66,7 @@ public class UDPPacket {
     return packet;
   }
 
+
   /****** Flag methods *****/
   public void setFlags(int flags) {
     header.setField(HeaderField.FLAGS,flags);
@@ -79,6 +80,7 @@ public class UDPPacket {
   public int getFlags() {
     return header.getField(HeaderField.FLAGS);
   }
+
 
   /****** Getters and Setters *****/
   public void setData(byte[] data) {
@@ -127,7 +129,8 @@ public class UDPPacket {
     return buffer.array();
   }
 
-  /****** Checksum methods *****/
+
+  /****** Checksum methods and validity checking *****/
   /* Warning updates the checksum field */
   public int updateChecksum() {
     Checksum checksum = new CRC32();
@@ -146,6 +149,21 @@ public class UDPPacket {
 
     checksum.update(getPkt(),0,getLength());
     return checksum.getValue() == 0;
+  }
+
+  /* Check if packet is valid, eg. checksum is correct and packet is meant for this host) */
+  public boolean isValid(int expectedSourcePort, int expectedDestPort) {
+    if(getSourcePort() != expectedSourcePort) {
+      System.out.println(String.format("Source port: expected %d but got %d", expectedSourcePort, getSourcePort()));
+      return false;
+    }
+
+    if(getDestPort() != expectedDestPort) {
+      System.out.println(String.format("Dest port: expected %d but got %d", expectedDestPort, getDestPort()));
+      return false;
+    }
+
+    return checkChecksum();
   }
 
   @Override

@@ -34,12 +34,16 @@ public abstract class Protocol {
     this.dataReceived = new byte[0];
   }
 
-  //TODO split file into multiple UDP packets
-
   /* Send data in sender buffer according to protocol */
   public abstract void send() throws IOException;
 
-  /* Wait for next packet over socket */
+  /* Wait until complete file is received */
+  public abstract void receiveFile(String filename, int fileId);
+
+  /* Tell if received packet is expected, if not it should be dropped .*/
+  public abstract boolean isExpected(UDPPacket packet);
+
+  /* Wait for next packet over socket, set maxTimeOut to 0 for infinite timeout */
   public UDPPacket receivePacket(int maxTimeOut) throws IOException,TimeoutException {
     UDPPacket response = receiver.retrievePacket();
     int time = 0;
@@ -49,7 +53,7 @@ public abstract class Protocol {
       Utils.sleep(10);
 
       time += 10;
-      if(time > maxTimeOut) {
+      if(maxTimeOut > 0 && time > maxTimeOut) {
         throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
       }
 
@@ -57,6 +61,8 @@ public abstract class Protocol {
     }
     return response;
   }
+
+
 
   /* Add data to received data */
   protected void addReceivedData(byte[] data) {

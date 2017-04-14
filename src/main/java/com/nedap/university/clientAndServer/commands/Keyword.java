@@ -6,7 +6,7 @@ import com.nedap.university.fileTranser.Flag;
  * Created by dorien.meijercluwen on 10/04/2017.
  */
 public enum Keyword {
-  HELP, EXIT, CONNECT, DOWNLOAD, UPLOAD, PAUSE, RESUME, CANCEL, LS;
+  HELP, EXIT, CONNECT, DOWNLOAD, UPLOAD, PAUSE, RESUME, CANCEL, LS, LSRUNNING;
 
   public static Keyword fromString(String text) {
     for (Keyword k : Keyword.values()) {
@@ -38,7 +38,7 @@ public enum Keyword {
       case UPLOAD:    return Flag.UPLOAD;
       case PAUSE:     return Flag.PAUSE;
       case RESUME:    return Flag.RESUME;
-      case CANCEL:     return Flag.CANCEL;
+      case CANCEL:    return Flag.CANCEL;
       case LS:        return Flag.LIST_FILES;
       default:        return null;
     }

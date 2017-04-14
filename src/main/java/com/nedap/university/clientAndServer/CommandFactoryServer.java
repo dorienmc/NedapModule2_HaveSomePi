@@ -2,22 +2,24 @@ package com.nedap.university.clientAndServer;
 
 
 import com.nedap.university.clientAndServer.commands.*;
+import com.nedap.university.clientAndServer.commands.server.ListFilesCommandServer;
 
 /**
  * Created by dorien.meijercluwen on 14/04/2017.
  */
 public class CommandFactoryServer extends CommandFactory {
+  public final static Byte ZERO = new Byte((byte)0);
 
   public CommandFactoryServer(Handler handler) {
     super(handler);
 
-    addCommand(new ExitCommand(handler, new Byte((byte) 0)));
-    addCommand(new ListFilesCommandServer(handler, new Byte((byte) 0)));
-    addCommand(new DownloadCommandServer(handler, new Byte((byte) 0)));
-    addCommand(new UploadCommandServer(handler, new Byte((byte) 0)));
-    addCommand(new PauseCommand(handler, new Byte((byte) 0)));
-    addCommand(new ResumeCommand(handler, new Byte((byte) 0)));
-    addCommand(new CancelCommand(handler, new Byte((byte) 0)));
+    addCommand(new ExitCommand(handler, ZERO));
+    addCommand(new ListFilesCommandServer(handler, ZERO));
+    addCommand(new DownloadCommandServer(handler, ZERO));
+    addCommand(new UploadCommandServer(handler, ZERO));
+    addCommand(new PauseCommand(handler, ZERO));
+    addCommand(new ResumeCommand(handler, ZERO));
+    addCommand(new CancelCommand(handler, ZERO));
   }
 
   /**

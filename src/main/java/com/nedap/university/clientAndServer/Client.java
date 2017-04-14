@@ -2,8 +2,7 @@ package com.nedap.university.clientAndServer;
 
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.*;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
+import com.nedap.university.clientAndServer.commands.client.ConnectCommandClient;
 
 /**
  * Client that handles user input on clientside and responds to this.
@@ -20,7 +19,7 @@ public class Client extends Handler {
 
   @Override
   public void run() {
-    handleSocketInput();
+    handleTerminalInput();
   }
 
   public void handleTerminalInput() {
@@ -45,22 +44,20 @@ public class Client extends Handler {
       String command = Utils.readString("Please enter a command (type help for a menu) ");
 
       super.handleCommand(command);
+
+      //Sleep shortly
+      Utils.sleep(1000);
     }
   }
 
-  private void handleSocketInput() {
-    while(getChannel() == null) {
-      Utils.sleep(10);
-    }
-
-    //Let channel demux the incoming packets
-    try {
-      getChannel().handleReceivedPackets(this);
-    } catch (IOException |TimeoutException e) {
-      print("Could not receive over socket " + e.getMessage());
-      //TODO what now? Restart connection?
-    }
+  /**
+   * Handle it when sender or receiver breaks down because it cannot reach the socket.
+   **/
+  public void handleSocketException (String errorMessage) {
+    print(errorMessage);
+    //TODO what now? Restart connection?
   }
+
 
   public void shutdown() { //TODO add more?
     super.removeChannel();

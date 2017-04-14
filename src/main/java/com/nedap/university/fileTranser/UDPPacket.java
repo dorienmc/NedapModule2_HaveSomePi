@@ -35,7 +35,7 @@ public class UDPPacket {
   /*
    * Create UDPPacket from DatagramPacket.
    */
-  public UDPPacket(DatagramPacket packet) throws ArrayIndexOutOfBoundsException {
+  public UDPPacket(DatagramPacket packet) throws ArrayIndexOutOfBoundsException, NegativeArraySizeException {
     header = new MyUDPHeader();
     byte[] packetData = packet.getData();
     if(packetData.length < header.getHeaderSize()) {
@@ -117,6 +117,7 @@ public class UDPPacket {
 
   public void setHeaderSetting(HeaderField field, int value) {
     header.setField(field, value);
+    updateChecksum();
   }
 
   private byte[] getPkt() {

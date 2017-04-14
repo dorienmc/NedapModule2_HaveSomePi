@@ -1,25 +1,26 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.server;
 
+import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MDNSdata;
-import com.nedap.university.fileTranser.ReliableUdpChannel;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class ConnectCommandServer extends Command{
+public class ConnectCommandServer extends Command {
   DatagramPacket connectPacket;
   public static final String SERVER_ADDRESS = "192.168.40.8";
+  public static final ProtocolFactory.Name DEFAULT_PROTOCOL = Name.NAIVE;
 
   public ConnectCommandServer(DatagramPacket connectPacket, Handler handler, Byte requestId) {
     super(Keyword.CONNECT, "Establish connection with client", handler, requestId);
@@ -33,11 +34,17 @@ public class ConnectCommandServer extends Command{
 
     //If the RUDP is setup, create an mDNS message (portIn + portOut) for the client
     if(handler.getChannel() != null) {
+      registerToChannel(DEFAULT_PROTOCOL);
+
+      //Wait shortly so protocol is registered and until client has started listening to correct channel.
+      Utils.sleep(2000);
+
       try {
+
         MDNSdata mdnSdata = new MDNSdata(handler.getInPort(),
             handler.getOutPort(), "Client");
         handler.print("mDNS data " + mdnSdata);
-        handler.getChannel().sendRequest(mdnSdata.getData(), Flag.CONNECT);
+        protocol.sendRequest(mdnSdata.getData(), Flag.CONNECT);
       } catch (IOException e) {
         handler.print(e.getMessage());
         handler.shutdown();
@@ -45,6 +52,12 @@ public class ConnectCommandServer extends Command{
     } else {
       handler.shutdown();
     }
+
+    //Wait until protcol is not busy anymore, then deregister the connect command.
+    while(protocol.busy()) {
+      Utils.sleep(10);
+    }
+    deregisterFromChannel();
   }
 
   private void createReliableUDPchannel(Handler handler){
@@ -67,7 +80,7 @@ public class ConnectCommandServer extends Command{
 
     //Create Reliable Udp channel
     try {
-      handler.setChannel(handler.getInPort(), handler.getOutPort(), address, clientPortIn, clientPortOut, false);
+      handler.setChannel(handler.getInPort(), handler.getOutPort(), address, clientPortIn, clientPortOut);
 
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s on ports %d and %d, %s",address, clientPortIn, clientPortOut, e.getMessage()));

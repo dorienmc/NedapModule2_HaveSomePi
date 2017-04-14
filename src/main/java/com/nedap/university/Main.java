@@ -27,9 +27,7 @@ public class Main {
         if(name.equals("Pi")) {
             (new Server()).start();
         } else {
-            //int inPort = getFreePort();
             client = new Client();
-            client.handleTerminalInput();
             client.start();
         }
 

@@ -7,7 +7,7 @@ import com.nedap.university.clientAndServer.commands.Keyword;
  * Created by dorien.meijercluwen on 10/04/2017.
  */
 public enum Flag {
-  CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4),ABORT(2),NOT_LAST(1);
+  CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4), CANCEL(2),NOT_LAST(1);
   byte value;
 
   Flag(int value) {
@@ -43,7 +43,7 @@ public enum Flag {
 
   /* Convert to keyword, return null if not possible. */
   public Keyword toKeyword() {
-    //HELP, EXIT, CONNECT, DOWNLOAD, UPLOAD, PAUSE, RESUME, ABORT, LS;
+    //HELP, EXIT, CONNECT, DOWNLOAD, UPLOAD, PAUSE, RESUME, CANCEL, LS;
     switch (this) {
       case CONNECT:     return Keyword.CONNECT;
       case LIST_FILES:  return Keyword.LS;
@@ -51,7 +51,7 @@ public enum Flag {
       case UPLOAD:      return Keyword.UPLOAD;
       case PAUSE:       return Keyword.PAUSE;
       case RESUME:      return Keyword.RESUME;
-      case ABORT:       return Keyword.ABORT;
+      case CANCEL:       return Keyword.CANCEL;
       default:          return null;
     }
   }

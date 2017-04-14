@@ -34,9 +34,9 @@ public abstract class Command extends Thread {
   }
 
   @Override
-  public String toString() {
+  public String toString(){ return String.format("  %-10s %s", requestId.intValue(), this.getClass().getName());}
+
+  public String getAsMenuItem()  {
     return String.format("  %-10s %s", keyword, description);
   }
-
-  public String requestToString() { return String.format("  %-10s %s", requestId.intValue(), this.getClass().getName());}
 }

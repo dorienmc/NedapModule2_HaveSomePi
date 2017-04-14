@@ -23,7 +23,7 @@ public class HelpCommand extends Command {
       if(command.getKeyword().equals(Keyword.EXIT) ) {
         exit = command;
       } else if (!command.getKeyword().equals(Keyword.HELP)) {
-        System.out.println(command);
+        System.out.println(command.getAsMenuItem());
       }
     }
 

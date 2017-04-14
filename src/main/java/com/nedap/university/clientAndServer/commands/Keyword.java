@@ -38,7 +38,7 @@ public enum Keyword {
       case UPLOAD:    return Flag.UPLOAD;
       case PAUSE:     return Flag.PAUSE;
       case RESUME:    return Flag.RESUME;
-      case CANCEL:     return Flag.CANCEL;
+      case CANCEL:    return Flag.CANCEL;
       case LS:        return Flag.LIST_FILES;
       default:        return null;
     }

@@ -30,15 +30,6 @@ public abstract class Handler extends Thread {
     this.commandFactory = commandFactory;
   }
 
-  //TODO remove this?
-//  public void setInPort(int inPort) {
-//    this.inPort = inPort;
-//  }
-//
-//  public void setOutPort(int outPort) {
-//    this.outPort = outPort;
-//  }
-
   public int getInPort() {
     return inPort;
   }
@@ -126,7 +117,7 @@ public abstract class Handler extends Thread {
 
     //for(Map.Entry<Byte, Command> entry: runningCommands.entrySet()) {
     for(Command command: runningCommands.values()) {
-      result += command.requestToString();
+      result += command;
       result += "\n";
     }
 

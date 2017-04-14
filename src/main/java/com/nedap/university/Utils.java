@@ -1,4 +1,4 @@
-package com.nedap.university.clientAndServer;
+package com.nedap.university;
 
 import java.util.Scanner;
 
@@ -26,5 +26,15 @@ public class Utils {
       }
     } while (answer == null);
     return answer;
+  }
+
+  /* Wait for 'waitTime' ms. */
+  public static void sleep(int waitTime) {
+    //Wait
+    try {
+      Thread.sleep(waitTime);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 }

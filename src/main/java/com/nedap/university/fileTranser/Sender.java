@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser;
 
+import com.nedap.university.Utils;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -76,11 +77,7 @@ public class Sender extends Thread {
       }
 
       //Wait
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
+      Utils.sleep(10);
     }
   }
 

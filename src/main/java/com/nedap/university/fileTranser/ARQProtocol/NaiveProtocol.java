@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
@@ -29,11 +30,7 @@ public class NaiveProtocol extends Protocol{
 
     while(sender.getBufferLength() > 0) {
       //Wait some more until buffer is empty.
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
+      Utils.sleep(10);
     }
 
     sender.blockSender();

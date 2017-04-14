@@ -64,11 +64,7 @@ public class Main {
             public void run() {
                 keepAlive = false;
                 while (running) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                    Utils.sleep(10);
                 }
             }
         };

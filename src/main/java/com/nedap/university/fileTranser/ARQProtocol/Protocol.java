@@ -1,5 +1,6 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
@@ -45,11 +46,7 @@ public abstract class Protocol {
 
     while(response == null) {
       //Wait
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
+      Utils.sleep(10);
 
       time += 10;
       if(time > maxTimeOut) {

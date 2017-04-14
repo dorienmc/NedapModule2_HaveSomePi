@@ -17,21 +17,10 @@ public class ClientHandler extends Handler {
   public ClientHandler(DatagramPacket connectPacket, int inPort, int outPort, Server server) throws SocketException {
     super(inPort, outPort);
     this.server = server;
-
-    //Add commands
-    addCommand(new ExitCommand());
-    addCommand(new ListFilesCommandServer());
-    addCommand(new DownloadCommandServer());
-    addCommand(new UploadCommandServer());
-    addCommand(new PauseCommand());
-    addCommand(new ResumeCommand());
-    //where does abort belong?
-
-    //TODO add more commands?
+    super.setCommandFactory(new CommandFactoryServer(this));
 
     //Setup Reliable UDP channel and return acknowledgement of connection to client
-    (new ConnectCommandServer(connectPacket)).execute(this);
-
+    (new ConnectCommandServer(connectPacket,this, new Byte((byte)0))).execute();
   }
 
   @Override

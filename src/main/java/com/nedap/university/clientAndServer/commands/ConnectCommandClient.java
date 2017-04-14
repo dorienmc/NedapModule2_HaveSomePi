@@ -2,7 +2,7 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
-import com.nedap.university.clientAndServer.Utils;
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -23,12 +23,12 @@ public class ConnectCommandClient extends Command {
   private InetAddress broadcastAddress;
   DatagramSocket socketIn;
 
-  public ConnectCommandClient(){
-    super(Keyword.CONNECT, "(Re)connect to PiServer");
+  public ConnectCommandClient(Handler handler, Byte requestId){
+    super(Keyword.CONNECT, "(Re)connect to PiServer", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //Clear current RUDP channel
     handler.removeChannel();
 

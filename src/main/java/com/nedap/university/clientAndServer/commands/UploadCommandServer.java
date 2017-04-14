@@ -7,13 +7,17 @@ import com.nedap.university.clientAndServer.Handler;
  */
 public class UploadCommandServer extends Command{
 
-  public UploadCommandServer() {
-    super(Keyword.UPLOAD, "Upload specific file");
+  public UploadCommandServer(Handler handler, Byte requestId) {
+    super(Keyword.UPLOAD, "Upload specific file", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //Read file meta data
+    //TODO from where?
+
+
+    //TODO figure out how to call protocol.receiveFile
     //Wait until complete file is received
     //Merge packets (or do this in RUDP channel?)
     //Save file

@@ -16,7 +16,7 @@ public class MyUDPHeader {
     SEQ_NUMBER(14,2), //Sequence number
     ACK_NUMBER(16,2), //Expected sequence number of next response
     FLAGS(18,1),      //Option flags (see fileTransfer.Flag)
-    FILE_ID(19,1),    //File id, for fragmented files
+    REQUEST_ID(19,1),   //Request id, used for demuxing.
     OFFSET(20,2);     //Offset in fragmented files (in bytes) //TODO count in bigger chunks? Otherwise this field is to small
 
     private int length;
@@ -53,7 +53,7 @@ public class MyUDPHeader {
     setField(HeaderField.SEQ_NUMBER, 0);
     setField(HeaderField.ACK_NUMBER,0);
     setField(HeaderField.FLAGS,0); //Set flags in packet
-    setField(HeaderField.FILE_ID, 0);
+    setField(HeaderField.REQUEST_ID, 0);
     setField(HeaderField.OFFSET, 0);
   }
 
@@ -64,7 +64,7 @@ public class MyUDPHeader {
     setField(HeaderField.DEST_PORT,destPort);
     setField(HeaderField.SEQ_NUMBER, seqNumber);
     setField(HeaderField.ACK_NUMBER,ackNumber);
-    setField(HeaderField.FILE_ID, id);
+    setField(HeaderField.REQUEST_ID, id);
     setField(HeaderField.OFFSET, offset);
   }
 

@@ -1,9 +1,8 @@
 package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.Handler;
-import com.nedap.university.clientAndServer.Utils;
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
-import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
 
 /**
@@ -11,12 +10,12 @@ import java.io.IOException;
  */
 public class DownloadCommandClient extends Command{
 
-  public DownloadCommandClient() {
-    super(Keyword.DOWNLOAD, "Download specific file");
+  public DownloadCommandClient(Handler handler, Byte requestId) {
+    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     String filename = Utils.readString("Which file do you want to download? ");
 
     //Create request packet

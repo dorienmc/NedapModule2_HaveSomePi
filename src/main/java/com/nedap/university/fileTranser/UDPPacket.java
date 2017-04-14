@@ -111,10 +111,11 @@ public class UDPPacket {
 
   public int getAckNumber() { return header.getField(HeaderField.ACK_NUMBER);}
 
+  public int getRequestId() { return header.getField(HeaderField.REQUEST_ID);}
+
   public void setHeaderSetting(HeaderField field, int value) {
     header.setField(field, value);
   }
-
 
   private byte[] getPkt() {
     ByteBuffer buffer = ByteBuffer.allocate(getLength());

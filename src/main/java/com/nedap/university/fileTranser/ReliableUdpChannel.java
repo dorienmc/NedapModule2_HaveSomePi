@@ -99,8 +99,7 @@ public class ReliableUdpChannel {
   }
 
   /* Send data in given file */
-  public byte[] uploadFile(String filename) throws FileNotFoundException, IOException {
-    int fileId = 1; //TODO dynamically assign a number!
+  public byte[] uploadFile(String filename, byte requestId) throws IOException {
     File file = new File("./files/filename");
     if(!file.exists()) {
       throw new FileNotFoundException("Could not find ./files/" + filename);
@@ -109,7 +108,7 @@ public class ReliableUdpChannel {
     //Put uploadrequest (with file metadata) in the sender buffer
     UDPPacket uploadRequest = sender.createEmptyPacket();
     uploadRequest.setFlags(Flag.UPLOAD.getValue());
-    uploadRequest.setHeaderSetting(HeaderField.FILE_ID,fileId);
+    uploadRequest.setHeaderSetting(HeaderField.REQUEST_ID,requestId);
     byte[] fileName = file.getName().getBytes();
     ByteBuffer buffer = ByteBuffer.allocate(fileName.length + 8);
     buffer.put(fileName);
@@ -126,7 +125,7 @@ public class ReliableUdpChannel {
       for (int packetId = 0; packetId < nPackets; packetId++) {
         UDPPacket packet = sender.createEmptyPacket();
         packet.setFlags(Flag.NOT_LAST.getValue());
-        packet.setHeaderSetting(HeaderField.FILE_ID,fileId);
+        packet.setHeaderSetting(HeaderField.REQUEST_ID,requestId);
         packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_BUFFER
 
         byte[] data = new byte[MAX_BUFFER];

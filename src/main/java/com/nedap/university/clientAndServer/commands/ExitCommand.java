@@ -7,12 +7,12 @@ import com.nedap.university.clientAndServer.*;
  */
 public class ExitCommand extends Command {
 
-  public ExitCommand() {
-    super(Keyword.EXIT,"Exit");
+  public ExitCommand(Handler handler, Byte requestId) {
+    super(Keyword.EXIT,"Exit", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     handler.shutdown();
   }
 }

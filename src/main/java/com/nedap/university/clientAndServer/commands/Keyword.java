@@ -17,6 +17,18 @@ public enum Keyword {
     return null;
   }
 
+  /* Parse keyword from flags (int) value, returns null if not possible.
+  * Note: only 1 flag can be set!
+  */
+  public static Keyword fromFlags(int flags) {
+    Keyword keyword = null;
+    Flag flag = Flag.fromByte((byte) flags);
+    if(flag != null) {
+      keyword = flag.toKeyword();
+    }
+    return keyword;
+  }
+
   /* Convert keyword to flag, return null if not possible */
   public Flag toFlag() {
     //CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4),ABORT(2),NOT_LAST(1);

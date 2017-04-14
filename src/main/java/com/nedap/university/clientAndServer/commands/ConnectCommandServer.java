@@ -21,13 +21,13 @@ public class ConnectCommandServer extends Command{
   DatagramPacket connectPacket;
   public static final String SERVER_ADDRESS = "192.168.40.8";
 
-  public ConnectCommandServer(DatagramPacket connectPacket) {
-    super(Keyword.CONNECT, "Establish connection with client");
+  public ConnectCommandServer(DatagramPacket connectPacket, Handler handler, Byte requestId) {
+    super(Keyword.CONNECT, "Establish connection with client", handler, requestId);
     this.connectPacket = connectPacket;
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //Try to create Reliable UDP channel
     createReliableUDPchannel(handler);
 

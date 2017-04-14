@@ -7,12 +7,12 @@ import com.nedap.university.clientAndServer.Handler;
  */
 public class ResumeCommand extends Command{
 
-  public ResumeCommand() {
-    super(Keyword.RESUME, "Resume given download/upload");
+  public ResumeCommand(Handler handler, Byte requestId) {
+    super(Keyword.RESUME, "Resume given download/upload", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //TODO
   }
 

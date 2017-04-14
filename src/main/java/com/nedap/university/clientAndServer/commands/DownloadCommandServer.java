@@ -7,12 +7,12 @@ import com.nedap.university.clientAndServer.Handler;
  */
 public class DownloadCommandServer extends Command{
 
-  public DownloadCommandServer() {
-    super(Keyword.DOWNLOAD, "Download specific file");
+  public DownloadCommandServer(Handler handler, Byte requestId) {
+    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //TODO Download file with given name.
     //Create Udp channel and give it the file, udp should fragment it.
   }

@@ -7,12 +7,12 @@ import com.nedap.university.clientAndServer.Handler;
  */
 public class PauseCommand extends Command{
 
-  public PauseCommand() {
-    super(Keyword.PAUSE, "Pause specific download/upload");
+  public PauseCommand(Handler handler, Byte requestId) {
+    super(Keyword.PAUSE, "Pause specific download/upload", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     //TODO
   }
 

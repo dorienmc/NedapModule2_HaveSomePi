@@ -7,12 +7,12 @@ import java.util.List;
  * Created by dorien.meijercluwen on 10/04/2017.
  */
 public class HelpCommand extends Command {
-  public HelpCommand() {
-    super(Keyword.HELP,"Show this menu");
+  public HelpCommand(Handler handler) {
+    super(Keyword.HELP,"Show this menu", handler, new Byte((byte)0));
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     List<Command> commands = handler.getCommands();
     Command exit = null;
 

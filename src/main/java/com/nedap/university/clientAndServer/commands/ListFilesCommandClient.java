@@ -12,12 +12,12 @@ import java.io.IOException;
  */
 public class ListFilesCommandClient extends Command{
 
-  public ListFilesCommandClient() {
-    super(Keyword.LS, "List files");
+  public ListFilesCommandClient(Handler handler, Byte requestId) {
+    super(Keyword.LS, "List files",handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     if(!(handler instanceof Client)) {
       return;
     }

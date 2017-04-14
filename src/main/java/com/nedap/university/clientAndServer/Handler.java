@@ -3,11 +3,8 @@ package com.nedap.university.clientAndServer;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,24 +14,30 @@ import java.util.Map;
  */
 public abstract class Handler extends Thread {
   ReliableUdpChannel channel;
-  Map<Keyword,Command> commands;
+  CommandFactory commandFactory;
   int inPort;
   int outPort;
   InetAddress address;
+  Map<Byte,Command> runningCommands;
 
   public Handler(int inPort, int outPort) {
     this.inPort = inPort;
     this.outPort = outPort;
-    commands = new HashMap<>();
   }
 
-  public void setInPort(int inPort) {
-    this.inPort = inPort;
+  /********** Setters and getters *********/
+  public void setCommandFactory(CommandFactory commandFactory) {
+    this.commandFactory = commandFactory;
   }
 
-  public void setOutPort(int outPort) {
-    this.outPort = outPort;
-  }
+  //TODO remove this?
+//  public void setInPort(int inPort) {
+//    this.inPort = inPort;
+//  }
+//
+//  public void setOutPort(int outPort) {
+//    this.outPort = outPort;
+//  }
 
   public int getInPort() {
     return inPort;
@@ -52,6 +55,8 @@ public abstract class Handler extends Thread {
     this.address = address;
   }
 
+
+  /********** Reliable UDP channel methods *********/
   /**
    * Create a reliable udp channel to 'destAddress' which receives message over port 9292
    * and sends them over 9293 (see ReliableUdpChannel DEFAULT_PORT_IN and DEFAULT_PORT_OUT.
@@ -73,33 +78,74 @@ public abstract class Handler extends Thread {
     return channel;
   }
 
-  public void addCommand(Command command) {commands.put(command.getKeyword(),command);}
-
+  /********** Command methods *********/
   public void handleCommand(String input) {
     Keyword keyword = Keyword.fromString(input);
     handleCommand(keyword);
   }
 
   public void handleCommand(Keyword keyword) {
-    if(keyword != null && commands.containsKey(keyword)) {
-      commands.get(keyword).execute(this);
+    if(keyword != null && commandFactory.hasCommand(keyword)) {
+      startNewCommand(keyword);
     } else {
       print(String.format("WARNING keyword %s is unknown", keyword));
     }
   }
 
-  public List<Command> getCommands() {
-    return new ArrayList<>(commands.values());
+  /* Create new command using the given keyword */
+  private void startNewCommand(Keyword keyword) {
+    Byte requestId = getFreeRequestId();
+    startNewCommand(keyword, requestId);
   }
 
-  public abstract void run();
+  /* Create new command using the given keyword and requestId */
+  public void startNewCommand(Keyword keyword, Byte requestId) {
+    Command command = commandFactory.createCommand(keyword, requestId);
+    command.start();
+    runningCommands.put(requestId, command);
+  }
 
-  public abstract void shutdown();
+
+
+  /* Get requestId that is not in use */
+  public Byte getFreeRequestId() {
+    for(byte i = 0; i < 256; i++) {
+      if(!runningCommands.containsKey(new Byte(i))) {
+        return new Byte(i);
+      }
+    }
+    return null;
+  }
+
+  public List<Command> getCommands() {
+    return commandFactory.getCommands();
+  }
+
+  public String listRunningCommands() {
+    String result = "--------------\nRunning commands: ";
+
+    //for(Map.Entry<Byte, Command> entry: runningCommands.entrySet()) {
+    for(Command command: runningCommands.values()) {
+      result += command.requestToString();
+      result += "\n";
+    }
+
+    result += "--------------";
+    return result;
+  }
+
+  public Command getRunningCommand(byte requestId) {
+    return runningCommands.get(new Byte(requestId));
+  }
+
+
+
 
   public void print(String msg) {
     System.out.println(msg);
   }
 
+  public abstract void run();
 
-
+  public abstract void shutdown();
 }

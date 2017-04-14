@@ -2,7 +2,6 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.ClientHandler;
 import com.nedap.university.clientAndServer.Handler;
-import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.io.File;
 import java.io.IOException;
@@ -12,12 +11,12 @@ import java.io.IOException;
  */
 public class ListFilesCommandServer extends Command{
 
-  public ListFilesCommandServer() {
-    super(Keyword.LS, "List files");
+  public ListFilesCommandServer(Handler handler, Byte requestId) {
+    super(Keyword.LS, "List files", handler, requestId);
   }
 
   @Override
-  public void execute(Handler handler) {
+  public void execute() {
     if(!(handler instanceof ClientHandler)) {
       return;
     }
@@ -40,5 +39,4 @@ public class ListFilesCommandServer extends Command{
     }
     //TODO do something with response?
   }
-
 }

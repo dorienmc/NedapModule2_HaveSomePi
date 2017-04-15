@@ -39,10 +39,6 @@ public class ListFilesCommandServer extends Command {
       e.printStackTrace();
     }
 
-    //Wait until protocol is not busy anymore.
-    while(protocol.busy()) {
-      Utils.sleep(10);
-    }
-    deregisterFromChannel();
+    shutdown();
   }
 }

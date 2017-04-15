@@ -45,8 +45,7 @@ public class ListFilesCommandClient extends Command {
     //Print files
     handler.print(new String(response.getData()));
 
-    //Deregister
-    deregisterFromChannel();
+    shutdown();
   }
 
 }

@@ -1,6 +1,8 @@
 package com.nedap.university.clientAndServer.commands;
 
+import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.Handler.Status;
 import com.nedap.university.fileTranser.ARQProtocol.*;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -84,6 +86,18 @@ public abstract class Command extends Thread {
   }
 
   public abstract void execute();
+
+  public void shutdown() {
+    //Wait until protocol is not busy anymore.
+    while(protocol.busy()) {
+      Utils.sleep(10);
+    }
+    //Deregister from channel because no more sending/receiving is needed.
+    deregisterFromChannel();
+
+    //Unpause handler (currenly only usefull for client)
+    handler.unPause();
+  }
 
   public Keyword getKeyword() {
     return keyword;

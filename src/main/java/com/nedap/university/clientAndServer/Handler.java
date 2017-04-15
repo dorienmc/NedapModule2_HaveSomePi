@@ -20,6 +20,10 @@ public abstract class Handler extends Thread {
   int outPort;
   InetAddress address;
   Map<Byte,Command> runningCommands;
+  public enum Status {
+    PAUSED, RUNNING, STOPPED;
+  }
+  private Status status;
 
   public Handler(int inPort, int outPort) {
     this.inPort = inPort;
@@ -48,6 +52,20 @@ public abstract class Handler extends Thread {
     this.address = address;
   }
 
+  public synchronized Status getStatus() {
+    return status;
+  }
+
+  public synchronized void setStatus(Status status) {
+    this.status = status;
+  }
+
+  //Unpause handler (currenly only usefull for client)
+  public synchronized void unPause() {
+    if(getStatus().equals(Status.PAUSED)) {
+      setStatus(Status.RUNNING);
+    }
+  }
 
   /********** Reliable UDP channel methods *********/
   /**

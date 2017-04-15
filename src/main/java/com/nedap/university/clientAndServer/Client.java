@@ -13,7 +13,7 @@ public class Client extends Handler {
 
   public Client() {
     super(9292,9293);
-    running = true;
+    setStatus(Status.RUNNING);
     super.setCommandFactory(new CommandFactoryClient(this));
   }
 
@@ -34,19 +34,23 @@ public class Client extends Handler {
       }
     }
 
-    if(running) {
+    if(isRunning()) {
       //List commands
       (new HelpCommand(this)).execute();
     }
 
-    while(running) {
+    while(isRunning()) {
       //Wait for new user command
       String command = Utils.readString("Please enter a command (type help for a menu) ");
 
+      setStatus(Status.PAUSED);
       super.handleCommand(command);
 
-      //Sleep shortly
-      Utils.sleep(1000);
+      //Sleep until command is done asking stuff
+      while(getStatus().equals(Status.PAUSED)) {
+        Utils.sleep(100);
+      }
+
     }
   }
 
@@ -61,11 +65,11 @@ public class Client extends Handler {
 
   public void shutdown() { //TODO add more?
     super.removeChannel();
-    running = false;
+    setStatus(Status.STOPPED);
     System.exit(0);
   }
 
   synchronized public boolean isRunning() {
-    return running;
+    return !getStatus().equals(Status.STOPPED);
   }
 }

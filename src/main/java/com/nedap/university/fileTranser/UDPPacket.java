@@ -85,12 +85,8 @@ public class UDPPacket {
   /****** Getters and Setters *****/
   public void setData(byte[] data) {
     this.data = data;
-    setLength(data.length + header.getHeaderSize());
+    header.setField(HeaderField.LENGTH,data.length + header.getHeaderSize());
     updateChecksum();
-  }
-
-  private void setLength(int length) {
-    header.setField(HeaderField.LENGTH,length);
   }
 
   public byte[] getData() {
@@ -172,7 +168,12 @@ public class UDPPacket {
       return false;
     }
 
-    return checkChecksum();
+    if(checkChecksum()) {
+      return true;
+    } else {
+      System.out.println(String.format("Checksum: expected %d but got %d", getChecksum(), calculateChecksum()));
+      return false;
+    }
   }
 
   @Override

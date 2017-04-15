@@ -70,8 +70,7 @@ public class Sender extends Thread {
   }
 
   private void sendPacket(UDPPacket packet) throws IOException {
-    System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
-
+    //System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
     //Try to send
     socket.send(packet.toDatagram(address));
   }
@@ -88,7 +87,7 @@ public class Sender extends Thread {
 
 
   public void deregister(Command request) {
-    System.out.println("De register " + requests.remove(request.getRequestId()) + " from sender");
+    requests.remove(request.getRequestId());
   }
 
   /**

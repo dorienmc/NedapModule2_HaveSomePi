@@ -2,7 +2,6 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
-import com.nedap.university.clientAndServer.Handler.Status;
 import com.nedap.university.fileTranser.ARQProtocol.*;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -108,7 +107,7 @@ public abstract class Command extends Thread {
   }
 
   @Override
-  public String toString(){ return String.format("  %s(%d)", this.getClass().getName(), requestId.intValue());}
+  public String toString(){ return String.format("  %s Request (id: %d)", this.getKeyword(), requestId.intValue());}
 
   public String getAsMenuItem()  {
     return String.format("  %-10s %s", keyword, description);

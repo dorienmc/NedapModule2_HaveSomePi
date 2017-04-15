@@ -31,11 +31,9 @@ public class NaiveProtocol extends Protocol{
   public UDPPacket getNextPacket() {
     if (getStatus().equals(Status.RUNNING)) {
       if(sendBuffer.size() > 0) {
-        System.out.println("Send buffer size of command " + requestId + " " + sendBuffer.size());
         UDPPacket packet = sendBuffer.pollFirst();
-        System.out.println("Send buffer size of command " + requestId + " " + sendBuffer.size());
-
-        //TODO update seqnumber and ack number and more?
+        System.out.println("Sending packet " + packet.getSequenceNumber() + ", offset " + packet.getOffset());
+        //TODO update seqnumber and ack number and more? (Or only do this in Protocol.addPacketToSendBuffer())?
         return packet;
       }
     }

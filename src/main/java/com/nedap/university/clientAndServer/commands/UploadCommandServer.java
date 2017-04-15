@@ -51,6 +51,7 @@ public class UploadCommandServer extends Command{
     //Save received packets in temporary file.
     try (FileOutputStream fileStream = new FileOutputStream(Server.FILEPATH + "/tmp_" + metaData.getFileName())) {
       for (int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
+        //TODO or use while(packet.isFlagSet(Flag.NOT_LAST) ?
         //Receive next packet //TODO require specific packet (specific seq.number? specific offset!)
         UDPPacket packet = protocol.receivePacket(0);
 

@@ -41,7 +41,11 @@ public class Receiver extends Thread {
       try {
         socket.receive(response);
       } catch (IOException e) {
-        handler.handleSocketException(String.format("Error in receiver: %s",e.getMessage()));
+        if(stop) { //Stopped by user.
+          return;
+        } else {
+          handler.handleSocketException(String.format("Error in receiver: %s", e.getMessage()));
+        }
       }
 
       //Try to parse received packet
@@ -64,7 +68,6 @@ public class Receiver extends Thread {
       }
 
       //Now send packet to correct Request, or let handler create a new request
-      System.out.println("Received new packet " + packet);
       sendPacketToRequest(packet);
 
       //Wait

@@ -20,7 +20,7 @@ import java.net.SocketException;
 public class ConnectCommandServer extends Command {
   DatagramPacket connectPacket;
   public static final String SERVER_ADDRESS = "192.168.40.8";
-  public static final ProtocolFactory.Name DEFAULT_PROTOCOL = Name.NAIVE;
+  public static final ProtocolFactory.Name DEFAULT_PROTOCOL = Name.DEFAULT;
 
   public ConnectCommandServer(DatagramPacket connectPacket, Handler handler, Byte requestId) {
     super(Keyword.CONNECT, "Establish connection with client", handler, requestId);

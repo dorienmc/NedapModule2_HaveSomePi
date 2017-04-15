@@ -2,6 +2,7 @@ package com.nedap.university.clientAndServer.commands;
 
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.ARQProtocol.*;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.UDPPacket;
 
 /**
@@ -15,12 +16,16 @@ public abstract class Command extends Thread {
   protected Protocol protocol;
   Byte requestId;
 
-  public Command(Keyword keyword, String description, Handler handler, Byte requestId){
+  public Command(Keyword keyword, String description, Handler handler, Byte requestId, ProtocolFactory.Name protocol){
     this.keyword = keyword;
     this.description =description;
     this.handler = handler;
     this.requestId = requestId;
-    registerToChannel(ProtocolFactory.Name.NAIVE);
+    registerToChannel(protocol);
+  }
+
+  public Command(Keyword keyword, String description, Handler handler, Byte requestId){
+    this(keyword, description, handler, requestId, Name.DEFAULT);
   }
 
   /********** Methods to (de)register to a Reliable UDP channel ********/

@@ -1,5 +1,7 @@
 package com.nedap.university;
 
+import com.nedap.university.clientAndServer.Server;
+import java.io.File;
 import java.util.Scanner;
 
 /**
@@ -85,5 +87,16 @@ public class Utils {
       encodedData[i*2+1] = lookUpHexAlphabet[temp & 0xf];
     }
     return new String(encodedData);
+  }
+
+  static public String listFiles(String path, String title) {
+    //List all files
+    File[] files = new File(path).listFiles();
+    String allFiles = title + "\n";
+
+    for (File file : files) {
+      allFiles += "\t" + file.getName();
+    }
+    return allFiles;
   }
 }

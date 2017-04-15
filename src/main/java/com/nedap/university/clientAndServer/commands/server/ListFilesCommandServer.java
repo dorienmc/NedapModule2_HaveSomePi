@@ -3,6 +3,7 @@ package com.nedap.university.clientAndServer.commands.server;
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.ClientHandler;
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
@@ -25,12 +26,7 @@ public class ListFilesCommandServer extends Command {
     }
 
     //List all files
-    File[] files = new File("/home/pi/files").listFiles();
-    String allFiles = "Files\n";
-
-    for (File file : files) {
-      allFiles += "\t" + file.getName();
-    }
+    String allFiles = Utils.listFiles(Server.FILEPATH, "Files");
 
     //Send this to the client
     try {

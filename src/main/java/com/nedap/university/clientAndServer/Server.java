@@ -26,6 +26,7 @@ public class Server extends Thread {
   public static final int MULTI_DNS_PORT = 5353;
   public static final int FIRST_RUDP_PORT = 8000;
   public static final String HOSTNAME = "8";
+  public static final String FILEPATH = "/home/pi/files";
 
   private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
   private InetAddress broadcastAddress;

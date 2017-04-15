@@ -9,7 +9,7 @@ import com.nedap.university.clientAndServer.commands.client.ConnectCommandClient
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class Client extends Handler {
-  volatile boolean running;
+  public static final String FILEPATH = "./files";
 
   public Client() {
     super(9292,9293);

@@ -1,10 +1,13 @@
 package com.nedap.university.fileTranser;
 
+import static com.nedap.university.Utils.HexToString;
 import static org.junit.Assert.*;
 
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +19,7 @@ public class UDPPacketTest {
   int sourcePort = 9297;
   int destPort = 5353;
   int length = HeaderField.getTotalLength();
-  int checksum = 0;
+  long checksum = 0;
   int seqNumber = 13;
   int ackNumber = 255;
   int flags = Flag.LIST_FILES.getValue();
@@ -30,14 +33,14 @@ public class UDPPacketTest {
 
   @Test
   public void testSetup() throws Exception {
-    checksum = packet.updateChecksum();
+    checksum = packet.calculateChecksum();
     String textBeforeHeader = "Packet representation in Hex.\n" + "Header: ";
     String textAfterHeader = "\nData: ";
     String expected = "";
     expected += HexToString(sourcePort,8);
     expected += HexToString(destPort,8);
     expected += HexToString(length,4);
-    expected += HexToString(checksum,8);
+    expected += HexToString(checksum,16);
     expected += HexToString(seqNumber,4);
     expected += HexToString(ackNumber,4);
     expected += "00"; //expected += Integer.toHexString(flags); //Not set by constructor
@@ -88,7 +91,7 @@ public class UDPPacketTest {
   @Test
   public void fromDatagram() throws Exception {
     DatagramPacket datagram = new DatagramPacket(new byte[100],100);
-    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)length,0,0,0,0,0,13,0,(byte) 255,
+    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)length,0,0,0,0,0,0,0,0,0,13,0,(byte) 255,
         Flag.LIST_FILES.getValue(),0,0,0,1,2,3,4}; //last 4 bytes are UDP data
     byte[] udpData = {1,2,3,4};
     datagram.setData(data);
@@ -105,7 +108,7 @@ public class UDPPacketTest {
   public void toDatagram() throws Exception {
     DatagramPacket expectedDatagram = new DatagramPacket(new byte[100],100);
     byte[] udpData = {1,2,3,4};
-    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)(length + udpData.length),0,0,0,0,0,13,0,(byte) 255,
+    byte[] data = {0,0,36,81,0,0,20,(byte) 233,0,(byte)(length + udpData.length),0,0,0,0,0,0,0,0,0,13,0,(byte) 255,
         Flag.LIST_FILES.getValue(),0,0,0,1,2,3,4}; //last 4 bytes are UDP data
     expectedDatagram.setData(data);
 
@@ -113,14 +116,9 @@ public class UDPPacketTest {
     assertArrayEquals(expectedDatagram.getData(), packet.toDatagram(InetAddress.getByName("192.168.40.8")).getData());
   }
 
-  /* Pad string with zeros to given length */
-  static String padString(String txt, int length) {
-    return String.format("%" + length + "s", txt).replace(' ', '0');
-  }
-
-  /* Convert decimal 32bit integer to hexadecimal string, with the given length.
-  * Pads the string with zeros at the left side. */
-  static String HexToString(int number, int length){
-    return padString(Integer.toHexString(number),length);
+  /* Test checksum */
+  @Test
+  public void checkSum() throws Exception {
+    assertEquals(packet.getChecksum(), packet.calculateChecksum());
   }
 }

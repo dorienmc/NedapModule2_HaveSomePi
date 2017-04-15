@@ -37,4 +37,21 @@ public class Utils {
       Thread.currentThread().interrupt();
     }
   }
+
+  /* Pad string with zeros to given length */
+  public static String padString(String txt, int length) {
+    return String.format("%" + length + "s", txt).replace(' ', '0');
+  }
+
+  /* Convert decimal 32bit integer to hexadecimal string, with the given length.
+  * Pads the string with zeros at the left side. */
+  public static String HexToString(int number, int length){
+    return padString(Integer.toHexString(number),length);
+  }
+
+  /* Convert decimal 64bit integer to hexadecimal string, with the given length.
+  * Pads the string with zeros at the left side. */
+  public static String HexToString(long number, int length){
+    return padString(Long.toHexString(number),length);
+  }
 }

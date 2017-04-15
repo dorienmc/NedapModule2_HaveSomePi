@@ -115,12 +115,14 @@ public class UDPPacket {
 
   public int getRequestId() { return header.getField(HeaderField.REQUEST_ID);}
 
+  public long getChecksum() {return header.getCheckSum();}
+
   public void setHeaderSetting(HeaderField field, int value) {
     header.setField(field, value);
     updateChecksum();
   }
 
-  private byte[] getPkt() {
+  public byte[] getPkt() {
     ByteBuffer buffer = ByteBuffer.allocate(getLength());
     buffer.put(header.getHeader());
     if(data.length > 0) {
@@ -133,23 +135,27 @@ public class UDPPacket {
 
   /****** Checksum methods and validity checking *****/
   /* Warning updates the checksum field */
-  public int updateChecksum() {
+  public void updateChecksum() {
+    long newChecksum = calculateChecksum();
+    header.setCheckSum(newChecksum);
+  }
+
+  public long calculateChecksum() {
     Checksum checksum = new CRC32();
+    long oldChecksum = header.getCheckSum();
 
-    header.setField(HeaderField.CHECKSUM,0);
+    header.setCheckSum(0);
     checksum.update(getPkt(),0,getLength());
+    long checksumValue = checksum.getValue();
 
-    int checksumValue = (short)checksum.getValue();
-    header.setField(HeaderField.CHECKSUM,checksumValue);
-
+    header.setCheckSum(oldChecksum);
     return checksumValue;
   }
 
   private boolean checkChecksum() {
-    Checksum checksum = new CRC32();
-
-    checksum.update(getPkt(),0,getLength());
-    return checksum.getValue() == 0;
+    long calculated = calculateChecksum();
+    long expected = getChecksum();
+    return calculated == expected;
   }
 
   /* Check if packet is valid, eg. checksum is correct and packet is meant for this host) */

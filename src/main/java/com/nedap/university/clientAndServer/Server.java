@@ -1,5 +1,6 @@
 package com.nedap.university.clientAndServer;
 
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -9,11 +10,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.ServerSocket;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,24 +69,6 @@ public class Server extends Thread {
     return myAddress;
   }
 
-  private static int getFreePort() {
-    for(int i = FIRST_RUDP_PORT; i < FIRST_RUDP_PORT + 1000; i += 2) {
-      if(isLocalPortFree(i)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  private static boolean isLocalPortFree(int port) {
-    try {
-      new ServerSocket(port).close();
-      return true;
-    } catch (IOException e) {
-      return false;
-    }
-  }
-
   private boolean isConnectionPacket(DatagramPacket packet) {
     UDPPacket udpPacket;
     try {
@@ -123,7 +103,7 @@ public class Server extends Thread {
    */
   private void addClientHandler(DatagramPacket packet) {
     UDPPacket udpPacket = new UDPPacket(packet);
-    int inPort = getFreePort();
+    int inPort = Utils.getFreePort(FIRST_RUDP_PORT);
     int outPort = inPort + 1;
 
     //Reserve spot for client (so port is not free for others)

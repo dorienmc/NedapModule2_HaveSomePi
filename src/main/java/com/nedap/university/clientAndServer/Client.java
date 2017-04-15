@@ -10,10 +10,10 @@ import com.nedap.university.clientAndServer.commands.client.ConnectCommandClient
  */
 public class Client extends Handler {
   public static final String FILEPATH = "./files";
+  public static final int FIRST_CLIENT_UDP_PORT = 9001;
 
-  public Client() {
-    super(9292,9293);
-    setStatus(Status.RUNNING);
+  public Client(int inPort, int outPort) {
+    super(inPort, outPort);
     super.setCommandFactory(new CommandFactoryClient(this));
   }
 

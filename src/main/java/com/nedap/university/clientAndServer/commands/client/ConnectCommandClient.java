@@ -1,5 +1,6 @@
 package com.nedap.university.clientAndServer.commands.client;
 
+import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.Utils;
@@ -70,6 +71,11 @@ public class ConnectCommandClient extends Command {
       socket.close();
       return false;
     }
+
+    //Request free port(s)
+    int port = Utils.getFreePort(Client.FIRST_CLIENT_UDP_PORT);
+    handler.setInPort(port);
+    handler.setOutPort(port + 1);
 
     //Shout out over multicast
     UDPPacket multiShout = new UDPPacket(socket.getLocalPort(), Server.MULTI_DNS_PORT,0, 0);

@@ -2,6 +2,8 @@ package com.nedap.university;
 
 import com.nedap.university.clientAndServer.Server;
 import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Scanner;
 
 /**
@@ -98,5 +100,23 @@ public class Utils {
       allFiles += "\t" + file.getName();
     }
     return allFiles;
+  }
+
+  public static int getFreePort(int lowerbound) {
+    for(int i = lowerbound; i < lowerbound + 1000; i += 2) {
+      if(isLocalPortFree(i)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 }

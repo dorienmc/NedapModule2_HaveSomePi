@@ -2,16 +2,11 @@ package com.nedap.university;
 
 import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Server;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.Date;
 
 public class Main {
 
     private static boolean keepAlive = true;
     private static boolean running = false;
-    private static final int FIRST_CLIENT_UDP_PORT = 9001;
-    private static final int LAST_CLIENT_UDP_PORT = 9999;
 
     private Main() {}
 
@@ -27,7 +22,7 @@ public class Main {
         if(name.equals("Pi")) {
             (new Server()).start();
         } else {
-            client = new Client();
+            client = new Client(-1,-1);
             client.start();
         }
 
@@ -63,23 +58,5 @@ public class Main {
             }
         };
         Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }
-
-    private static int getFreePort() {
-        for(int i = FIRST_CLIENT_UDP_PORT; i < LAST_CLIENT_UDP_PORT; i += 2) {
-            if(isLocalPortFree(i)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private static boolean isLocalPortFree(int port) {
-        try {
-            new ServerSocket(port).close();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
     }
 }

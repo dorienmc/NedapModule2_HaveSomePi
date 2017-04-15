@@ -29,6 +29,7 @@ public abstract class Handler extends Thread {
     this.inPort = inPort;
     this.outPort = outPort;
     this.runningCommands = new HashMap<>();
+    this.status = Status.RUNNING;
   }
 
   /********** Setters and getters *********/
@@ -42,6 +43,14 @@ public abstract class Handler extends Thread {
 
   public int getOutPort() {
     return outPort;
+  }
+
+  public void setInPort(int inPort) {
+    this.inPort = inPort;
+  }
+
+  public void setOutPort(int outPort) {
+    this.outPort = outPort;
   }
 
   public InetAddress getAddress() {

@@ -117,6 +117,8 @@ public class UDPPacket {
 
   public long getChecksum() {return header.getCheckSum();}
 
+  public int getOffset() { return header.getField(HeaderField.OFFSET);}
+
   public void setHeaderSetting(HeaderField field, int value) {
     header.setField(field, value);
     updateChecksum();

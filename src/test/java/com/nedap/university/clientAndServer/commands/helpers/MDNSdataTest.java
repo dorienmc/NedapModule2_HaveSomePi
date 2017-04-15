@@ -1,7 +1,8 @@
-package com.nedap.university.fileTranser;
+package com.nedap.university.clientAndServer.commands.helpers;
 
 import static org.junit.Assert.*;
 
+import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import org.junit.Before;
 import org.junit.Test;
 

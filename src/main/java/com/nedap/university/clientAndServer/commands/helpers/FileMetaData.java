@@ -8,9 +8,9 @@ import java.nio.ByteBuffer;
  */
 public class FileMetaData {
   private static final int MIN_SIZE = 4 + 8;
-  String fileName;
-  long fileLength;
-  int numberOfPackets;
+  private long fileLength;
+  private int numberOfPackets;
+  private String fileName;
 
   public FileMetaData(File file, int maxPacketSize) {
     fileName = file.getName();
@@ -24,11 +24,11 @@ public class FileMetaData {
     }
     ByteBuffer buffer = ByteBuffer.allocate(data.length).put(data);
     buffer.rewind();
-    byte[] fileNameInBytes = new byte[buffer.capacity() - MIN_SIZE];
-    buffer.get(fileNameInBytes);
-    fileName = fileNameInBytes.toString();
     fileLength = buffer.getLong();
     numberOfPackets = buffer.getInt();
+    byte[] fileNameInBytes = new byte[buffer.capacity() - MIN_SIZE];
+    buffer.get(fileNameInBytes);
+    fileName = new String(fileNameInBytes);
   }
 
   public String getFileName() {
@@ -45,10 +45,16 @@ public class FileMetaData {
   }
 
   public byte[] getData() {
-    ByteBuffer buffer = ByteBuffer.allocate(fileName.getBytes().length + MIN_SIZE);
-    buffer.put(fileName.getBytes());
+    byte[] fileNameInBytes = fileName.getBytes();
+    ByteBuffer buffer = ByteBuffer.allocate(fileNameInBytes.length + MIN_SIZE);
     buffer.putLong(fileLength);
     buffer.putInt(numberOfPackets);
+    buffer.put(fileNameInBytes);
     return buffer.array();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s, length: %d, #packets:%d", fileName, fileLength, numberOfPackets);
   }
 }

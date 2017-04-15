@@ -1,7 +1,7 @@
 package com.nedap.university.clientAndServer;
 
 import com.nedap.university.fileTranser.Flag;
-import com.nedap.university.fileTranser.MDNSdata;
+import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 

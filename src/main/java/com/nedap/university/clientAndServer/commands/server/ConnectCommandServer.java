@@ -7,7 +7,7 @@ import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
-import com.nedap.university.fileTranser.MDNSdata;
+import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
 import java.net.DatagramPacket;

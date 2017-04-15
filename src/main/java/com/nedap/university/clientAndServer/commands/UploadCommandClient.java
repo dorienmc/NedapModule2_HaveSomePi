@@ -54,6 +54,7 @@ public class UploadCommandClient extends Command{
     FileMetaData metaData = new FileMetaData(file, MAX_BUFFER);
 
     handler.print(String.format("Start upload of %s, needs %d packets",filename, metaData.getNumberOfPackets()));
+    System.out.println("Send metadata " + metaData);
     handler.unPause();
 
     //Put uploadrequest (with file metadata) in the sender buffer

@@ -30,6 +30,7 @@ public class UploadCommandServer extends Command{
       e.printStackTrace();
     }
     FileMetaData metaData = new FileMetaData(firstPacket.getData());
+    System.out.println("Upload request for " + metaData);
 
     downloadFile(metaData);
 

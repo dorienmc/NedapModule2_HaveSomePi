@@ -7,6 +7,15 @@ import java.util.Scanner;
  * Created by dorien.meijercluwen on 13/04/2017.
  */
 public class Utils {
+  static final private char [] lookUpHexAlphabet = new char[16];
+  static {
+    for(int i = 0; i<10; i++ ) {
+      lookUpHexAlphabet[i] = (char)('0'+i);
+    }
+    for(int i = 10; i<=15; i++ ) {
+      lookUpHexAlphabet[i] = (char)('A'+i -10);
+    }
+  }
 
   /**
    * Writes a prompt to standard out and tries to read an String value from
@@ -53,5 +62,28 @@ public class Utils {
   * Pads the string with zeros at the left side. */
   public static String HexToString(long number, int length){
     return padString(Long.toHexString(number),length);
+  }
+
+  /**
+   * Encode a byte array to hex string
+   *
+   * @param binaryData array of byte to encode
+   * @return return encoded string
+   */
+  static public String binaryArrToHexString(byte[] binaryData) {
+    if (binaryData == null)
+      return null;
+    int lengthData   = binaryData.length;
+    int lengthEncode = lengthData * 2;
+    char[] encodedData = new char[lengthEncode];
+    int temp;
+    for (int i = 0; i < lengthData; i++) {
+      temp = binaryData[i];
+      if (temp < 0)
+        temp += 256;
+      encodedData[i*2] = lookUpHexAlphabet[temp >> 4];
+      encodedData[i*2+1] = lookUpHexAlphabet[temp & 0xf];
+    }
+    return new String(encodedData);
   }
 }

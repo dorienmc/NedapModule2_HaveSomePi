@@ -1,7 +1,7 @@
 package com.nedap.university.fileTranser;
 
+import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
-import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -176,8 +176,8 @@ public class UDPPacket {
   @Override
   public String toString() {
     String result = "Packet representation in Hex.\n";
-    result += "Header: " + HexBin.encode(header.getHeader());
-    result += "\nData: " + HexBin.encode(data);
+    result += "Header: " + Utils.binaryArrToHexString(header.getHeader());
+    result += "\nData: " + Utils.binaryArrToHexString(data);
     return result;
   }
 }

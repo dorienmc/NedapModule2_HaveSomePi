@@ -44,8 +44,13 @@ public class NaiveProtocol extends Protocol{
   /**
    * Send data in sender buffer according to protocol
    **/
-  public void send() throws IOException {
+  @Override
+  public void run() {
     setStatus(Status.RUNNING);
+
+    while(busy()) {
+      Utils.sleep(100);
+    }
   }
 
   /**

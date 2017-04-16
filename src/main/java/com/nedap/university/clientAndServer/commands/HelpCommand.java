@@ -31,6 +31,7 @@ public class HelpCommand extends Command {
     if(exit != null) {System.out.println(exit.getAsMenuItem());}
 
     System.out.println("--------------");
+    shutdown(false);
   }
 
 }

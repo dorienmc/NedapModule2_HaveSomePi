@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
  * Abstract class for an ARQ protocol
  * Created by dorien.meijercluwen on 09/04/2017.
  */
-public abstract class Protocol {
+public abstract class Protocol extends Thread {
   public static final int MAX_BUFFER = 1500;
   Sender sender;
   Receiver receiver;
@@ -27,7 +27,7 @@ public abstract class Protocol {
   Status status;
 
   public enum Status {
-    PAUSED, RUNNING;
+    CREATED, PAUSED, RUNNING, STOPPING;
   }
 
   public Protocol(Sender sender, Receiver receiver, byte requestId) {
@@ -38,7 +38,7 @@ public abstract class Protocol {
     this.seqNumber = 1;
     this.sendBuffer = new ConcurrentLinkedDeque<>();
     this.receiveBuffer = new ConcurrentLinkedDeque<>();
-    this.status = Status.PAUSED;
+    this.status = Status.CREATED;
   }
 
   /********** Abstract methods ***********/
@@ -57,7 +57,7 @@ public abstract class Protocol {
   /**
    * Send data in sender buffer and receive data in receive buffer according to protocol
    **/
-  public abstract void send() throws IOException;
+  public abstract void run();
 
   /**
    *  Tell if received packet is expected, if not it should be dropped .
@@ -117,12 +117,14 @@ public abstract class Protocol {
     packet.setFlags(flags);
     addPacketToSendBuffer(packet);
 
-    send();
     //Add End-of-Request packet
     if(addEOR) {
       sendEndOfRequestPacket();
     }
 
+    if(!this.isAlive()) {
+      start();
+    }
   }
 
   /**
@@ -146,12 +148,17 @@ public abstract class Protocol {
     packet.setData(data);
     addPacketToSendBuffer(packet);
 
-    send();
     //Add End-of-Request packet
     if(addEOR) {
       sendEndOfRequestPacket();
     }
+
+    if(!this.isAlive()) {
+      start();
+    }
   }
+
+
 
   /********** Receive data **********/
   /* Wait for next packet over socket, set maxTimeOut to 0 for infinite timeout */ //TODO wait for specific packet

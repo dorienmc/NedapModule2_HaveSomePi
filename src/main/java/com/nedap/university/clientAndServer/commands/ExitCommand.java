@@ -9,6 +9,7 @@ public class ExitCommand extends Command {
 
   public ExitCommand(Handler handler, Byte requestId) {
     super(Keyword.EXIT,"Exit", handler, requestId);
+    shutdown(false);
   }
 
   @Override

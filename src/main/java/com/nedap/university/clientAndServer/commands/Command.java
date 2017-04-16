@@ -66,8 +66,15 @@ public abstract class Command extends Thread {
 
   /**
    * Add new packet to the request. Protocol can decide to drop it or not.
+   * If its the first packet, start the protocol before asking if the packet was expected.
    */
-  public void addPacketToReceiveBuffer(UDPPacket packet) {
+  public void addPacketToReceiveBuffer(UDPPacket packet, boolean first) {
+    handler.print("Received packet for request " + this + " with sequence number " + packet
+        .getSequenceNumber());
+    if(first && !protocol.isAlive()) {
+      protocol.start();
+    }
+
     //Let protocol decide if packet is expected (eg. sequence number could not confirm to sliding window)
     if(protocol.isExpected(packet)) {
       protocol.addPacketToReceiverBuffer(packet);
@@ -87,10 +94,17 @@ public abstract class Command extends Thread {
   public abstract void execute();
 
   public void shutdown() {
+    shutdown(true);
+  }
+
+  public void shutdown(boolean waitUntilNotBusy) {
     //Wait until protocol is not busy anymore.
-    while(protocol.busy()) {
-      Utils.sleep(10);
+    if(waitUntilNotBusy) {
+      while (protocol.busy()) {
+        Utils.sleep(10);
+      }
     }
+
     //Deregister from channel because no more sending/receiving is needed.
     deregisterFromChannel();
 

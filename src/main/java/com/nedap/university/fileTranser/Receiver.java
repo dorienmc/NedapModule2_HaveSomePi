@@ -92,14 +92,14 @@ public class Receiver extends Thread {
       if (requestType != null) {
         System.out.println("Received an " + requestType + " request.");
         Command command = handler.startNewCommand(requestType, requestId);
-        command.addPacketToReceiveBuffer(packet);
+        command.addPacketToReceiveBuffer(packet, true);
       } else {
         //Drop packet. //TODO update statistics?
         //handler.print("Could not parse request type from flags: " + packet.getFlags());
       }
       return;
     } else {
-      request.addPacketToReceiveBuffer(packet);
+      request.addPacketToReceiveBuffer(packet, false);
     }
 
   }

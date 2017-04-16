@@ -48,8 +48,8 @@ public class ConnectCommandServer extends Command {
       handler.shutdown();
     }
 
-    //Wait until protcol is not busy anymore, then deregister the connect command.
-    shutdown();
+    //Wait until protocol is not busy anymore, then deregister the connect command.
+    shutdown(handler.getChannel() != null);
   }
 
   private void createReliableUDPchannel(Handler handler){

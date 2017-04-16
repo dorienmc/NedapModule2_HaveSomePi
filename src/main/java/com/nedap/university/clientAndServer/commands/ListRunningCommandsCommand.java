@@ -18,6 +18,6 @@ public class ListRunningCommandsCommand extends Command {
   @Override
   public void execute() {
     handler.print(handler.listRunningCommands());
-    deregisterFromChannel();
+    shutdown(false);
   }
 }

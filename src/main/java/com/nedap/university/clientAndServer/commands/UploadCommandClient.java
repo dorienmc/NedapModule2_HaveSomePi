@@ -40,11 +40,7 @@ public class UploadCommandClient extends Command{
       System.out.println("Could not upload " + filename + ", " + e.getMessage());
     }
 
-    while(protocol.busy()) {
-      Utils.sleep(10);
-    }
-
-    deregisterFromChannel();
+    shutdown();
   }
 
   /* Send data in given file */
@@ -69,7 +65,9 @@ public class UploadCommandClient extends Command{
     protocol.addPacketToSendBuffer(uploadRequest);
 
     //Tell protocol it can already start sending
-    protocol.send();
+    if(!protocol.isAlive()) {
+      protocol.start();
+    }
 
     //Split file in packets
     try (FileInputStream fileStream = new FileInputStream(file)) {

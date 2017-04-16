@@ -34,17 +34,7 @@ public class UploadCommandServer extends Command{
 
     downloadFile(metaData);
 
-    while(protocol.busy()) {
-      Utils.sleep(10);
-    }
-
-    deregisterFromChannel();
-
-    //TODO figure out how to call protocol.receiveFile
-    //Wait until complete file is received
-    //Merge packets (or do this in RUDP channel?)
-    //Save file
-    //TODO get file/data that should be send
+    shutdown();
   }
 
   private void downloadFile(FileMetaData metaData) {

@@ -6,6 +6,7 @@ import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -51,7 +52,19 @@ public class ConnectCommandClient extends Command {
     }
 
     //Create Reliable UDP channel
-    createReliableUDPchannel(response, handler);
+    if(createReliableUDPchannel(response, handler)){
+      //Register to it.
+      registerToChannel(Name.DEFAULT);
+
+      //Tell server we have connected
+      UDPPacket lastPacket = protocol.createEmptyPacket();
+      lastPacket.setFlags(Flag.LAST.getValue());
+      protocol.addPacketToSendBuffer(lastPacket);
+      addPacketToReceiveBuffer(new UDPPacket(response), true); //To let protocol know that this was the first packet
+
+    }
+
+    shutdown();
   }
 
   public String getHostName() {
@@ -107,7 +120,7 @@ public class ConnectCommandClient extends Command {
     //Create socket for receiving data.
     try {
       socketIn = new DatagramSocket(handler.getInPort());
-      socketIn.setSoTimeout(20000);
+      socketIn.setSoTimeout(10000);
     } catch (SocketException e) {
       handler.print(e.getMessage());
     }
@@ -162,7 +175,7 @@ public class ConnectCommandClient extends Command {
     return false;
   }
 
-  private void createReliableUDPchannel(DatagramPacket response, Handler handler){
+  private boolean createReliableUDPchannel(DatagramPacket response, Handler handler){
     //Retrieve address and portIn/portOut of server
     UDPPacket input = new UDPPacket(response);
     int serverPortIn = 0;
@@ -178,14 +191,16 @@ public class ConnectCommandClient extends Command {
 
     } catch (IndexOutOfBoundsException e) {
       handler.print(e.getMessage());
-      return;
+      return false;
     }
 
     //Create Reliable Udp channel
     try {
       handler.setChannel(handler.getInPort(), handler.getOutPort(), address,serverPortIn, serverPortOut);
+      return true;
     } catch (SocketException e) {
       handler.print(String.format("Could not create connection to %s: %s",hostName, e.getMessage()));
+      return false;
     }
   }
 

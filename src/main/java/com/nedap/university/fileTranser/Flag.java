@@ -51,7 +51,7 @@ public enum Flag {
       case UPLOAD:      return Keyword.UPLOAD;
       case PAUSE:       return Keyword.PAUSE;
       case RESUME:      return Keyword.RESUME;
-      case CANCEL:       return Keyword.CANCEL;
+      case CANCEL:      return Keyword.CANCEL;
       default:          return null;
     }
   }

@@ -20,7 +20,6 @@ import java.net.SocketException;
 public class ConnectCommandServer extends Command {
   DatagramPacket connectPacket;
   public static final String SERVER_ADDRESS = "192.168.40.8";
-  public static final ProtocolFactory.Name DEFAULT_PROTOCOL = Name.DEFAULT;
 
   public ConnectCommandServer(DatagramPacket connectPacket, Handler handler, Byte requestId) {
     super(Keyword.CONNECT, "Establish connection with client", handler, requestId);
@@ -34,21 +33,17 @@ public class ConnectCommandServer extends Command {
 
     //If the RUDP is setup, create an mDNS message (portIn + portOut) for the client
     if(handler.getChannel() != null) {
-      registerToChannel(DEFAULT_PROTOCOL);
+      registerToChannel(Name.DEFAULT);
 
       //Wait shortly so protocol is registered and until client has started listening to correct channel.
-      Utils.sleep(2000);
+      Utils.sleep(500);
 
-      try {
 
-        MDNSdata mdnSdata = new MDNSdata(handler.getInPort(),
-            handler.getOutPort(), "Client");
-        handler.print("mDNS data " + mdnSdata);
-        protocol.sendRequest(mdnSdata.getData(), Flag.CONNECT);
-      } catch (IOException e) {
-        handler.print(e.getMessage());
-        handler.shutdown();
-      }
+      MDNSdata mDNSdata = new MDNSdata(handler.getInPort(), handler.getOutPort(), "Client");
+      handler.print("My mDNS data " + mDNSdata);
+      protocol.sendRequest(mDNSdata.getData(), Flag.CONNECT, false);
+
+
     } else {
       handler.shutdown();
     }

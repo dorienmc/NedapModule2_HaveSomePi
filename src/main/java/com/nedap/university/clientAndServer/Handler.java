@@ -151,7 +151,6 @@ public abstract class Handler extends Thread {
   public String listRunningCommands() {
     String result = "--------------\nRunning commands: ";
 
-    //for(Map.Entry<Byte, Command> entry: runningCommands.entrySet()) {
     for(Command command: runningCommands.values()) {
       result += command;
       result += "\n";
@@ -160,13 +159,6 @@ public abstract class Handler extends Thread {
     result += "--------------";
     return result;
   }
-
-  public Command getRunningCommand(byte requestId) {
-    return runningCommands.get(new Byte(requestId));
-  }
-
-
-
 
   public void print(String msg) {
     System.out.println(msg);

@@ -41,7 +41,9 @@ public class Utils {
     return answer;
   }
 
-  /* Wait for 'waitTime' ms. */
+  /**
+   * Wait for 'waitTime' ms.
+   * */
   public static void sleep(int waitTime) {
     //Wait
     try {
@@ -51,19 +53,25 @@ public class Utils {
     }
   }
 
-  /* Pad string with zeros to given length */
+  /*
+   * Pad string with zeros to given length
+   **/
   public static String padString(String txt, int length) {
     return String.format("%" + length + "s", txt).replace(' ', '0');
   }
 
-  /* Convert decimal 32bit integer to hexadecimal string, with the given length.
-  * Pads the string with zeros at the left side. */
+  /**
+   * Convert decimal 32bit integer to hexadecimal string, with the given length.
+   * Pads the string with zeros at the left side.
+   **/
   public static String HexToString(int number, int length){
     return padString(Integer.toHexString(number),length);
   }
 
-  /* Convert decimal 64bit integer to hexadecimal string, with the given length.
-  * Pads the string with zeros at the left side. */
+  /**
+   * Convert decimal 64bit integer to hexadecimal string, with the given length.
+   * Pads the string with zeros at the left side.
+   **/
   public static String HexToString(long number, int length){
     return padString(Long.toHexString(number),length);
   }
@@ -91,13 +99,19 @@ public class Utils {
     return new String(encodedData);
   }
 
+  /**
+   * List files in the given path. Prepend with the given title.
+   */
   static public String listFiles(String path, String title) {
     //List all files
     File[] files = new File(path).listFiles();
     String allFiles = title + "\n";
+    int id = 1;
 
+    allFiles += String.format("  %-5s %s\n", "id","file name");
     for (File file : files) {
-      allFiles += "\t" + file.getName();
+      allFiles += String.format("  %-5d %s\n", id,file.getName());
+      id++;
     }
     return allFiles;
   }

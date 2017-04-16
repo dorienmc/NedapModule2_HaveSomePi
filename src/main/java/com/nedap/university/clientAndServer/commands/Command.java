@@ -94,7 +94,7 @@ public abstract class Command extends Thread {
     //Deregister from channel because no more sending/receiving is needed.
     deregisterFromChannel();
 
-    //Unpause handler (currenly only usefull for client)
+    //Unpause handler (currently only useful for client)
     handler.unPause();
   }
 

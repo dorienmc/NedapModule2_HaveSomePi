@@ -80,8 +80,6 @@ public class Receiver extends Thread {
   public void sendPacketToRequest(UDPPacket packet) {
     //Get requestId
     byte requestId = (byte) packet.getRequestId();
-    handler.print("Received packet for request " + requestId + " with sequence number " + packet
-        .getSequenceNumber());
 
     //Determine to which request the packet belongs
     Command request = requests.get(new Byte(requestId));
@@ -92,10 +90,12 @@ public class Receiver extends Thread {
 
       //Create a new one
       if (requestType != null) {
+        System.out.println("Received an " + requestType + " request.");
         Command command = handler.startNewCommand(requestType, requestId);
         command.addPacketToReceiveBuffer(packet);
       } else {
-        handler.print("Could not parse request type from flags: " + packet.getFlags());
+        //Drop packet. //TODO update statistics?
+        //handler.print("Could not parse request type from flags: " + packet.getFlags());
       }
       return;
     } else {
@@ -114,7 +114,7 @@ public class Receiver extends Thread {
   }
 
   public void deregister(Command request) {
-    System.out.println("Deregister " + requests.remove(request.getRequestId()) + " from receiver.");
+    requests.remove(request.getRequestId());
   }
 
   /**

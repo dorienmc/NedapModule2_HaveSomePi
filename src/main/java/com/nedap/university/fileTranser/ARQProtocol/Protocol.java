@@ -55,7 +55,7 @@ public abstract class Protocol {
   public abstract boolean busy();
 
   /**
-   * Send data in sender buffer according to protocol
+   * Send data in sender buffer and receive data in receive buffer according to protocol
    **/
   public abstract void send() throws IOException;
 
@@ -72,16 +72,20 @@ public abstract class Protocol {
     packet.setHeaderSetting(HeaderField.ACK_NUMBER, ackNumber);
     seqNumber++;
     ackNumber++;
+    System.out.println(String.format("Add packet to send buffer of request %d with seqno: %d", packet.getRequestId(), packet.getSequenceNumber()));
     sendBuffer.add(packet);
   }
 
   public void addPacketToReceiverBuffer(UDPPacket packet) {
+    System.out.println(String.format("Add packet to receive buffer with seq: %d, ack: %d, offset:%d",
+        packet.getSequenceNumber(), packet.getAckNumber(), packet.getOffset()));
     receiveBuffer.add(packet);
   }
 
   /********** Send request ***********/
   /**
    * Tell protocol to send given request.
+   * @param keyword Type of request
    */
   public void sendRequest(Keyword keyword) throws IOException {
     Flag flag = keyword.toFlag();
@@ -92,6 +96,8 @@ public abstract class Protocol {
 
   /**
    * Tell protocol to send given request.
+   * @param data Payload to be start
+   * @param flag Flag that is set
    */
   public void sendRequest(byte[] data, Flag flag) throws IOException {
     sendRequest(data, flag.getValue());
@@ -99,6 +105,8 @@ public abstract class Protocol {
 
   /**
    * Tell protocol to send given request.
+   * @param data Payload to be start
+   * @param flags Flags that are set
    */
   public void sendRequest(byte[] data, int flags) throws IOException {
     UDPPacket packet = createEmptyPacket();
@@ -153,28 +161,5 @@ public abstract class Protocol {
   public void setStatus(Status status) {
     this.status = status;
   }
-
-
-
-
-//
-//
-//
-//  /* Add data to received data */
-//  protected void addReceivedData(byte[] data) {
-//    int oldLength = dataReceived.length;
-//    int dataLength = data.length;
-//    dataReceived = Arrays.copyOf(dataReceived, oldLength + dataLength);
-//    System.arraycopy(data,0,dataReceived,oldLength,dataLength);
-//  }
-//
-//  /* Return received data */
-//  public byte[] receive() {
-//    byte[] response = dataReceived.clone();
-//    dataReceived = new byte[0];
-//    return response;
-//  }
-
-
 }
 

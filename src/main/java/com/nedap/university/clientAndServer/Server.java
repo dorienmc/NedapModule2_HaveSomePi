@@ -102,7 +102,6 @@ public class Server extends Thread {
    * But do check if the connection request is valid.
    */
   private void addClientHandler(DatagramPacket packet) {
-    UDPPacket udpPacket = new UDPPacket(packet);
     int inPort = Utils.getFreePort(FIRST_RUDP_PORT);
     int outPort = inPort + 1;
 
@@ -152,11 +151,11 @@ public class Server extends Thread {
       client.shutdown();
     }
 
-    Thread.currentThread().interrupt();
-
     //close socket
     socket.close();
     running = false;
+
+    Thread.currentThread().interrupt();
   }
 
   synchronized public boolean isRunning() {

@@ -26,12 +26,7 @@ public class ListFilesCommandClient extends Command {
     }
 
     //Send request
-    try {
-      protocol.sendRequest(Keyword.LS);
-    } catch (IOException e) {
-      handler.print(e.getMessage());
-      deregisterFromChannel();
-    }
+    protocol.sendRequest(Keyword.LS, true);
 
     //Wait for response
     UDPPacket response = null; //TODO let protocol determine timeout?

@@ -57,7 +57,7 @@ public class Sender extends Thread {
         UDPPacket packet = request.getNextPacket();
         if(packet != null) {
           try {
-            System.out.println("Send new packet for " + request);
+            System.out.println(String.format("Send packet %d for request %s",packet.getSequenceNumber(), request));
             sendPacket(packet);
           } catch (IOException e) {
             handler.handleSocketException(String.format("WARNING could not send packet from request %d with seq. number %d",

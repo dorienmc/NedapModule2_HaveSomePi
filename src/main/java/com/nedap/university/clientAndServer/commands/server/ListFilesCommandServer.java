@@ -29,11 +29,7 @@ public class ListFilesCommandServer extends Command {
     String allFiles = Utils.listFiles(Server.FILEPATH, "Files");
 
     //Send this to the client
-    try {
-      protocol.sendData(allFiles.getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    protocol.sendData(allFiles.getBytes(), false);
 
     shutdown();
   }

@@ -31,7 +31,7 @@ public class ReliableUdpChannel {
   }
 
   /**
-   * Register to channel, so it protocol can use its sender and receiver.
+   * Register to channel, so the commands protocol can use its sender and receiver.
    */
   public void register(Command command, ProtocolFactory.Name protocolName) {
     sender.register(command);

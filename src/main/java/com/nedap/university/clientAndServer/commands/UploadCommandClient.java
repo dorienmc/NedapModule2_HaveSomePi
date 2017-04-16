@@ -27,7 +27,12 @@ public class UploadCommandClient extends Command{
   public void execute() {
     System.out.println("test");
     handler.print(Utils.listFiles(Client.FILEPATH,"Files available for upload"));
-    String filename = Utils.readString("Which file do you want to upload? ");
+    String filename = Utils.readString("Which file do you want to upload (enter name or id)? ");
+
+    if(Utils.isANumber(filename)) {
+      //Parse number to actual file
+      filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
+    }
 
     try {
       uploadFile(filename);

@@ -116,6 +116,19 @@ public class Utils {
     return allFiles;
   }
 
+  /**
+   * Get name of the i^th file in given path, start numbering at 1
+   * (corresponding with the listFiles() method)
+   */
+  static public String getFile(String path, int id) {
+    File[] files = new File(path).listFiles();
+    if(id > files.length) {
+      return "FileNotFound";
+    } else {
+      return files[id - 1].getName();
+    }
+  }
+
   public static int getFreePort(int lowerbound) {
     for(int i = lowerbound; i < lowerbound + 1000; i += 2) {
       if(isLocalPortFree(i)) {
@@ -130,6 +143,15 @@ public class Utils {
       new ServerSocket(port).close();
       return true;
     } catch (IOException e) {
+      return false;
+    }
+  }
+
+  public static boolean isANumber(String value) {
+    try {
+      Integer.parseInt(value);
+      return true;
+    } catch (NumberFormatException e) {
       return false;
     }
   }

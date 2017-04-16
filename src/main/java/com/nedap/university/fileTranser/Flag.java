@@ -7,7 +7,7 @@ import com.nedap.university.clientAndServer.commands.Keyword;
  * Created by dorien.meijercluwen on 10/04/2017.
  */
 public enum Flag {
-  CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4), CANCEL(2),NOT_LAST(1);
+  CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4), CANCEL(2), LAST(1);
   byte value;
 
   Flag(int value) {

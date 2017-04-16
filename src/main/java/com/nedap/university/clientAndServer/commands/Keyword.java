@@ -31,7 +31,7 @@ public enum Keyword {
 
   /* Convert keyword to flag, return null if not possible */
   public Flag toFlag() {
-    //CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4),CANCEL(2),NOT_LAST(1);
+    //CONNECT(128), LIST_FILES(64),DOWNLOAD(32), UPLOAD(16), PAUSE(8),RESUME(4),CANCEL(2),LAST(1);
     switch (this) {
       case CONNECT:   return Flag.CONNECT;
       case DOWNLOAD:  return Flag.DOWNLOAD;

@@ -86,11 +86,12 @@ public abstract class Protocol {
   /**
    * Tell protocol to send given request.
    * @param keyword Type of request
+   * @param addEOR add End-of-Request packet if true
    */
-  public void sendRequest(Keyword keyword) throws IOException {
+  public void sendRequest(Keyword keyword, boolean addEOR) {
     Flag flag = keyword.toFlag();
     if(flag != null) {
-      sendRequest(new byte[0], flag);
+      sendRequest(new byte[0], flag, addEOR);
     }
   }
 
@@ -98,33 +99,58 @@ public abstract class Protocol {
    * Tell protocol to send given request.
    * @param data Payload to be start
    * @param flag Flag that is set
+   * @param addEOR add End-of-Request packet if true
    */
-  public void sendRequest(byte[] data, Flag flag) throws IOException {
-    sendRequest(data, flag.getValue());
+  public void sendRequest(byte[] data, Flag flag, boolean addEOR) {
+    sendRequest(data, flag.getValue(), addEOR);
   }
 
   /**
    * Tell protocol to send given request.
    * @param data Payload to be start
    * @param flags Flags that are set
+   * @param addEOR add End-of-Request packet if true
    */
-  public void sendRequest(byte[] data, int flags) throws IOException {
+  public void sendRequest(byte[] data, int flags, boolean addEOR) {
     UDPPacket packet = createEmptyPacket();
     packet.setData(data);
     packet.setFlags(flags);
     addPacketToSendBuffer(packet);
 
     send();
+    //Add End-of-Request packet
+    if(addEOR) {
+      sendEndOfRequestPacket();
+    }
+
+  }
+
+  /**
+   * Send end-of-request packet.
+   */
+  public void sendEndOfRequestPacket() {
+    UDPPacket lastPacket = createEmptyPacket();
+    lastPacket.setFlags(Flag.LAST.getValue());
+    addPacketToSendBuffer(lastPacket);
+  }
   }
 
   /********** Send data **********/
-  /* Send data (not from file), small enough to fit in 1 packet */
-  public void sendData(byte[] data) throws IOException {
+  /**
+   * Send data (not from file), small enough to fit in 1 packet
+   * @param data Payload to be start
+   * @param addEOR add End-of-Request packet if true
+   **/
+  public void sendData(byte[] data, boolean addEOR) {
     UDPPacket packet = createEmptyPacket();
     packet.setData(data);
     addPacketToSendBuffer(packet);
 
     send();
+    //Add End-of-Request packet
+    if(addEOR) {
+      sendEndOfRequestPacket();
+    }
   }
 
   /********** Receive data **********/

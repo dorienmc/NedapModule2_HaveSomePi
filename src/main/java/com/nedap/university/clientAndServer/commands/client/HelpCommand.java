@@ -1,6 +1,8 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.client;
 
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import java.util.List;
 
 /**

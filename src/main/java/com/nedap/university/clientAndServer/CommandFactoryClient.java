@@ -22,7 +22,7 @@ public class CommandFactoryClient extends CommandFactory {
     addCommand(new UploadCommandClient(handler,ZERO));
     addCommand(new PauseCommand(handler,ZERO));
     addCommand(new ResumeCommand(handler,ZERO));
-    addCommand(new CancelCommand(handler,ZERO));
+    addCommand(new CancelCommandClient(handler,ZERO));
   }
 
   /**
@@ -42,7 +42,7 @@ public class CommandFactoryClient extends CommandFactory {
       case UPLOAD:  return new UploadCommandClient(handler,requestId);
       case PAUSE:   return new PauseCommand(handler,requestId);
       case RESUME:  return new ResumeCommand(handler,requestId);
-      case CANCEL:  return new CancelCommand(handler,requestId);
+      case CANCEL:  return new CancelCommandClient(handler,requestId);
       default:      return null;
     }
   }

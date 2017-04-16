@@ -1,8 +1,8 @@
 package com.nedap.university.clientAndServer;
 
 import com.nedap.university.Utils;
-import com.nedap.university.clientAndServer.commands.*;
 import com.nedap.university.clientAndServer.commands.client.ConnectCommandClient;
+import com.nedap.university.clientAndServer.commands.client.HelpCommand;
 
 /**
  * Client that handles user input on clientside and responds to this.

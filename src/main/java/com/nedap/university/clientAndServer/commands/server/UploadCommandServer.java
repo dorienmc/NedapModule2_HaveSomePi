@@ -1,8 +1,10 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.server;
 
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
 import com.nedap.university.fileTranser.ARQProtocol.StopAndWaitProtocol;
 import com.nedap.university.fileTranser.Flag;
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class UploadCommandServer extends Command{
+public class UploadCommandServer extends Command {
 
   public UploadCommandServer(Handler handler, Byte requestId) {
     super(Keyword.UPLOAD, "Upload specific file", handler, requestId);

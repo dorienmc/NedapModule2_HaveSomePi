@@ -149,7 +149,7 @@ public abstract class Handler extends Thread {
   }
 
   public String listRunningCommands() {
-    String result = "--------------\nRunning commands: ";
+    String result = "--------------\nRunning commands: \n";
 
     for(Command command: runningCommands.values()) {
       result += command;
@@ -158,6 +158,10 @@ public abstract class Handler extends Thread {
 
     result += "--------------";
     return result;
+  }
+
+  public Command removeRunningCommand(Byte id) {
+    return runningCommands.remove(id);
   }
 
   public void print(String msg) {

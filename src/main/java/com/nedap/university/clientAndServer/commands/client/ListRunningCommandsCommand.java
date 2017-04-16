@@ -1,6 +1,8 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.client;
 
 import com.nedap.university.clientAndServer.Handler;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -19,5 +21,10 @@ public class ListRunningCommandsCommand extends Command {
   public void execute() {
     handler.print(handler.listRunningCommands());
     shutdown(false);
+  }
+
+  @Override
+  public String getInfo() {
+    return "Listing commands.";
   }
 }

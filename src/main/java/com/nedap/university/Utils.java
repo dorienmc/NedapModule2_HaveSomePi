@@ -42,6 +42,29 @@ public class Utils {
   }
 
   /**
+   * Writes a prompt to standard out and tries to read an int value from
+   * standard in. This is repeated until an int value is entered.
+   * @param prompt the question to prompt the user
+   * @return the first int value which is entered by the user
+   */
+  public static int readInt(String prompt) {
+    int value = 0;
+    boolean intRead = false;
+    @SuppressWarnings("resource")
+    Scanner line = new Scanner(System.in);
+    do {
+      System.out.print(prompt);
+      try (Scanner scannerLine = new Scanner(line.nextLine());) {
+        if (scannerLine.hasNextInt()) {
+          intRead = true;
+          value = scannerLine.nextInt();
+        }
+      }
+    } while (!intRead);
+    return value;
+  }
+
+  /**
    * Wait for 'waitTime' ms.
    * */
   public static void sleep(int waitTime) {

@@ -1,10 +1,12 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.client;
 
 import static com.nedap.university.fileTranser.ARQProtocol.Protocol.MAX_BUFFER;
 
 import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
@@ -17,7 +19,7 @@ import java.io.IOException;
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class UploadCommandClient extends Command{
+public class UploadCommandClient extends Command {
 
   public UploadCommandClient(Handler handler, Byte requestId) {
     super(Keyword.UPLOAD, "Upload specific file", handler, requestId);
@@ -25,7 +27,6 @@ public class UploadCommandClient extends Command{
 
   @Override
   public void execute() {
-    System.out.println("test");
     handler.print(Utils.listFiles(Client.FILEPATH,"Files available for upload"));
     String filename = Utils.readString("Which file do you want to upload (enter name or id)? ");
 

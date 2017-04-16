@@ -31,6 +31,7 @@ public class UploadCommandServer extends Command {
       firstPacket = protocol.receivePacket(StopAndWaitProtocol.TIMEOUT);
     } catch (IOException|TimeoutException e) {
       handler.print("Error in " + getKeyword() + " request " + e.getMessage());
+      shutdown();
     }
     FileMetaData metaData = new FileMetaData(firstPacket.getData());
     System.out.println("Upload request for " + metaData);

@@ -9,6 +9,7 @@ import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -22,6 +23,12 @@ public class ListFilesCommandServer extends Command {
   @Override
   public void execute() {
     if(!(handler instanceof ClientHandler)) {
+      return;
+    }
+    //Retrieve request packet
+    try {
+      protocol.receivePacket(0);
+    } catch (IOException|TimeoutException e) {
       return;
     }
 

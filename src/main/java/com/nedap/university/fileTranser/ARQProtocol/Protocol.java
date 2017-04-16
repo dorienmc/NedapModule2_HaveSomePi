@@ -22,8 +22,8 @@ public abstract class Protocol extends Thread {
   byte requestId;
   ConcurrentLinkedDeque<UDPPacket> sendBuffer; //Packets that still need to be send
   ConcurrentLinkedDeque<UDPPacket> receiveBuffer; //Packets need to be processed
-  int seqNumber; //Sequence number of next packet that is to be send.
-  int ackNumber; //Sequence number of next expected packet from receiver.
+  ConcurrentLinkedDeque<UDPPacket> resendBuffer; //Packets that have timed out
+  private int seqNumber; //Sequence number of next packet that is to be start.
   Status status;
 
   public enum Status {
@@ -34,10 +34,10 @@ public abstract class Protocol extends Thread {
     this.sender = sender;
     this.receiver = receiver;
     this.requestId = requestId;
-    this.ackNumber = 1;
-    this.seqNumber = 1;
+    this.seqNumber = 0;
     this.sendBuffer = new ConcurrentLinkedDeque<>();
     this.receiveBuffer = new ConcurrentLinkedDeque<>();
+    this.resendBuffer = new ConcurrentLinkedDeque<>();
     this.status = Status.CREATED;
   }
 
@@ -67,11 +67,8 @@ public abstract class Protocol extends Thread {
 
   /********** Add/Remove from Buffers **********/
   public void addPacketToSendBuffer(UDPPacket packet) {
-    //TODO create timeout timer? Set sequence number and ack number?
     packet.setHeaderSetting(HeaderField.SEQ_NUMBER, seqNumber);
-    packet.setHeaderSetting(HeaderField.ACK_NUMBER, ackNumber);
     seqNumber++;
-    ackNumber++;
     System.out.println(String.format("Add packet to send buffer of request %d with seqno: %d", packet.getRequestId(), packet.getSequenceNumber()));
     sendBuffer.add(packet);
   }
@@ -80,6 +77,11 @@ public abstract class Protocol extends Thread {
     System.out.println(String.format("Add packet to receive buffer with seq: %d, ack: %d, offset:%d",
         packet.getSequenceNumber(), packet.getAckNumber(), packet.getOffset()));
     receiveBuffer.add(packet);
+  }
+
+  public void addPacketToResendBuffer(UDPPacket packet) {
+    System.out.println(String.format("Add packet to resend buffer with seqno: %d", packet.getSequenceNumber()));
+    resendBuffer.add(packet);
   }
 
   /********** Send request ***********/
@@ -135,6 +137,14 @@ public abstract class Protocol extends Thread {
     lastPacket.setFlags(Flag.LAST.getValue());
     addPacketToSendBuffer(lastPacket);
   }
+
+  /********** Send ack *********/
+  /**
+   * Send packet with flags or data, only for acknowledgement.
+   */
+  public void sendAck() {
+    UDPPacket packet = createEmptyPacket();
+    addPacketToSendBuffer(packet);
   }
 
   /********** Send data **********/
@@ -185,6 +195,10 @@ public abstract class Protocol extends Thread {
    */
   public UDPPacket createEmptyPacket(){
     return new UDPPacket(sender.getSourcePort(),sender.getDestPort(),0,0,requestId,0);
+  }
+
+  protected int getSeqNumber() {
+    return seqNumber;
   }
 
   public Status getStatus() {

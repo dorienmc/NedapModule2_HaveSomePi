@@ -74,21 +74,20 @@ public class UploadCommandClient extends Command{
 
       for (int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
         UDPPacket packet = protocol.createEmptyPacket();
-        packet.setFlags(Flag.NOT_LAST.getValue());
         packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_BUFFER
 
         byte[] data = new byte[MAX_BUFFER];
-        if(fileStream.read(data) == -1) {
-          //NO more bytes to read, send packet with Flag.NOT_LAST = false
-          packet.setFlags(0);
-          //TODO add packet checksum/md5?
-        } else {
-          packet.setData(data);
+        fileStream.read(data);
+        packet.setData(data);
 
-          //Put each packet in the sender buffer
-          protocol.addPacketToSendBuffer(packet);
-        }
+        //Put each packet in the sender buffer
+        protocol.addPacketToSendBuffer(packet);
+
       }
+
+      //Send EOR packet
+      protocol.sendEndOfRequestPacket();
+
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }

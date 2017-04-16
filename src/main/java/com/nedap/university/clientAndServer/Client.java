@@ -54,6 +54,16 @@ public class Client extends Handler {
     }
   }
 
+  /* List active commands once in a while. */
+  public void keepOverview() {
+    while(isRunning()) {
+      //List active commands
+      //TODO print(super.listRunningCommands());
+
+      //Sleep for a while
+      Utils.sleep(1000);
+    }
+  }
   /**
    * Handle it when sender or receiver breaks down because it cannot reach the socket.
    **/

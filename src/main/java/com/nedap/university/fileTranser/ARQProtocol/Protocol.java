@@ -191,6 +191,8 @@ public abstract class Protocol extends Thread {
     return status;
   }
 
+  public abstract String getInfo();
+
   public void setStatus(Status status) {
     this.status = status;
   }

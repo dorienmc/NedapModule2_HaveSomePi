@@ -24,6 +24,7 @@ public class Main {
         } else {
             client = new Client(-1,-1);
             client.start();
+            client.keepOverview();
         }
 
         while (keepAlive) {

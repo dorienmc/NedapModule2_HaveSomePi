@@ -120,8 +120,12 @@ public abstract class Command extends Thread {
     return requestId;
   }
 
+  public String getInfo() {
+    return protocol.getInfo();
+  }
+
   @Override
-  public String toString(){ return String.format("  %s Request (id: %d)", this.getKeyword(), requestId.intValue());}
+  public String toString(){ return String.format("%s Request (id: %d) %s", this.getKeyword(), requestId.intValue(), getInfo());}
 
   public String getAsMenuItem()  {
     return String.format("  %-10s %s", keyword, description);

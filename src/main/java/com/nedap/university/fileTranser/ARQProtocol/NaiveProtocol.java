@@ -61,4 +61,9 @@ public class NaiveProtocol extends Protocol{
   public boolean isExpected(UDPPacket packet) {
     return true;
   }
+
+  /** Give status info that the Handler can than represent to the user */
+  public String getInfo() {
+    return "Current seq: " + getSeqNumber();
+  }
 }

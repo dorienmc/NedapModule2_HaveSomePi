@@ -36,6 +36,7 @@ public class CommandFactoryClient extends CommandFactory {
       case EXIT:    return new ExitCommand(handler, requestId);
       case HELP:    return new HelpCommand(handler);
       case CONNECT: return new ConnectCommandClient(handler,requestId);
+      case LSRUNNING: return new ListRunningCommandsCommand(handler,requestId);
       case LS:      return new ListFilesCommandClient(handler,requestId);
       case DOWNLOAD:return new DownloadCommandClient(handler,requestId);
       case UPLOAD:  return new UploadCommandClient(handler,requestId);

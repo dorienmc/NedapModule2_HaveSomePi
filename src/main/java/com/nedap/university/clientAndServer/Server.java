@@ -72,8 +72,8 @@ public class Server extends Thread {
     UDPPacket udpPacket;
     try {
       udpPacket = new UDPPacket(packet);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      print(e.getMessage());
+    } catch (ArrayIndexOutOfBoundsException|NegativeArraySizeException e) {
+      print("Received packet is not a connection packet, " + e.getMessage());
       return false;
     }
 

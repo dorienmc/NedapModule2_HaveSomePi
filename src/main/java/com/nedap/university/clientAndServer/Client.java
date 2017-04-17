@@ -18,6 +18,11 @@ public class Client extends Handler {
   }
 
   @Override
+  public String getFilePath() {
+    return FILEPATH;
+  }
+
+  @Override
   public void run() {
     handleTerminalInput();
   }

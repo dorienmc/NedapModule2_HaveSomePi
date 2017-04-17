@@ -127,6 +127,12 @@ public abstract class Command extends Thread {
     return protocol.getInfo();
   }
 
+  public Protocol getProtocol() {return protocol;}
+
+  public Handler getHandler() {
+    return handler;
+  }
+
   @Override
   public String toString(){ return String.format("%s Request (id: %d) %s", this.getKeyword(), requestId.intValue(), getInfo());}
 

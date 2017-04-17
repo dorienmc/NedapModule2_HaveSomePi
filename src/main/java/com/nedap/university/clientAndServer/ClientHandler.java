@@ -20,10 +20,17 @@ public class ClientHandler extends Handler {
     (new ConnectCommandServer(connectPacket,this, new Byte((byte)0))).execute();
   }
 
+
+
   @Override
   public void run() {
     //TODO Check periodically if UDP channel is still working?
     //handleSocketInput();
+  }
+
+  @Override
+  public String getFilePath() {
+    return Server.FILEPATH;
   }
 
   /**

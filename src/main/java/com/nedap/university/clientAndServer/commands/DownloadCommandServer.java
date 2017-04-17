@@ -1,8 +1,8 @@
 package com.nedap.university.clientAndServer.commands;
 
-import static com.nedap.university.fileTranser.ARQProtocol.Protocol.MAX_BUFFER;
+import static com.nedap.university.clientAndServer.commands.helpers.FileSendingHelper.uploadFile;
+import static com.nedap.university.fileTranser.UDPPacket.MAX_PAYLOAD;
 
-import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
@@ -11,8 +11,8 @@ import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -44,7 +44,7 @@ public class DownloadCommandServer extends Command{
     }
 
     //Create file meta data and send this info to client
-    FileMetaData metaData = new FileMetaData(file, MAX_BUFFER);
+    FileMetaData metaData = new FileMetaData(file, MAX_PAYLOAD);
     UDPPacket downloadInfo = protocol.createEmptyPacket();
     downloadInfo.setData(metaData.getData());
     protocol.addPacketToSendBuffer(downloadInfo);
@@ -55,28 +55,11 @@ public class DownloadCommandServer extends Command{
     }
 
     //Split file in packets and send them
-    try (FileInputStream fileStream = new FileInputStream(file)) {
-
-      for (int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
-        UDPPacket packet = protocol.createEmptyPacket();
-        packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_BUFFER
-
-        byte[] data = new byte[MAX_BUFFER];
-        fileStream.read(data);
-        packet.setData(data);
-
-        //Put each packet in the sender buffer
-        protocol.addPacketToSendBuffer(packet);
-
-      }
-
-      //Send EOR packet
-      protocol.sendEndOfRequestPacket();
-
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+    try {
+      uploadFile(file, metaData.getNumberOfPackets(), protocol);
+    } catch (IOException e) {
+      handler.print("Cannot upload " + metaData.getFileName() + " " + e.getMessage());
     }
-
 
   }
 

@@ -20,6 +20,7 @@ public abstract class Handler extends Thread {
   int outPort;
   InetAddress address;
   Map<Byte,Command> runningCommands;
+
   public enum Status {
     PAUSED, RUNNING, STOPPED;
   }
@@ -33,6 +34,8 @@ public abstract class Handler extends Thread {
   }
 
   /********** Setters and getters *********/
+  public abstract String getFilePath();
+
   public void setCommandFactory(CommandFactory commandFactory) {
     this.commandFactory = commandFactory;
   }

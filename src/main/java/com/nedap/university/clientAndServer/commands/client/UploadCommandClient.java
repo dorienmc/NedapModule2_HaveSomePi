@@ -1,6 +1,7 @@
 package com.nedap.university.clientAndServer.commands.client;
 
-import static com.nedap.university.fileTranser.ARQProtocol.Protocol.MAX_BUFFER;
+import static com.nedap.university.clientAndServer.commands.helpers.FileSendingHelper.uploadFile;
+import static com.nedap.university.fileTranser.UDPPacket.MAX_PAYLOAD;
 
 import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -35,26 +37,15 @@ public class UploadCommandClient extends Command {
       filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
     }
 
-    try {
-      uploadFile(filename);
-    } catch (IOException e) {
-      System.out.println("Could not upload " + filename + ", " + e.getMessage());
-    }
-
-    shutdown();
-  }
-
-  /* Send data in given file */
-  //TODO create checksum/md5 during reading?
-  public void uploadFile(String filename) throws IOException {
+    //Retrieve file, if possible
     File file = new File(Client.FILEPATH + "/" + filename);
     if(!file.exists()) {
-      throw new FileNotFoundException("Could not find " + Client.FILEPATH + "/" + filename);
+      handler.print("File not found: " + filename);
+      shutdown();
     }
 
     //Create file meta data
-    FileMetaData metaData = new FileMetaData(file, MAX_BUFFER);
-
+    FileMetaData metaData = new FileMetaData(file, MAX_PAYLOAD);
     handler.print(String.format("Start upload of %s, needs %d packets",filename, metaData.getNumberOfPackets()));
     System.out.println("Send metadata " + metaData);
     handler.unPause();
@@ -71,27 +62,14 @@ public class UploadCommandClient extends Command {
     }
 
     //Split file in packets
-    try (FileInputStream fileStream = new FileInputStream(file)) {
-
-      for (int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
-        UDPPacket packet = protocol.createEmptyPacket();
-        packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_BUFFER
-
-        byte[] data = new byte[MAX_BUFFER];
-        fileStream.read(data);
-        packet.setData(data);
-
-        //Put each packet in the sender buffer
-        protocol.addPacketToSendBuffer(packet);
-
-      }
-
-      //Send EOR packet
-      protocol.sendEndOfRequestPacket();
-
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+    try {
+      uploadFile(file, metaData.getNumberOfPackets(), protocol);
+    } catch (IOException e) {
+      handler.print("Could not upload " + filename + ", " + e.getMessage());
     }
+
+    shutdown();
   }
+
 
 }

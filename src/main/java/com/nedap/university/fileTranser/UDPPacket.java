@@ -13,6 +13,8 @@ import java.util.zip.CRC32;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class UDPPacket {
+  public static final int MAX_PAYLOAD = 1500;
+  public static final int MAX_PACKET_SIZE = MAX_PAYLOAD + MyUDPHeader.HeaderField.getTotalLength();
   MyUDPHeader header;   //Header settings, in the MyUDPHeader format
   byte[] data;          //Payload data
 
@@ -44,16 +46,18 @@ public class UDPPacket {
     }
 
     //Split datagram packet into UDP header fields and data
+    ByteBuffer buffer = ByteBuffer.allocate(packetData.length).put(packetData);
+    buffer.rewind();
+
     byte[] headerFields = new byte[header.getHeaderSize()];
-    System.arraycopy(packetData,0,headerFields,0,headerFields.length);
+    buffer.get(headerFields);
     header = new MyUDPHeader(headerFields);
 
-
-    data = new byte[packet.getLength() - headerFields.length];
-    System.arraycopy(packetData,headerFields.length,data,0,data.length);
-
-//    //TODO check if checksum is correct?
-//    //TODO check if ack and seq are correct?
+    //Only retrieve actual data (datagram might be appended with zeros)
+    data = new byte[header.getField(HeaderField.LENGTH) - header.getHeaderSize()];
+    if(data.length > 0) {
+      buffer.get(data);
+    }
   }
 
 
@@ -168,22 +172,19 @@ public class UDPPacket {
       return false;
     }
 
-    return true;
-
-    //TODO fix checksum
-//    if(checkChecksum()) {
-//      return true;
-//    } else {
-//      System.out.println(String.format("Checksum: expected %d but got %d", getChecksum(), calculateChecksum()));
-//      return false;
-//    }
+    if(checkChecksum()) {
+      return true;
+    } else {
+      System.out.println(String.format("Checksum: expected %d but got %d", getChecksum(), calculateChecksum()));
+      return false;
+    }
   }
 
   @Override
   public String toString() {
     String result = "Packet representation in Hex.\n";
-    result += "Header: " + Utils.binaryArrToHexString(header.getHeader());
-    result += "\nData: " + Utils.binaryArrToHexString(data);
+    result += "Header: \n" + header;//Utils.binaryArrToHexString(header.getHeader());
+    result += "Data: " + Utils.binaryArrToHexString(data);
     return result;
   }
 }

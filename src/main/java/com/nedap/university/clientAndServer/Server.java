@@ -4,7 +4,6 @@ import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
-import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -45,8 +44,8 @@ public class Server extends Thread {
     //Listen for clients
     print("Waiting for clients...");
     while(true) {
-      DatagramPacket packet = new DatagramPacket(new byte[Protocol.MAX_BUFFER],
-          Protocol.MAX_BUFFER);
+      DatagramPacket packet = new DatagramPacket(new byte[UDPPacket.MAX_PAYLOAD],
+          UDPPacket.MAX_PAYLOAD);
 
       try {
         socket.receive(packet);
@@ -83,9 +82,12 @@ public class Server extends Thread {
       return false;
     }
 
+    System.out.println(Utils.binaryArrToHexString(udpPacket.getData()));
+
     //Is asking for me
     try {
       MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
+      System.out.println(mdnSdata);
       if(mdnSdata.getHostname() != null && mdnSdata.getHostname().equals(HOSTNAME)) {
         return true;
       }

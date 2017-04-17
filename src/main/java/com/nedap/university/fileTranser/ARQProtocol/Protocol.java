@@ -16,7 +16,6 @@ import java.util.concurrent.TimeoutException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public abstract class Protocol extends Thread {
-  public static final int MAX_BUFFER = 1500;
   Sender sender;
   Receiver receiver;
   byte requestId;

@@ -4,7 +4,6 @@ import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
-import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -37,7 +36,7 @@ public class Receiver extends Thread {
   public void run() { //TODO stop when no packet has arrived for a long time?
     while(!stop) {
       //Receive packets from socket
-      DatagramPacket response = new DatagramPacket(new byte[Protocol.MAX_BUFFER],Protocol.MAX_BUFFER);
+      DatagramPacket response = new DatagramPacket(new byte[UDPPacket.MAX_PACKET_SIZE], UDPPacket.MAX_PACKET_SIZE);
       try {
         socket.receive(response);
       } catch (IOException e) {

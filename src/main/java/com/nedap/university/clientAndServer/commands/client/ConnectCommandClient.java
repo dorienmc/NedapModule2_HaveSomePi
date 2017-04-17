@@ -10,7 +10,6 @@ import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
-import com.nedap.university.fileTranser.ARQProtocol.Protocol;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -127,7 +126,7 @@ public class ConnectCommandClient extends Command {
 
     //Wait for response from server
     handler.print("Waiting for response from server on port " + socketIn.getLocalPort());
-    DatagramPacket response = new DatagramPacket(new byte[Protocol.MAX_BUFFER],Protocol.MAX_BUFFER);
+    DatagramPacket response = new DatagramPacket(new byte[UDPPacket.MAX_PACKET_SIZE], UDPPacket.MAX_PACKET_SIZE);
 
     try {
       socketIn.receive(response);

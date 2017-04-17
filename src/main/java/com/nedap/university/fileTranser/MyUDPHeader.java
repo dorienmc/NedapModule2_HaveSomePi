@@ -126,4 +126,18 @@ public class MyUDPHeader {
   public byte[] getHeader() {
     return buffer.array();
   }
+
+  @Override
+  public String toString() {
+    String result = "";
+    for(HeaderField field: HeaderField.values()) {
+      if(field.equals(HeaderField.CHECKSUM)) {
+        result += String.format("%s: %d\n",field.toString(), getCheckSum());
+      } else {
+        result += String.format("%s: %d\n",field.toString(), getField(field));
+      }
+    }
+    return result;
+  }
+
 }

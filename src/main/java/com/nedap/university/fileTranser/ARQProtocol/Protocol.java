@@ -137,6 +137,16 @@ public abstract class Protocol extends Thread {
     addPacketToSendBuffer(lastPacket);
   }
 
+  /**
+   * Send end-of-request packet, with data
+   */
+  public void sendEndOfRequestPacket(byte[] data) {
+    UDPPacket lastPacket = createEmptyPacket();
+    lastPacket.setFlags(Flag.LAST.getValue());
+    lastPacket.setData(data);
+    addPacketToSendBuffer(lastPacket);
+  }
+
   /********** Send ack *********/
   /**
    * Send packet with flags or data, only for acknowledgement.

@@ -120,6 +120,7 @@ public abstract class Handler extends Thread {
       startNewCommand(keyword);
     } else {
       print(String.format("WARNING keyword %s is unknown", keyword));
+      setStatus(Status.RUNNING);
     }
   }
 

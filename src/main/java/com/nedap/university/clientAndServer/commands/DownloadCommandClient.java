@@ -65,15 +65,19 @@ public class DownloadCommandClient extends Command{
       shutdown();
     }
 
-    //Rename file
-    File file = new File(handler.getFilePath() + "/tmp_" + metaData.getFileName());
-    file.renameTo(new File(handler.getFilePath() + "/" + metaData.getFileName()));
-
     //Report statistics
     long endTime = System.currentTimeMillis();
     handler.print(String.format("Downloaded %d packets in %d ms, speed: %d (packet/s)",
         metaData.getNumberOfPackets() + 2,(endTime - startTime),
         1000 * (metaData.getNumberOfPackets() + 2)/(endTime - startTime)));
+
+    //Rename file (delete old if one exists).
+    File file = new File(handler.getFilePath() + "/tmp_" + metaData.getFileName());
+    File oldFile = new File(handler.getFilePath() + "/" + metaData.getFileName());
+    if(oldFile.exists()) {
+      oldFile.delete();
+    }
+    file.renameTo(new File(handler.getFilePath() + "/" + metaData.getFileName()));
 
     shutdown();
   }

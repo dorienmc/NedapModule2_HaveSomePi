@@ -60,8 +60,12 @@ public class UploadCommandServer extends Command {
       shutdown();
     }
 
-    //Rename file
+    //Rename file (delete old if one exists).
     File file = new File(handler.getFilePath() + "/tmp_" + metaData.getFileName());
+    File oldFile = new File(handler.getFilePath() + "/" + metaData.getFileName());
+    if(oldFile.exists()) {
+      oldFile.delete();
+    }
     file.renameTo(new File(handler.getFilePath() + "/" + metaData.getFileName()));
 
     shutdown();

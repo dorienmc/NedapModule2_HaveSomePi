@@ -16,9 +16,9 @@ import java.io.IOException;
 public class StopAndWaitProtocol extends Protocol {
   public static final int TIMEOUT = 5000; //ms
   TimeOutHandler timeOutHandler;
-  private volatile int lastAckRec;    //Last ack received
-  private volatile int lastPacketRec; //Last packet received
-  private volatile int lastPacketSend;//Last packet start
+  private volatile int lastAckRec;    //All packets below this sequence number have been acked.
+  private volatile int lastPacketRec; //All packets (of the other host) with this sequence number or smaller have been received.
+  private volatile int lastPacketSend;//Sequence number of the last send packet, all packets with this sequence number or smaller have been send at least once.
 
   public StopAndWaitProtocol(Sender sender, Receiver receiver, byte requestId) {
     super(sender, receiver, requestId, TIMEOUT);
@@ -143,12 +143,16 @@ public class StopAndWaitProtocol extends Protocol {
 
   /** Give status info that the Handler can than represent to the user */
   public String getInfo() {
-    return String.format("[LAR: %d, LFS: %d], [LFR: %d, LAF: %d]",
-        getLastAckRec(), getLastPacketSend(),
-        getLastPacketRec(), getLastPacketRec() + 1 );
+    if(getStatus().equals(Status.PAUSED)) {
+      return Status.PAUSED.toString();
+    } else {
+      return String.format("[LAR: %d, LFS: %d], [LFR: %d, LAF: %d]",
+          getLastAckRec(), getLastPacketSend(),
+          getLastPacketRec(), getLastPacketRec() + 1);
+    }
   }
 
-  /** A packet can be start if its sequence number equals LastAckRec,
+  /** A packet can be send if its sequence number equals LastAckRec,
    * as that is the next packet that the other side expects. */
   public boolean isInSendWindow(int seq) {
     //getLastAckRec() <= seq && seq < getLastAckRec() + getSendWindowSize();

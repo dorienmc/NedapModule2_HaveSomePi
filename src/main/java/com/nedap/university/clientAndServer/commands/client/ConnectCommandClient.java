@@ -1,5 +1,7 @@
 package com.nedap.university.clientAndServer.commands.client;
 
+import static com.nedap.university.clientAndServer.commands.helpers.ConnectionHelper.isConnectionPacket;
+
 import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
@@ -144,34 +146,6 @@ public class ConnectCommandClient extends Command {
     }
 
     return null;
-  }
-
-  private boolean isConnectionPacket(DatagramPacket packet, Handler handler) {
-    UDPPacket udpPacket;
-    try {
-      udpPacket = new UDPPacket(packet);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      handler.print(e.getMessage());
-      return false;
-    }
-
-    //Has connection flag set
-    if(!udpPacket.isFlagSet(Flag.CONNECT)) {
-      return false;
-    }
-
-    //Is asking for me
-    try {
-      MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
-      if(mdnSdata.getHostname() != null && mdnSdata.getHostname().equals("Client")) {
-        return true;
-      }
-    } catch (IndexOutOfBoundsException e) {
-      handler.print(e.getMessage());
-      return false;
-    }
-
-    return false;
   }
 
   private boolean createReliableUDPchannel(DatagramPacket response, Handler handler){

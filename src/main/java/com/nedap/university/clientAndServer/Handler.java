@@ -36,6 +36,8 @@ public abstract class Handler extends Thread {
   /********** Setters and getters *********/
   public abstract String getFilePath();
 
+  public abstract String getHostName();
+
   public void setCommandFactory(CommandFactory commandFactory) {
     this.commandFactory = commandFactory;
   }

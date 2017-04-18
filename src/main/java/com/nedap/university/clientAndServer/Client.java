@@ -23,6 +23,11 @@ public class Client extends Handler {
   }
 
   @Override
+  public String getHostName() {
+    return "Client";
+  }
+
+  @Override
   public void run() {
     handleTerminalInput();
   }

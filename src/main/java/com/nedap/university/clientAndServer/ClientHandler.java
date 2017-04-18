@@ -30,7 +30,12 @@ public class ClientHandler extends Handler {
 
   @Override
   public String getFilePath() {
-    return Server.FILEPATH;
+    return server.getFilePath();
+  }
+
+  @Override
+  public String getHostName() {
+    return server.getHostName();
   }
 
   /**

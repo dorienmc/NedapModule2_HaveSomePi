@@ -1,5 +1,7 @@
 package com.nedap.university.clientAndServer;
 
+import static com.nedap.university.clientAndServer.commands.helpers.ConnectionHelper.isConnectionPacket;
+
 import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
@@ -17,7 +19,7 @@ import java.util.Map;
  * Server that receives client commands via UDP.
  * Created by dorien.meijercluwen on 09/04/2017.
  */
-public class Server extends Thread {
+public class Server extends Handler {
   volatile boolean running = true;
   private MulticastSocket socket;
   public static final int MULTI_DNS_PORT = 5353;
@@ -28,6 +30,10 @@ public class Server extends Thread {
   private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
   private InetAddress broadcastAddress;
   private static InetAddress myAddress;
+
+  public Server() {
+    super(MULTI_DNS_PORT,-1);
+  }
 
   public void run() {
     //Create socket to listen to broadcast messages from clients.
@@ -57,7 +63,7 @@ public class Server extends Thread {
 
       //Check is packet is a connecting packet and destined for this Server
       //Otherwise drop it.
-      if(isConnectionPacket(packet)) {
+      if(isConnectionPacket(packet, this)) {
         print("Found client " + packet.getAddress() + ":" + packet.getPort());
         addClientHandler(packet);
       }
@@ -68,36 +74,6 @@ public class Server extends Thread {
     return myAddress;
   }
 
-  private boolean isConnectionPacket(DatagramPacket packet) {
-    UDPPacket udpPacket;
-    try {
-      udpPacket = new UDPPacket(packet);
-    } catch (ArrayIndexOutOfBoundsException|NegativeArraySizeException e) {
-      print("Received packet is not a connection packet, " + e.getMessage());
-      return false;
-    }
-
-    //Has connection flag set
-    if(!udpPacket.isFlagSet(Flag.CONNECT)) {
-      return false;
-    }
-
-    System.out.println(Utils.binaryArrToHexString(udpPacket.getData()));
-
-    //Is asking for me
-    try {
-      MDNSdata mdnSdata = new MDNSdata(udpPacket.getData());
-      System.out.println(mdnSdata);
-      if(mdnSdata.getHostname() != null && mdnSdata.getHostname().equals(HOSTNAME)) {
-        return true;
-      }
-    } catch (IndexOutOfBoundsException e) {
-      print(e.getMessage());
-      return false;
-    }
-
-    return false;
-  }
 
   /**
    * Create ClientHandler for client which sends the given connect request.
@@ -139,6 +115,21 @@ public class Server extends Thread {
     }
   }
 
+  @Override
+  public String getFilePath() {
+    return FILEPATH;
+  }
+
+  @Override
+  public String getHostName() {
+    return HOSTNAME;
+  }
+
+  @Override
+  public void handleSocketException(String errorMessage) {
+    print("Server socket error: " + errorMessage);
+  }
+
   /**
    * Print message to System.out //TODO to logfile?
    * @param message
@@ -163,5 +154,6 @@ public class Server extends Thread {
   synchronized public boolean isRunning() {
     return running;
   }
+
 
 }

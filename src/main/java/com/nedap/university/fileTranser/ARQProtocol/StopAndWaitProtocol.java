@@ -92,7 +92,6 @@ public class StopAndWaitProtocol extends Protocol {
     setStatus(Status.RUNNING);
     System.out.println("Start sending/receiving.");
 
-    //TODO do stuff?
     while(busy()) {
       Utils.sleep(100);
     }
@@ -136,7 +135,6 @@ public class StopAndWaitProtocol extends Protocol {
 
       System.out.println("Status: " + getInfo());
 
-      //TODO what else?
       return true;
     }
     //Otherwise return false

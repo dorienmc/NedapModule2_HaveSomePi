@@ -17,13 +17,13 @@ import java.util.concurrent.TimeoutException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public abstract class Protocol extends Thread {
-  Sender sender;
-  Receiver receiver;
-  byte requestId;
-  ConcurrentLinkedDeque<UDPPacket> sendBuffer; //Packets that still need to be send
-  ConcurrentLinkedDeque<UDPPacket> resendBuffer; //Packets that have timed out
-  private int seqNumber; //Sequence number of next packet that is to be start.
+  private Sender sender;
+  private Receiver receiver;
+  private byte requestId;
+  ConcurrentLinkedDeque<UDPPacket> sendBuffer;        //Packets that still need to be send
   ConcurrentHashMap<Integer,UDPPacket> receiveBuffer; //Packets need to be processed, mapped by seq. number
+  ConcurrentLinkedDeque<UDPPacket> resendBuffer;      //Packets that have timed out
+  private int seqNumber;          //Sequence number of next packet that is to be start.
   Status status;
   private int timeOut;            //Time out in ms.
 
@@ -81,7 +81,7 @@ public abstract class Protocol extends Thread {
     receiveBuffer.put(packet.getSequenceNumber(),packet);
   }
 
-  public void addPacketToResendBuffer(UDPPacket packet) {
+  void addPacketToResendBuffer(UDPPacket packet) {
     System.out.println(String.format("Add packet to resend buffer with seqno: %d", packet.getSequenceNumber()));
     resendBuffer.add(packet);
   }
@@ -115,7 +115,7 @@ public abstract class Protocol extends Thread {
    * @param flags Flags that are set
    * @param addEOR add End-of-Request packet if true
    */
-  public void sendRequest(byte[] data, int flags, boolean addEOR) {
+  private void sendRequest(byte[] data, int flags, boolean addEOR) {
     UDPPacket packet = createEmptyPacket();
     packet.setData(data);
     packet.setFlags(flags);
@@ -236,17 +236,17 @@ public abstract class Protocol extends Thread {
     return new UDPPacket(sender.getSourcePort(),sender.getDestPort(),0,0,requestId,0);
   }
 
-  protected int getSeqNumber() {
+  int getSeqNumber() {
     return seqNumber;
   }
 
-  public Status getStatus() {
+  Status getStatus() {
     return status;
   }
 
   public abstract String getInfo();
 
-  public void setStatus(Status status) {
+  void setStatus(Status status) {
     this.status = status;
   }
 

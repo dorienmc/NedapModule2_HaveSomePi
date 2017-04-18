@@ -26,7 +26,7 @@ public class ExitCommand extends Command {
     //Wait for response
     try {
       UDPPacket response = protocol.receivePacket(0);
-    } catch (IOException |TimeoutException e) {
+    } catch (TimeoutException e) {
       handler.print(e.getMessage());
       return;
     }

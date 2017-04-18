@@ -28,7 +28,7 @@ public class ListFilesCommandServer extends Command {
     //Retrieve request packet
     try {
       protocol.receivePacket(0);
-    } catch (IOException|TimeoutException e) {
+    } catch (TimeoutException e) {
       return;
     }
 

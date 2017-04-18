@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class NaiveProtocol extends Protocol{
   public NaiveProtocol(Sender sender, Receiver receiver, byte requestId) {
-    super(sender, receiver, requestId);
+    super(sender, receiver, requestId,-1);
   }
 
   /**

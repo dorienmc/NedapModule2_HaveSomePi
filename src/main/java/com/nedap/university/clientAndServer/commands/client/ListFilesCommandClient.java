@@ -32,7 +32,7 @@ public class ListFilesCommandClient extends Command {
     UDPPacket response = null; //TODO let protocol determine timeout?
     try {
       response = protocol.receivePacket(0);
-    } catch (IOException|TimeoutException e) {
+    } catch (TimeoutException e) {
       handler.print(e.getMessage());
       return;
     }

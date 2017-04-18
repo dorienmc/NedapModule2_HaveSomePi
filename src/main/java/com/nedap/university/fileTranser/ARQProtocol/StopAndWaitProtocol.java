@@ -21,7 +21,7 @@ public class StopAndWaitProtocol extends Protocol {
   private volatile int lastPacketSend;//Last packet start
 
   public StopAndWaitProtocol(Sender sender, Receiver receiver, byte requestId) {
-    super(sender, receiver, requestId);
+    super(sender, receiver, requestId, TIMEOUT);
     timeOutHandler = new TimeOutHandler(this, TIMEOUT);
     this.lastAckRec = 0;
     this.lastPacketRec = -1;

@@ -8,6 +8,7 @@ import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeoutException;
 
@@ -20,24 +21,26 @@ public abstract class Protocol extends Thread {
   Receiver receiver;
   byte requestId;
   ConcurrentLinkedDeque<UDPPacket> sendBuffer; //Packets that still need to be send
-  ConcurrentLinkedDeque<UDPPacket> receiveBuffer; //Packets need to be processed
   ConcurrentLinkedDeque<UDPPacket> resendBuffer; //Packets that have timed out
   private int seqNumber; //Sequence number of next packet that is to be start.
+  ConcurrentHashMap<Integer,UDPPacket> receiveBuffer; //Packets need to be processed, mapped by seq. number
   Status status;
+  private int timeOut;            //Time out in ms.
 
   public enum Status {
     CREATED, PAUSED, RUNNING, STOPPING;
   }
 
-  public Protocol(Sender sender, Receiver receiver, byte requestId) {
+  public Protocol(Sender sender, Receiver receiver, byte requestId, int timeOut) {
     this.sender = sender;
     this.receiver = receiver;
     this.requestId = requestId;
     this.seqNumber = 0;
     this.sendBuffer = new ConcurrentLinkedDeque<>();
-    this.receiveBuffer = new ConcurrentLinkedDeque<>();
+    this.receiveBuffer = new ConcurrentHashMap<>();
     this.resendBuffer = new ConcurrentLinkedDeque<>();
     this.status = Status.CREATED;
+    this.timeOut = timeOut;
   }
 
   /********** Abstract methods ***********/
@@ -75,7 +78,7 @@ public abstract class Protocol extends Thread {
   public void addPacketToReceiverBuffer(UDPPacket packet) {
     System.out.println(String.format("Add packet to receive buffer with seq: %d, ack: %d, offset:%d",
         packet.getSequenceNumber(), packet.getAckNumber(), packet.getOffset()));
-    receiveBuffer.add(packet);
+    receiveBuffer.put(packet.getSequenceNumber(),packet);
   }
 
   public void addPacketToResendBuffer(UDPPacket packet) {
@@ -180,10 +183,15 @@ public abstract class Protocol extends Thread {
 
 
   /********** Receive data **********/
-  /* Wait for next packet over socket, set maxTimeOut to 0 for infinite timeout */ //TODO wait for specific packet
-  public UDPPacket receivePacket(int maxTimeOut) throws IOException,TimeoutException {
+  /** Wait for next packet over socket
+   * @param maxTimeOut maximum time the method will wait for a packet
+   *  Set to -1 for infinite time out, set to 0 for default timeout of the protocol.
+   * @throws TimeoutException when no packet has arrived after 'maxTimeOut' ms
+   **/
+  public UDPPacket receivePacket(int maxTimeOut) throws TimeoutException {
+    maxTimeOut = (maxTimeOut == -1) ? getTimeOut() : maxTimeOut;
     int time = 0;
-    while(receiveBuffer.size() == 0) {
+    while(receiveBuffer.isEmpty()) {
       //Wait
       Utils.sleep(10);
       time += 10;
@@ -193,8 +201,30 @@ public abstract class Protocol extends Thread {
       }
     }
 
-    UDPPacket response = receiveBuffer.pollFirst();
-    return response;
+    Integer seqNumber = receiveBuffer.keys().nextElement();
+    return receiveBuffer.remove(seqNumber);
+  }
+
+  /** Wait for next packet over socket
+   * @param seqNumber  sequence number of the packet that we wish to retrieve
+   * @param maxTimeOut maximum time the method will wait for a packet
+   *  Set to -1 for infinite time out, set to 0 for default timeout of the protocol.
+   * @throws TimeoutException when no packet has arrived after 'maxTimeOut' ms
+   **/
+  public UDPPacket receivePacket(int seqNumber, int maxTimeOut) throws TimeoutException {
+    maxTimeOut = (maxTimeOut == -1) ? getTimeOut() : maxTimeOut;
+    int time = 0;
+    while(!receiveBuffer.containsKey(seqNumber)) {
+      //Wait
+      Utils.sleep(10);
+      time += 10;
+
+      if(maxTimeOut > 0 && time > maxTimeOut) {
+        throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
+      }
+    }
+
+    return receiveBuffer.remove(seqNumber);
   }
 
   /********** Other ***********/
@@ -218,6 +248,10 @@ public abstract class Protocol extends Thread {
 
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  public int getTimeOut() {
+    return timeOut;
   }
 }
 

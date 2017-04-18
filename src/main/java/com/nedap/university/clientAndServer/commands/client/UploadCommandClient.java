@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
@@ -62,10 +63,28 @@ public class UploadCommandClient extends Command {
     }
 
     //Split file in packets
+    byte[] digest = new byte[0];
     try {
-      uploadFile(file, metaData.getNumberOfPackets(), protocol);
+      digest = uploadFile(file, protocol);
     } catch (IOException e) {
       handler.print("Could not upload " + filename + ", " + e.getMessage());
+      shutdown();
+    }
+
+    //Send md5 of the uploaded file
+    System.out.println("Created message digest " + Utils.binaryArrToHexString(digest));
+    protocol.sendData(digest,false);
+
+    //Wait for ack of server of the md5 packet, then send End Of Request packet.
+    try {
+      UDPPacket md5Ack = protocol.receivePacket(metaData.getNumberOfPackets() + 1,
+          metaData.getNumberOfPackets() * protocol.getTimeOut());
+      System.out.println("File md5 correct");
+
+      //Send eof packet.
+      protocol.sendEndOfRequestPacket();
+    } catch (TimeoutException e) {
+      handler.print("Did not receive md5 ack packet from server in given time, " + e.getMessage());
     }
 
     shutdown();

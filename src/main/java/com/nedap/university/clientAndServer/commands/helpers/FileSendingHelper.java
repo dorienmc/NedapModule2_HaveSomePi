@@ -9,8 +9,6 @@ import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,7 +26,15 @@ import java.util.concurrent.TimeoutException;
  */
 public class FileSendingHelper {
 
-  public static void downloadFile(FileMetaData metaData, Protocol protocol, String filepath) {
+  /**
+   * Downloads the given file from the other side, using the given protocol.
+   * @param metaData Metadata about the file that is to be received.
+   * @param protocol Protocol used for sending/receiving
+   * @param filepath File path to the folder the file should be saved to.
+   * @return md5 of the downloaded file, or an empty array if the md5 protocol was not found or
+   * the file was downloaded only partially.
+   */
+  public static byte[] downloadFile(FileMetaData metaData, Protocol protocol, String filepath) {
     //Acknowledge to other side that we are ready to receive the file
     protocol.sendAck();
 
@@ -38,7 +44,7 @@ public class FileSendingHelper {
       md = MessageDigest.getInstance("MD5");
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
-      return;
+      return new byte[0];
     }
 
     //Save received packets in temporary file.
@@ -47,39 +53,33 @@ public class FileSendingHelper {
     try (OutputStream fileStream = Files.newOutputStream(Paths.get(temporaryFileName));
         DigestOutputStream digestOutStream = new DigestOutputStream(fileStream, md))
     {
-      //Receive first packet
-      packet = protocol.receivePacket(0);
-      protocol.sendAck();
-      System.out.println("Received packet " + packet.getOffset() + " data length " + packet.getData().length);
+      for(int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
+        packet = protocol.receivePacket(packetId + 1, 0);
 
-      //Receive packets until the last packets has arrived.
-      while(!packet.isFlagSet(Flag.LAST)) {
-        digestOutStream.write(packet.getData());
 
-        packet = protocol.receivePacket(0);
+        if(packet.isFlagSet(Flag.LAST)) {
+          throw new IOException(String.format("Warning, expected %d data packets, but got only %d before receiving an EOR packet.",
+              metaData.getNumberOfPackets(), packetId));
+        }
+
         protocol.sendAck();
         System.out.println("Received packet " + packet.getOffset() + " data length " + packet.getData().length);
+        digestOutStream.write(packet.getData());
       }
+
     } catch (IOException | TimeoutException e) {
-      e.printStackTrace();
-      return;
+      System.out.println(e.getMessage());
+      return new byte[0];
     }
 
-    //Check message digest
-    byte[] digest = md.digest();
-    System.out.println(String.format("Expected digest %s, got %s",
-        Utils.binaryArrToHexString(packet.getData()),Utils.binaryArrToHexString(digest)));
-
-    //Rename file
-    File file = new File(filepath + "/tmp_" + metaData.getFileName());
-    file.renameTo(new File(filepath + "/" + metaData.getFileName()));
+    return md.digest();
   }
 
   public static FileMetaData retrieveFileMetaData(Command command) {
     UDPPacket firstPacket = null;
     try {
-      firstPacket = command.getProtocol().receivePacket(StopAndWaitProtocol.TIMEOUT);
-    } catch (IOException|TimeoutException e) {
+      firstPacket = command.getProtocol().receivePacket(0);
+    } catch (TimeoutException e) {
       command.getHandler().print("Error in " + command.getKeyword() + " request " + e.getMessage());
       command.shutdown();
     }
@@ -90,14 +90,21 @@ public class FileSendingHelper {
     return metaData;
   }
 
-  public static void uploadFile(File file, int nPackets, Protocol protocol) throws IOException {
+  /**
+   * Uploads given file to the other side, using the given protocol.
+   * @param file
+   * @param protocol
+   * @return md5 of the uploaded file
+   * @throws IOException When md5 algorithm is not found or reading of file does not work.
+   */
+  public static byte[] uploadFile(File file, Protocol protocol) throws IOException {
     //Create message digest for file 'proofing'
     MessageDigest md = null;
     try {
       md = MessageDigest.getInstance("MD5");
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
-      return;
+      return new byte[0];
     }
 
     //Split file in packets
@@ -132,9 +139,18 @@ public class FileSendingHelper {
       throw new IOException(e.getMessage());
     }
 
-    //Send EOR packet, with packet md5
-    byte[] digest = md.digest();
-    System.out.println("Created message digest " + Utils.binaryArrToHexString(digest));
-    protocol.sendEndOfRequestPacket(digest);
+    //Return md5
+    return md.digest();
+  }
+
+  public static void removeCorruptedFile(String fileName) {
+    File file = new File(fileName);
+    if(file.exists()) {
+      file.delete();
+    }
+  }
+
+  public static boolean isDigestCorrect(byte[] expected, byte[] calculated) {
+    return Utils.binaryArrToHexString(expected).equals(Utils.binaryArrToHexString(calculated));
   }
 }

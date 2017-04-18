@@ -28,6 +28,9 @@ public class DownloadCommandClient extends Command{
     //Ask user for input
     String filename = Utils.readString("Which file do you want to download (enter name or id)? ");
 
+    //Start download timer
+    long startTime = System.currentTimeMillis();
+
     //Create request packet
     protocol.sendRequest(filename.getBytes(), Flag.DOWNLOAD, true);
 
@@ -64,6 +67,12 @@ public class DownloadCommandClient extends Command{
     //Rename file
     File file = new File(handler.getFilePath() + "/tmp_" + metaData.getFileName());
     file.renameTo(new File(handler.getFilePath() + "/" + metaData.getFileName()));
+
+    //Report statistics
+    long endTime = System.currentTimeMillis();
+    handler.print(String.format("Downloaded %d packets in %d ms, speed: %d (packet/s)",
+        metaData.getNumberOfPackets() + 2,(endTime - startTime),
+        1000 * (metaData.getNumberOfPackets() + 2)/(endTime - startTime)));
 
     shutdown();
   }

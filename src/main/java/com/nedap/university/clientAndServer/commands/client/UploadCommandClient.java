@@ -33,6 +33,9 @@ public class UploadCommandClient extends Command {
     handler.print(Utils.listFiles(Client.FILEPATH,"Files available for upload"));
     String filename = Utils.readString("Which file do you want to upload (enter name or id)? ");
 
+    //Start upload timer
+    long startTime = System.currentTimeMillis();
+
     if(Utils.isANumber(filename)) {
       //Parse number to actual file
       filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
@@ -86,6 +89,12 @@ public class UploadCommandClient extends Command {
     } catch (TimeoutException e) {
       handler.print("Did not receive md5 ack packet from server in given time, " + e.getMessage());
     }
+
+    //Report statistics
+    long endTime = System.currentTimeMillis();
+    handler.print(String.format("Uploaded %d packets in %d ms, speed: %d (packet/s)",
+        metaData.getNumberOfPackets() + 3,(endTime - startTime),
+        1000 * (metaData.getNumberOfPackets() + 3)/(endTime - startTime)));
 
     shutdown();
   }

@@ -97,7 +97,7 @@ public class FileSendingHelper {
    * @return md5 of the uploaded file
    * @throws IOException When md5 algorithm is not found or reading of file does not work.
    */
-  public static byte[] uploadFile(File file, Protocol protocol) throws IOException {
+  public static byte[] uploadFile(File file, FileMetaData metaData, Protocol protocol) throws IOException {
     //Create message digest for file 'proofing'
     MessageDigest md = null;
     try {
@@ -111,29 +111,21 @@ public class FileSendingHelper {
     try (InputStream fileStream = Files.newInputStream(Paths.get(file.getPath()));
         DigestInputStream digestInputStream = new DigestInputStream(fileStream,md))
     {
-      int packetId = 0;
-
-      //Create first packet
-      UDPPacket packet = protocol.createEmptyPacket();
-      packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_PAYLOAD
-      byte[] data = new byte[MAX_PAYLOAD];
-      int bytesRead = digestInputStream.read(data);
-
-      //Send packets
-      while(bytesRead > 0) {
-        ByteBuffer dataTrimmed = ByteBuffer.allocate(bytesRead).put(data, 0, bytesRead);
-        packet.setData(dataTrimmed.array());
-        System.out.println("Packet length " + packet.getLength() + " data length " + packet.getData().length);
-
-        //Put each packet in the sender buffer
-        protocol.addPacketToSendBuffer(packet);
-
-        //Create next packet
-        packetId++;
-        packet = protocol.createEmptyPacket();
+      for(int packetId = 0; packetId < metaData.getNumberOfPackets(); packetId++) {
+        //Create packet
+        UDPPacket packet = protocol.createEmptyPacket();
         packet.setHeaderSetting(HeaderField.OFFSET,packetId); //Count per MAX_PAYLOAD
-        data = new byte[MAX_PAYLOAD];
-        bytesRead = digestInputStream.read(data);
+        byte[] data = new byte[MAX_PAYLOAD];
+
+        //Read bytes from file and put in packet.
+        int bytesRead = digestInputStream.read(data);
+        if(bytesRead > 0) {
+          ByteBuffer dataTrimmed = ByteBuffer.allocate(bytesRead).put(data, 0, bytesRead);
+          packet.setData(dataTrimmed.array());
+
+          //Put each packet in the sender buffer
+          protocol.addPacketToSendBuffer(packet);
+        }
       }
     } catch (IOException e) {
       throw new IOException(e.getMessage());

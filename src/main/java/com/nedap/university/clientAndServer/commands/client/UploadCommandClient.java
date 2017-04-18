@@ -9,6 +9,7 @@ import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.UDPPacket;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 public class UploadCommandClient extends Command {
 
   public UploadCommandClient(Handler handler, Byte requestId) {
-    super(Keyword.UPLOAD, "Upload specific file", handler, requestId);
+    super(Keyword.UPLOAD, "Upload specific file", handler, requestId, Name.SLIDING_WINDOW);
   }
 
   @Override
@@ -68,7 +69,7 @@ public class UploadCommandClient extends Command {
     //Split file in packets
     byte[] digest = new byte[0];
     try {
-      digest = uploadFile(file, protocol);
+      digest = uploadFile(file, metaData, protocol);
     } catch (IOException e) {
       handler.print("Could not upload " + filename + ", " + e.getMessage());
       shutdown();
@@ -80,7 +81,8 @@ public class UploadCommandClient extends Command {
 
     //Wait for ack of server of the md5 packet, then send End Of Request packet.
     try {
-      UDPPacket md5Ack = protocol.receivePacket(metaData.getNumberOfPackets() + 1,
+      //Note: the sequence number is updated after sending each packet, so it now equals the ack we expect to get.
+      UDPPacket md5Ack = protocol.retrievePacketByAck(protocol.getSeqNumber(),
           metaData.getNumberOfPackets() * protocol.getTimeOut());
       System.out.println("File md5 correct");
 

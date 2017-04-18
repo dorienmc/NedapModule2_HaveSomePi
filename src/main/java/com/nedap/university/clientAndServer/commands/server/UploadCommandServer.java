@@ -7,6 +7,7 @@ import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.File;
 import java.util.concurrent.TimeoutException;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 public class UploadCommandServer extends Command {
 
   public UploadCommandServer(Handler handler, Byte requestId) {
-    super(Keyword.UPLOAD, "Upload specific file", handler, requestId);
+    super(Keyword.UPLOAD, "Upload specific file", handler, requestId, Name.SLIDING_WINDOW);
   }
 
   @Override

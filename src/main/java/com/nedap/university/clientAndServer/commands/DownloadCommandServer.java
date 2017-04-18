@@ -8,6 +8,7 @@ import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.Server;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.ARQProtocol.StopAndWaitProtocol;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 public class DownloadCommandServer extends Command{
 
   public DownloadCommandServer(Handler handler, Byte requestId) {
-    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId);
+    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId, Name.SLIDING_WINDOW);
   }
 
   @Override
@@ -66,7 +67,7 @@ public class DownloadCommandServer extends Command{
     //Split file in packets and send them
     byte[] digest = new byte[0];
     try {
-      digest = uploadFile(file, protocol);
+      digest = uploadFile(file, metaData, protocol);
     } catch (IOException e) {
       handler.print("Cannot download " + metaData.getFileName() + " " + e.getMessage());
       shutdown();
@@ -78,8 +79,9 @@ public class DownloadCommandServer extends Command{
 
     //Wait for ack of client, aka the EOR packet
     try {
-      UDPPacket md5Ack = protocol.receivePacket(metaData.getNumberOfPackets() + 1,
-          metaData.getNumberOfPackets() * protocol.getTimeOut());
+      //Note: the sequence number is updated after sending each packet, so it now equals the ack we expect to get.
+      UDPPacket md5Ack = protocol.retrievePacketByAck(protocol.getSeqNumber(),
+           metaData.getNumberOfPackets() * protocol.getTimeOut());
 
       //Check if this is also the EOR packet
       if(!md5Ack.isFlagSet(Flag.LAST)) {

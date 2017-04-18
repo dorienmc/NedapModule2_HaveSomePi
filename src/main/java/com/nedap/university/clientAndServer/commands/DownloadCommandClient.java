@@ -5,6 +5,7 @@ import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.client.ListFilesCommandClient;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
+import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.io.File;
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 public class DownloadCommandClient extends Command{
 
   public DownloadCommandClient(Handler handler, Byte requestId) {
-    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId);
+    super(Keyword.DOWNLOAD, "Download specific file", handler, requestId, Name.SLIDING_WINDOW);
   }
 
   @Override

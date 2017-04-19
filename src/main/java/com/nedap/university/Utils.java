@@ -169,7 +169,7 @@ public class Utils {
    * Get name of the i^th file in given path, start numbering at 1
    * (corresponding with the listFiles() method)
    */
-  static public String getFile(String path, int id) {
+  static public String getFile(String path, int id) throws ArrayIndexOutOfBoundsException {
     File[] files = new File(path).listFiles();
     if(id > files.length) {
       return "FileNotFound";

@@ -56,6 +56,7 @@ public class UploadCommandClient extends Command {
 
     //Create file meta data
     FileMetaData metaData = new FileMetaData(file, MAX_PAYLOAD);
+    protocol.setExpectedNumberOfPackets(metaData.getNumberOfPackets());
     handler.print(String.format("Start upload of %s, needs %d packets",filename, metaData.getNumberOfPackets()));
     handler.printDebug("Send metadata " + metaData);
     handler.unPause();

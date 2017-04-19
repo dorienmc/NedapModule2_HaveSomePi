@@ -66,6 +66,7 @@ public class DownloadCommandServer extends Command {
     UDPPacket downloadInfo = protocol.createEmptyPacket();
     downloadInfo.setData(metaData.getData());
     protocol.addPacketToSendBuffer(downloadInfo);
+    protocol.setExpectedNumberOfPackets(metaData.getNumberOfPackets());
 
     //Tell protocol it can already start sending
     if(!protocol.isAlive()) {

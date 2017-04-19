@@ -25,6 +25,7 @@ public class UploadCommandServer extends Command {
   public void execute() {
     //Retrieve file meta data
     FileMetaData metaData = retrieveFileMetaData(this);
+    protocol.setExpectedNumberOfPackets(metaData.getNumberOfPackets());
 
     //Download file and calculate message digest
     byte[] digest = downloadFile(metaData, protocol, handler.getFilePath(), handler);

@@ -39,6 +39,7 @@ public class DownloadCommandClient extends Command {
 
     //Retrieve file metadata from server
     FileMetaData metaData = retrieveFileMetaData(this);
+    protocol.setExpectedNumberOfPackets(metaData.getNumberOfPackets());
 
     //Unpause handler
     handler.unPause();

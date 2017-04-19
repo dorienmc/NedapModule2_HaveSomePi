@@ -19,13 +19,16 @@ import java.util.concurrent.TimeoutException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public abstract class Protocol extends Thread {
+  public static final int LOG_TIME = 10;       //Time between logs, in sec.
   private Sender sender;
   private Receiver receiver;
   private byte requestId;
   ConcurrentLinkedDeque<UDPPacket> sendBuffer;        //Packets that still need to be send
   ConcurrentHashMap<Integer,UDPPacket> receiveBuffer; //Packets need to be processed, mapped by seq. number
   ConcurrentLinkedDeque<UDPPacket> resendBuffer;      //Packets that have timed out
-  private int seqNumber;          //Sequence number of next packet that is to be start.
+  private int seqNumber;          //Sequence number of next packet that is to be send.
+  private int offset;             //Offset of the last packet that has been acked.
+  private int expectedNumberOfPackets; //Expected number packets that will be send.
   Status status;
   private int timeOut;            //Time out in ms.
   protected Statistics statistics;
@@ -205,10 +208,8 @@ public abstract class Protocol extends Thread {
       Utils.sleep(10);
       time += 10;
 
-      //Log last ack received (every 5 seconds)
-      if((time % 5000) == 0) {
-        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
-      }
+      //Log last ack received (every LOG_TIME seconds)
+      log(time);
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
         throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
@@ -236,10 +237,8 @@ public abstract class Protocol extends Thread {
       Utils.sleep(10);
       time += 10;
 
-      //Log last ack received (every 5 seconds)
-      if((time % 5000) == 0) {
-        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
-      }
+      //Log last ack received (every LOG_TIME seconds)
+      log(time);
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
         throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
@@ -269,16 +268,22 @@ public abstract class Protocol extends Thread {
       Utils.sleep(10);
       time += 10;
 
-      //Log last ack received (every 5 seconds)
-      if((time % 5000) == 0) {
-        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
-      }
+      //Log last ack received (every LOG_TIME seconds)
+      log(time);
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
         return false;
       }
 
     }
+  }
+
+  /** Log last ack received (every LOG_TIME seconds) **/
+  private void log(int time) {
+    if((time % (LOG_TIME * 1000)) == 0) {
+      print("Got acks for " + getLastAck() + " out of " + getExpectedNumberOfPackets() + " packets");
+    }
+
   }
 
   /********** Other ***********/
@@ -309,6 +314,23 @@ public abstract class Protocol extends Thread {
   public int getTimeOut() {
     return timeOut;
   }
+
+  public int getExpectedNumberOfPackets() {
+    return expectedNumberOfPackets;
+  }
+
+  public void setExpectedNumberOfPackets(int expectedNumberOfPackets) {
+    this.expectedNumberOfPackets = expectedNumberOfPackets;
+  }
+
+  public int getOffset() {
+    return offset;
+  }
+
+  public void setOffset(int offset) {
+    this.offset = offset;
+  }
+
 
   public void printDebug(String msg) {
     handler.printDebug(msg);

@@ -162,8 +162,11 @@ public class SlidingWindowProtocol extends Protocol {
 
     //Stop corresponding timer
     //Note: ACK tells the next packet that is expected, so the previous packet is acked.
-    timeOutHandler.stopTimer(packet.getAckNumber() - 1);
-    printDebug("Stopping timer of packet with seq: " + (packet.getAckNumber() - 1));
+    UDPPacket ackedPacket = timeOutHandler.stopTimer(packet.getAckNumber() - 1);
+    if(ackedPacket != null) {
+      setOffset(ackedPacket.getOffset());
+      printDebug("Stopping timer of packet with seq: " + ackedPacket.getSequenceNumber());
+    }
 
     //Check if packet lies in receiving window
     if(isInRecWindow(packet.getSequenceNumber())) {

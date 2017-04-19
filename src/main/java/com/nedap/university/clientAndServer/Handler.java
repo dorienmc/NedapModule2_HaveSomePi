@@ -26,6 +26,7 @@ public abstract class Handler extends Thread {
   int outPort;
   InetAddress address;
   Map<Byte,Command> runningCommands;
+  byte firstRequestIdToTry = 1;
   FileOutputStream logFile;
 
   public enum Status {
@@ -156,11 +157,19 @@ public abstract class Handler extends Thread {
 
   /* Get requestId that is not in use */
   public Byte getFreeRequestId() {
-    for(byte i = 1; i < 256; i++) {
-      if(!runningCommands.containsKey(new Byte(i))) {
-        return new Byte(i);
+    for(byte b = firstRequestIdToTry; b <= 255; b++) {
+      if(!runningCommands.containsKey(firstRequestIdToTry)) {
+        firstRequestIdToTry = (byte) (b+1);
+        return new Byte(b);
       }
     }
+    for(byte b = 1; b < firstRequestIdToTry; b++) {
+      if(!runningCommands.containsKey(firstRequestIdToTry)) {
+        firstRequestIdToTry = (byte) (b+1);
+        return new Byte(b);
+      }
+    }
+
     return null;
   }
 

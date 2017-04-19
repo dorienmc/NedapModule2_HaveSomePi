@@ -131,15 +131,30 @@ public class Utils {
     String allFiles = title + "\n";
     int id = 1;
 
-    allFiles += String.format("  %-5s %s\n", "id","file name");
+    allFiles += String.format("  %-5s %-10s %s\n", "id","size", "file name");
     for (File file : files) {
-      allFiles += String.format("  %-5d %s\n", id,file.getName());
+      allFiles += String.format("  %-5d %-10s %s\n", id,getFileSize(file.length()), file.getName());
+      file.length();
       id++;
     }
     return allFiles;
   }
 
   /**
+   * Return file size in B, KB or MB, including this postfix.
+   */
+  static public String getFileSize(long sizeInBytes) {
+    if(sizeInBytes < 1000) {
+      return String.format("%dB", sizeInBytes);
+    } else {
+      long sizeInKB = sizeInBytes / 1000;
+      if(sizeInKB < 1000) {
+        return String.format("%dKB", sizeInKB);
+      } else {
+        return String.format("%dMB", sizeInKB / 1000);
+      }
+    }
+  }
    * Get name of the i^th file in given path, start numbering at 1
    * (corresponding with the listFiles() method)
    */

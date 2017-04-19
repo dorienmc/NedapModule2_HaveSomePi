@@ -12,12 +12,12 @@ public class MyUDPHeader {
     SOURCE_PORT(0,4), //Port of sender
     DEST_PORT(4,4),   //Port of receiver
     LENGTH(8,2),      //Length of UDP packet, eg. datagrampacket.getData()
-    CHECKSUM(10,8),    //Checksum for UDP packet
+    CHECKSUM(10,8),   //Checksum for UDP packet
     SEQ_NUMBER(18,2), //Sequence number
     ACK_NUMBER(20,2), //Expected sequence number of next response
     FLAGS(22,1),      //Option flags (see fileTransfer.Flag)
-    REQUEST_ID(23,1),   //Request id, used for demuxing.
-    OFFSET(24,2);     //Offset in fragmented files (in bytes) //TODO count in bigger chunks? Otherwise this field is to small
+    REQUEST_ID(23,1), //Request id, used for demuxing.
+    OFFSET(24,4);     //Offset in fragmented files (in bytes)
 
     private int length;
     private int startIndex;

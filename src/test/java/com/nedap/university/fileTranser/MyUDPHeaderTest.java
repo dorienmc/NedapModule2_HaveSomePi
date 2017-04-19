@@ -54,7 +54,7 @@ public class MyUDPHeaderTest {
 
   @Test
   public void getHeader() throws Exception {
-    byte[] expected = {0,0,36,81,0,0,(byte)168,(byte) 132,0,(byte)length,0,0,0,0,0,0,0,0,0,13,0,(byte) 255,0,1,0,0};
+    byte[] expected = {0,0,36,81,0,0,(byte)168,(byte) 132,0,(byte)length,0,0,0,0,0,0,0,0,0,13,0,(byte) 255,0,1,0,0,0,0};
     assertArrayEquals(expected, header.getHeader());
   }
 

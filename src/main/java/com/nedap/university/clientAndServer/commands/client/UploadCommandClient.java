@@ -39,7 +39,12 @@ public class UploadCommandClient extends Command {
 
     if(Utils.isANumber(filename)) {
       //Parse number to actual file
-      filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
+      try {
+        filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
+      } catch (ArrayIndexOutOfBoundsException e) {
+        handler.print("File with id " + Integer.parseInt(filename) + " not found");
+        shutdown();
+      }
     }
 
     //Retrieve file, if possible

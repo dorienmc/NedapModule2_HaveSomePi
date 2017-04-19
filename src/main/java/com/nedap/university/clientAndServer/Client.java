@@ -41,6 +41,11 @@ public class Client extends Handler {
       if (getChannel() == null) {
         print("Could not connect to host " + connector.getHostName() + ".");
         super.removeChannel();
+        //Try again with new in/out ports
+        int newInPort = Utils.getFreePort(FIRST_CLIENT_UDP_PORT, getInPort() + 2);
+        printDebug("Try again with ports " + newInPort + " and " + (newInPort + 1));
+        super.setInPort(newInPort);
+        super.setOutPort(newInPort + 1);
       }
     }
 

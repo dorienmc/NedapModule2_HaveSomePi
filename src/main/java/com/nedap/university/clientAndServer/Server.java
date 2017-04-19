@@ -26,6 +26,7 @@ public class Server extends Handler {
   public static final int FIRST_RUDP_PORT = 8000;
   public static final String HOSTNAME = "8";
   public static final String FILEPATH = "/home/pi/files";
+  private int firstPortTry = FIRST_RUDP_PORT;
 
   private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
   private InetAddress broadcastAddress;
@@ -80,8 +81,9 @@ public class Server extends Handler {
    * But do check if the connection request is valid.
    */
   private void addClientHandler(DatagramPacket packet) {
-    int inPort = Utils.getFreePort(FIRST_RUDP_PORT);
+    int inPort = Utils.getFreePort(FIRST_RUDP_PORT, firstPortTry);
     int outPort = inPort + 1;
+    firstPortTry = inPort + 2;
 
     //Reserve spot for client (so port is not free for others)
     ClientHandler client = null;

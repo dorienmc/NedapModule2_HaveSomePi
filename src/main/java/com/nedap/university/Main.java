@@ -22,7 +22,8 @@ public class Main {
         if(name.equals("Pi")) {
             (new Server()).start();
         } else {
-            client = new Client(-1,-1);
+            int inPort = Utils.getFreePort(Client.FIRST_CLIENT_UDP_PORT, Client.FIRST_CLIENT_UDP_PORT);
+            client = new Client(inPort, inPort + 1);
             client.start();
             client.keepOverview();
         }

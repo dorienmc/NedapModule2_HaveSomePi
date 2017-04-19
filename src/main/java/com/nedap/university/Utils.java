@@ -152,12 +152,18 @@ public class Utils {
     }
   }
 
-  public static int getFreePort(int lowerbound) {
-    for(int i = lowerbound; i < lowerbound + 1000; i += 2) {
+  public static int getFreePort(int lowerbound, int tryFirst) {
+    for(int i = tryFirst; i < lowerbound + 1000; i += 2) {
       if(isLocalPortFree(i)) {
         return i;
       }
     }
+    for(int i = lowerbound; i < tryFirst; i += 2) {
+      if(isLocalPortFree(i)) {
+        return i;
+      }
+    }
+
     return -1;
   }
 

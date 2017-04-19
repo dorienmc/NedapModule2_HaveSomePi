@@ -86,11 +86,6 @@ public class ConnectCommandClient extends Command {
       return false;
     }
 
-    //Request free port(s)
-    int port = Utils.getFreePort(Client.FIRST_CLIENT_UDP_PORT);
-    handler.setInPort(port);
-    handler.setOutPort(port + 1);
-
     //Shout out over multicast
     UDPPacket multiShout = new UDPPacket(socket.getLocalPort(), Server.MULTI_DNS_PORT,0, 0);
     multiShout.setFlags(Flag.CONNECT.getValue());

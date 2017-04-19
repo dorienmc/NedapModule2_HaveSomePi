@@ -13,11 +13,11 @@ public class MyUDPHeader {
     DEST_PORT(4,4),   //Port of receiver
     LENGTH(8,2),      //Length of UDP packet, eg. datagrampacket.getData()
     CHECKSUM(10,8),   //Checksum for UDP packet
-    SEQ_NUMBER(18,2), //Sequence number
-    ACK_NUMBER(20,2), //Expected sequence number of next response
-    FLAGS(22,1),      //Option flags (see fileTransfer.Flag)
-    REQUEST_ID(23,1), //Request id, used for demuxing.
-    OFFSET(24,4);     //Offset in fragmented files (in bytes)
+    SEQ_NUMBER(18,4), //Sequence number
+    ACK_NUMBER(22,4), //Expected sequence number of next response
+    FLAGS(26,1),      //Option flags (see fileTransfer.Flag)
+    REQUEST_ID(27,1), //Request id, used for demuxing.
+    OFFSET(28,4);     //Offset in fragmented files (in bytes)
 
     private int length;
     private int startIndex;

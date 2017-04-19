@@ -13,7 +13,7 @@ import java.util.zip.CRC32;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class UDPPacket {
-  public static final int MAX_PAYLOAD = 1500;
+  public static final int MAX_PAYLOAD = 2900;
   public static final int MAX_PACKET_SIZE = MAX_PAYLOAD + MyUDPHeader.HeaderField.getTotalLength();
   MyUDPHeader header;   //Header settings, in the MyUDPHeader format
   byte[] data;          //Payload data

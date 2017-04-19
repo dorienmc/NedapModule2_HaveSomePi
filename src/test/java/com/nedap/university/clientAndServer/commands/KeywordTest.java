@@ -1,8 +1,6 @@
 package com.nedap.university.clientAndServer.commands;
 
 import static org.junit.Assert.*;
-
-import java.security.Key;
 import org.junit.Test;
 
 /**

@@ -70,9 +70,8 @@ public class Sender extends Thread {
     }
   }
 
+  /** Send given packet over datagram socket **/
   private void sendPacket(UDPPacket packet) throws IOException {
-    //System.out.println("Try to send packet to " + address + ":" + packet.getDestPort());
-    //Try to send
     socket.send(packet.toDatagram(address));
   }
 

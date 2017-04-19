@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
 public class ListFilesCommandClient extends Command {
 
   public ListFilesCommandClient(Handler handler, Byte requestId) {
-    super(Keyword.LS, "List files",handler, requestId);
+    super(Keyword.LS, "List files on the server",handler, requestId);
   }
 
   @Override
@@ -29,7 +29,7 @@ public class ListFilesCommandClient extends Command {
     protocol.sendRequest(Keyword.LS, true);
 
     //Wait for response
-    UDPPacket response = null; //TODO let protocol determine timeout?
+    UDPPacket response = null;
     try {
       response = protocol.receivePacket(0);
     } catch (TimeoutException e) {

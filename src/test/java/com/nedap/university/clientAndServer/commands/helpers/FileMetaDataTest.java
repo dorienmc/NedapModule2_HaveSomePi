@@ -2,9 +2,7 @@ package com.nedap.university.clientAndServer.commands.helpers;
 
 import static org.junit.Assert.*;
 
-import com.nedap.university.clientAndServer.Client;
 import java.io.File;
-import java.nio.ByteBuffer;
 import org.junit.Before;
 import org.junit.Test;
 

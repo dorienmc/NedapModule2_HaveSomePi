@@ -3,8 +3,6 @@ package com.nedap.university.clientAndServer;
 import static com.nedap.university.clientAndServer.commands.helpers.ConnectionHelper.isConnectionPacket;
 
 import com.nedap.university.Utils;
-import com.nedap.university.fileTranser.Flag;
-import com.nedap.university.clientAndServer.commands.helpers.MDNSdata;
 import com.nedap.university.fileTranser.UDPPacket;
 
 import java.io.IOException;
@@ -105,9 +103,6 @@ public class Server extends Handler {
     clients.put(new Integer(inPort), client);
     client.start();
     print("[Connected " + client + "]");
-
-
-    //TODO print warning if packet is incorrect?
   }
 
   /**

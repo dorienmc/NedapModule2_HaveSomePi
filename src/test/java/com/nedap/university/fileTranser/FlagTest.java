@@ -1,6 +1,5 @@
 package com.nedap.university.fileTranser;
 
-import com.nedap.university.fileTranser.Flag;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

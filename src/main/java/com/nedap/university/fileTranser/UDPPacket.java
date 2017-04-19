@@ -163,19 +163,19 @@ public class UDPPacket {
   /* Check if packet is valid, eg. checksum is correct and packet is meant for this host) */
   public boolean isValid(int expectedSourcePort, int expectedDestPort) {
     if(getSourcePort() != expectedSourcePort) {
-      System.out.println(String.format("Source port: expected %d but got %d", expectedSourcePort, getSourcePort()));
+      //System.out.println(String.format("Source port: expected %d but got %d", expectedSourcePort, getSourcePort()));
       return false;
     }
 
     if(getDestPort() != expectedDestPort) {
-      System.out.println(String.format("Dest port: expected %d but got %d", expectedDestPort, getDestPort()));
+      //System.out.println(String.format("Dest port: expected %d but got %d", expectedDestPort, getDestPort()));
       return false;
     }
 
     if(checkChecksum()) {
       return true;
     } else {
-      System.out.println(String.format("Checksum: expected %d but got %d", getChecksum(), calculateChecksum()));
+      //System.out.println(String.format("Checksum: expected %d but got %d", getChecksum(), calculateChecksum()));
       return false;
     }
   }

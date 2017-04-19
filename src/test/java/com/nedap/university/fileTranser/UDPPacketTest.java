@@ -76,7 +76,7 @@ public class UDPPacketTest {
     assertArrayEquals(udpData, packetFromDataGram.getData());
 
     //Change data
-    byte[] data = {1,2,3,4,5,6,7}; //TODO check checksum
+    byte[] data = {1,2,3,4,5,6,7};
     packet.setData(data);
     packetFromDataGram.setData(data);
 

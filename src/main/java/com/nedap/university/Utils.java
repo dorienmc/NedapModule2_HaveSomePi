@@ -1,6 +1,6 @@
 package com.nedap.university;
 
-import com.nedap.university.clientAndServer.Server;
+import com.nedap.university.fileTranser.UDPPacket;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -155,6 +155,17 @@ public class Utils {
       }
     }
   }
+
+  /** Return speed in KBps
+   * Uses the packetSize (in bytes) from UDPPacket.MAX_PACKET_SIZE
+   * Note: bytes per ms == KB per s (we define 1KB = 1000bytes in this case)
+   */
+  static public double getSpeed(int nPackets, long timeInMs) {
+    double sizeInBytes = nPackets * UDPPacket.MAX_PACKET_SIZE;
+    return sizeInBytes / (double) timeInMs;
+  }
+
+  /**
    * Get name of the i^th file in given path, start numbering at 1
    * (corresponding with the listFiles() method)
    */

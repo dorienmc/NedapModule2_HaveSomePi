@@ -86,11 +86,11 @@ public class Client extends Handler {
    **/
   public void handleSocketException (String errorMessage) {
     print(errorMessage);
-    //TODO what now? Restart connection?
+    //TODO More?
   }
 
 
-  public void shutdown() { //TODO add more?
+  public void shutdown() {
     super.removeChannel();
     setStatus(Status.STOPPED);
 

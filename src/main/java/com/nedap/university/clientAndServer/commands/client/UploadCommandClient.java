@@ -43,7 +43,7 @@ public class UploadCommandClient extends Command {
         filename = Utils.getFile(Client.FILEPATH, Integer.parseInt(filename));
       } catch (ArrayIndexOutOfBoundsException e) {
         handler.print("File with id " + Integer.parseInt(filename) + " not found");
-        shutdown();
+        shutdown(false);
       }
     }
 
@@ -51,7 +51,7 @@ public class UploadCommandClient extends Command {
     File file = new File(Client.FILEPATH + "/" + filename);
     if(!file.exists()) {
       handler.print("File not found: " + filename);
-      shutdown();
+      shutdown(false);
     }
 
     //Create file meta data

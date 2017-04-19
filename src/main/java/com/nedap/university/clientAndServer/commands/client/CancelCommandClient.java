@@ -35,6 +35,7 @@ public class CancelCommandClient extends Command {
     byte[] data = {(byte) id};
     protocol.sendRequest(data, Flag.CANCEL, true );
 
+    //Shutdown (waits for server ack during shutting down)
     shutdown();
   }
 

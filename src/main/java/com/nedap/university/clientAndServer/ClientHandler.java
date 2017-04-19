@@ -25,7 +25,6 @@ public class ClientHandler extends Handler {
   @Override
   public void run() {
     //TODO Check periodically if UDP channel is still working?
-    //handleSocketInput();
   }
 
   @Override
@@ -56,7 +55,5 @@ public class ClientHandler extends Handler {
       getChannel().shutdown();
     }
     server.removeClientHandler(this);
-
-    //TODO anything else?
   }
 }

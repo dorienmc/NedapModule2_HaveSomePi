@@ -307,7 +307,7 @@ public abstract class Protocol extends Thread {
 
   public abstract String getInfo();
 
-  void setStatus(Status status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 

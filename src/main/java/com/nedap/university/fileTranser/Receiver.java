@@ -33,7 +33,7 @@ public class Receiver extends Thread {
   }
 
   @Override
-  public void run() { //TODO stop when no packet has arrived for a long time?
+  public void run() {
     while(!stop) {
       //Receive packets from socket
       DatagramPacket response = new DatagramPacket(new byte[UDPPacket.MAX_PACKET_SIZE], UDPPacket.MAX_PACKET_SIZE);

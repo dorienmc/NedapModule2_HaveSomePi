@@ -29,10 +29,15 @@ public class CancelCommandServer extends Command {
     }
     byte id = request.getData()[0];
 
+    //If the id is not -1 (cancel complete connection), cancel the corresponding request.
+    //If its -1 do not stop the clienthandler otherwise we cannot receive the EOR packet,
+    handler.print("Canceled " + handler.removeRunningCommand(id));
+    //TODO log where the command was? So we can restart it?
+
     //Ack the packet
     protocol.sendAck();
 
-    //Retrieve clients ack
+    //Wait for EOR packet
     UDPPacket endOfRequest = null;
     try {
       endOfRequest = protocol.receivePacket(0);
@@ -46,10 +51,6 @@ public class CancelCommandServer extends Command {
         handler.shutdown();
         shutdown();
       }
-
-      //Otherwise cancel the running command with the corresponding id
-      handler.print("Canceled " + handler.removeRunningCommand(id));
-      //TODO log where the command was? So we can restart it?
     } else {
       handler.print("Error expected EOR packet.");
     }

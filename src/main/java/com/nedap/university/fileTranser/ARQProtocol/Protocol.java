@@ -202,6 +202,11 @@ public abstract class Protocol extends Thread {
       Utils.sleep(10);
       time += 10;
 
+      //Log last ack received (every 5 seconds)
+      if((time % 5000) == 0) {
+        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
+      }
+
       if(maxTimeOut > 0 && time > maxTimeOut) {
         throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
       }
@@ -224,6 +229,11 @@ public abstract class Protocol extends Thread {
       //Wait
       Utils.sleep(10);
       time += 10;
+
+      //Log last ack received (every 5 seconds)
+      if((time % 5000) == 0) {
+        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
+      }
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
         throw new TimeoutException("Protocol.receivePacket: Exceeded timeOut of " + maxTimeOut + "ms.");
@@ -249,6 +259,11 @@ public abstract class Protocol extends Thread {
       //Wait
       Utils.sleep(10);
       time += 10;
+
+      //Log last ack received (every 5 seconds)
+      if((time % 5000) == 0) {
+        print("Got acks for " + getLastAck() + " out of " + getSeqNumber() + " packets");
+      }
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
         return false;

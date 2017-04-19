@@ -113,6 +113,11 @@ public abstract class Command extends Thread {
 
     //Unpause handler (currently only useful for client)
     handler.unPause();
+//    if(isAlive()) {
+//      handler.unPause();
+//    } else {
+//      System.out.println("TODO unpause handler in request of type " + getKeyword());
+//    }
   }
 
   public Keyword getKeyword() {

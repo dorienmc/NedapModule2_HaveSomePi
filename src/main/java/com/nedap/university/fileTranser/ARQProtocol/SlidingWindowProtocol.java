@@ -142,12 +142,11 @@ public class SlidingWindowProtocol extends Protocol {
    * sequence number or smaller have been received.)
    */
   public synchronized void updateLPR(int seq) {
-    if(!receivedFrames.isEmpty()) {
-      while(receivedFrames.contains(lastPacketRec + 1)) {
-        receivedFrames.remove(lastPacketRec + 1);
-        lastPacketRec++;
-      }
-      System.out.println("Updated LPR to " + lastPacketRec);
+    receivedFrames.add(seq);
+
+    while(receivedFrames.contains(lastPacketRec + 1)) {
+      receivedFrames.remove(lastPacketRec + 1);
+      lastPacketRec++;
     }
   }
 
@@ -158,16 +157,18 @@ public class SlidingWindowProtocol extends Protocol {
         packet.getSequenceNumber(),packet.getAckNumber()));
     printDebug(getInfo());
 
+    //Update Last Ack Received
+    updateLAR(packet.getAckNumber());
+
+    //Stop corresponding timer
+    //Note: ACK tells the next packet that is expected, so the previous packet is acked.
+    timeOutHandler.stopTimer(packet.getAckNumber() - 1);
+    printDebug("Stopping timer of packet with seq: " + (packet.getAckNumber() - 1));
+
     //Check if packet lies in receiving window
     if(isInRecWindow(packet.getSequenceNumber())) {
-      //Update the last packet received and last ack received
-      receivedFrames.add(packet.getSequenceNumber());
+      //Update the last packet received
       updateLPR(packet.getSequenceNumber());
-      updateLAR(packet.getAckNumber());
-
-      //Stop corresponding timer
-      //Note: ACK tells the next packet that is expected, so the previous packet is acked.
-      timeOutHandler.stopTimer(packet.getAckNumber() - 1);
 
       //Note: Add to receive buffer is done by method that calls isExpected()
 

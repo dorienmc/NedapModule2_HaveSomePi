@@ -12,7 +12,7 @@ public class ClientHandler extends Handler {
   Server server;
 
   public ClientHandler(DatagramPacket connectPacket, int inPort, int outPort, Server server) throws SocketException {
-    super(inPort, outPort);
+    super(inPort, outPort,Server.LOGPATH);
     this.server = server;
     super.setCommandFactory(new CommandFactoryServer(this));
 

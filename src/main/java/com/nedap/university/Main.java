@@ -4,7 +4,7 @@ import com.nedap.university.clientAndServer.Client;
 import com.nedap.university.clientAndServer.Server;
 
 public class Main {
-
+    public static boolean DEBUG = false;
     private static boolean keepAlive = true;
     private static boolean running = false;
 

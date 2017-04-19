@@ -69,8 +69,8 @@ public abstract class Command extends Thread {
    * If its the first packet, start the protocol before asking if the packet was expected.
    */
   public void addPacketToReceiveBuffer(UDPPacket packet, boolean first) {
-    handler.print("Received packet for request " + this + " with sequence number " + packet
-        .getSequenceNumber());
+    handler.printDebug(String.format("Received packet for request %s, (seq: %d, ack: %d)",
+        this, packet.getSequenceNumber(), packet.getAckNumber()));
     if(first && !protocol.isAlive()) {
       protocol.start();
     }

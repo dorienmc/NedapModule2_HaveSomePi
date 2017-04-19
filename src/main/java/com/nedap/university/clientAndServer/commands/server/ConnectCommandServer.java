@@ -40,7 +40,7 @@ public class ConnectCommandServer extends Command {
 
 
       MDNSdata mDNSdata = new MDNSdata(handler.getInPort(), handler.getOutPort(), "Client");
-      handler.print("My mDNS data " + mDNSdata);
+      handler.printDebug("My mDNS data " + mDNSdata);
       protocol.sendRequest(mDNSdata.getData(), Flag.CONNECT, false);
 
 
@@ -55,7 +55,7 @@ public class ConnectCommandServer extends Command {
   private void createReliableUDPchannel(Handler handler){
     //Retrieve address and portIn/portOut of client
     UDPPacket udpPacket = new UDPPacket(connectPacket);
-    System.out.println("Create reliable UDP channel from" + udpPacket);
+    handler.printDebug("Create reliable UDP channel from" + udpPacket);
 
     InetAddress address = connectPacket.getAddress();
     handler.setAddress(address);

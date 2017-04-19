@@ -26,6 +26,7 @@ public class Server extends Handler {
   public static final int FIRST_RUDP_PORT = 8000;
   public static final String HOSTNAME = "8";
   public static final String FILEPATH = "/home/pi/files";
+  public static final String LOGPATH = "/home/pi/logs";
   private int firstPortTry = FIRST_RUDP_PORT;
 
   private Map<Integer, ClientHandler> clients = new HashMap<>(); //map clientHandlers to ports
@@ -33,7 +34,7 @@ public class Server extends Handler {
   private static InetAddress myAddress;
 
   public Server() {
-    super(MULTI_DNS_PORT,-1);
+    super(MULTI_DNS_PORT,-1,LOGPATH);
   }
 
   public void run() {
@@ -132,14 +133,7 @@ public class Server extends Handler {
     print("Server socket error: " + errorMessage);
   }
 
-  /**
-   * Print message to System.out //TODO to logfile?
-   * @param message
-   */
-  public void print(String message){
-    System.out.println(message);
-  }
-
+  @Override
   public void shutdown() {
     print("Server is shutting down.");
     for(ClientHandler client : clients.values()) {
@@ -149,6 +143,15 @@ public class Server extends Handler {
     //close socket
     socket.close();
     running = false;
+
+    //close logfile
+    if(logFile != null) {
+      try {
+        logFile.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
 
     Thread.currentThread().interrupt();
   }

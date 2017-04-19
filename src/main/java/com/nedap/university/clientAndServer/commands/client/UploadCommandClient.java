@@ -52,7 +52,7 @@ public class UploadCommandClient extends Command {
     //Create file meta data
     FileMetaData metaData = new FileMetaData(file, MAX_PAYLOAD);
     handler.print(String.format("Start upload of %s, needs %d packets",filename, metaData.getNumberOfPackets()));
-    System.out.println("Send metadata " + metaData);
+    handler.printDebug("Send metadata " + metaData);
     handler.unPause();
 
     //Put uploadrequest (with file metadata) in the sender buffer
@@ -69,14 +69,14 @@ public class UploadCommandClient extends Command {
     //Split file in packets
     byte[] digest = new byte[0];
     try {
-      digest = uploadFile(file, metaData, protocol);
+      digest = uploadFile(file, metaData, protocol, handler);
     } catch (IOException e) {
       handler.print("Could not upload " + filename + ", " + e.getMessage());
       shutdown();
     }
 
     //Send md5 of the uploaded file
-    System.out.println("Created message digest " + Utils.binaryArrToHexString(digest));
+    handler.printDebug("Created message digest " + Utils.binaryArrToHexString(digest));
     protocol.sendData(digest,false);
 
     //Wait for ack of server of the md5 packet, then send End Of Request packet.

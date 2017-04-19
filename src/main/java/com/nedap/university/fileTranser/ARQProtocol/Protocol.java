@@ -1,13 +1,14 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
+import com.nedap.university.Main;
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeoutException;
@@ -26,12 +27,13 @@ public abstract class Protocol extends Thread {
   private int seqNumber;          //Sequence number of next packet that is to be start.
   Status status;
   private int timeOut;            //Time out in ms.
+  protected Handler handler;
 
   public enum Status {
     CREATED, PAUSED, RUNNING, STOPPING;
   }
 
-  public Protocol(Sender sender, Receiver receiver, byte requestId, int timeOut) {
+  public Protocol(Sender sender, Receiver receiver, byte requestId, int timeOut, Handler handler) {
     this.sender = sender;
     this.receiver = receiver;
     this.requestId = requestId;
@@ -41,6 +43,7 @@ public abstract class Protocol extends Thread {
     this.resendBuffer = new ConcurrentLinkedDeque<>();
     this.status = Status.CREATED;
     this.timeOut = timeOut;
+    this.handler = handler;
   }
 
   /********** Abstract methods ***********/
@@ -71,18 +74,18 @@ public abstract class Protocol extends Thread {
   public void addPacketToSendBuffer(UDPPacket packet) {
     packet.setHeaderSetting(HeaderField.SEQ_NUMBER, seqNumber);
     seqNumber++;
-    System.out.println(String.format("Add packet to send buffer of request %d with seqno: %d", packet.getRequestId(), packet.getSequenceNumber()));
+    printDebug(String.format("Add packet to send buffer of request %d with seqno: %d", packet.getRequestId(), packet.getSequenceNumber()));
     sendBuffer.add(packet);
   }
 
   public void addPacketToReceiverBuffer(UDPPacket packet) {
-    System.out.println(String.format("Add packet to receive buffer with seq: %d, ack: %d, offset:%d",
+    printDebug(String.format("Add packet to receive buffer with seq: %d, ack: %d, offset:%d",
         packet.getSequenceNumber(), packet.getAckNumber(), packet.getOffset()));
     receiveBuffer.put(packet.getSequenceNumber(),packet);
   }
 
   void addPacketToResendBuffer(UDPPacket packet) {
-    System.out.println(String.format("Add packet to resend buffer with seqno: %d", packet.getSequenceNumber()));
+    printDebug(String.format("Time out of packet with seqno: %d has elapsed.", packet.getSequenceNumber()));
     resendBuffer.add(packet);
   }
 
@@ -280,6 +283,13 @@ public abstract class Protocol extends Thread {
     return timeOut;
   }
 
+  public void printDebug(String msg) {
+    handler.printDebug(msg);
+  }
+
+  public void print(String msg) {
+    handler.print(msg);
+  }
 
 }
 

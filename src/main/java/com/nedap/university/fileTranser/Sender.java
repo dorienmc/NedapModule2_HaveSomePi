@@ -57,7 +57,8 @@ public class Sender extends Thread {
         UDPPacket packet = request.getNextPacket();
         if(packet != null) {
           try {
-            System.out.println(String.format("Send packet %d for request %s",packet.getSequenceNumber(), request));
+            handler.printDebug(String.format("Send packet (seq: %d, ack:d) for request %s",
+                packet.getSequenceNumber(), packet.getAckNumber(), request));
             sendPacket(packet);
           } catch (IOException e) {
             handler.handleSocketException(String.format("WARNING could not send packet from request %d with seq. number %d",
@@ -88,14 +89,6 @@ public class Sender extends Thread {
 
   public void deregister(Command request) {
     requests.remove(request.getRequestId());
-  }
-
-  /**
-   * Log running commands.
-   */
-  public void log() {
-    //TODO
-    System.out.println("TODO log running commands in Sender");
   }
 
 }

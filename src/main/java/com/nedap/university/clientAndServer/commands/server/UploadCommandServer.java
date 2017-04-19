@@ -27,7 +27,7 @@ public class UploadCommandServer extends Command {
     FileMetaData metaData = retrieveFileMetaData(this);
 
     //Download file and calculate message digest
-    byte[] digest = downloadFile(metaData, protocol, handler.getFilePath());
+    byte[] digest = downloadFile(metaData, protocol, handler.getFilePath(), handler);
 
     //Check if message digest was computed
     if(digest.length == 0) {
@@ -42,13 +42,13 @@ public class UploadCommandServer extends Command {
           metaData.getNumberOfPackets() * protocol.getTimeOut());
 
       //Check message digest
-      System.out.println(String.format("Expected digest %s, got %s",
+      handler.printDebug(String.format("Expected digest %s, got %s",
           Utils.binaryArrToHexString(md5Packet.getData()),Utils.binaryArrToHexString(digest)));
 
       //Send ack if message digest was correct
       if(isDigestCorrect(md5Packet.getData(), digest)) {
         handler.print("File md5 correct");
-        protocol.sendAck();;
+        protocol.sendAck();
       } else {
         handler.print("File corrupted, message digest incorrect");
         removeCorruptedFile(handler.getFilePath() + "/tmp_" + metaData.getFileName());

@@ -2,7 +2,6 @@ package com.nedap.university.fileTranser;
 
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.clientAndServer.commands.Command;
-import com.nedap.university.fileTranser.ARQProtocol.NaiveProtocol;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -26,7 +25,7 @@ public class ReliableUdpChannel {
     this.sender = new Sender(destAddress,sourceOutPort,destInPort, handler); //send over socketOut
     sender.start();
     receiver.start();
-    System.out.println(String.format("Setup ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
+    handler.print(String.format("Setup ReliableUdp Channel to %s, sender: %d -> %d, receiver: %d <- %d",
         destAddress,sourceOutPort,destInPort,sourceInPort,destOutPort));
   }
 
@@ -36,7 +35,7 @@ public class ReliableUdpChannel {
   public void register(Command command, ProtocolFactory.Name protocolName) {
     sender.register(command);
     receiver.register(command);
-    command.setProtocol(ProtocolFactory.createProtocol(protocolName, sender,receiver, command.getRequestId()));
+    command.setProtocol(ProtocolFactory.createProtocol(protocolName, sender,receiver, command.getRequestId(), command.getHandler()));
   }
 
   /**
@@ -47,17 +46,8 @@ public class ReliableUdpChannel {
     receiver.deregister(command);
   }
 
-  /**
-   * Log running commands.
-   */
-  public void log() {
-    receiver.log();
-    sender.log();
-  }
-
   //Private methods
   public void shutdown() {
-    log();
     sender.shutdown();
     receiver.shutdown();
   }

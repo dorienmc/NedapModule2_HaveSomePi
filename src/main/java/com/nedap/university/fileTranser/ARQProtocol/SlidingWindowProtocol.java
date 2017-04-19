@@ -1,6 +1,7 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
@@ -22,8 +23,8 @@ public class SlidingWindowProtocol extends Protocol {
   private volatile int lastPacketSend;//Sequence number of the last send packet, all packets with this sequence number or smaller have been send at least once.
   ConcurrentLinkedDeque<Integer> receivedFrames; //Place to store the seq.number of received frames for when the arrive out of order.
 
-  public SlidingWindowProtocol(Sender sender, Receiver receiver, byte requestId) {
-    super(sender, receiver, requestId, TIMEOUT);
+  public SlidingWindowProtocol(Sender sender, Receiver receiver, byte requestId, Handler handler) {
+    super(sender, receiver, requestId, TIMEOUT, handler);
     timeOutHandler = new TimeOutHandler(this, TIMEOUT);
     this.lastAckRec = 0;
     this.lastPacketRec = -1;
@@ -63,15 +64,17 @@ public class SlidingWindowProtocol extends Protocol {
       //Set timer, except for last packet
       if(!packet.isFlagSet(Flag.LAST)) {
         timeOutHandler.addTimer(packet);
+        printDebug("Create timer for packet with seq " + packet.getSequenceNumber()
+            + " of request " + packet.getRequestId());
       } else {
-        System.out.println("Last packet, so start stopping.");
+        printDebug("Last packet, so start stopping.");
         super.setStatus(Status.STOPPING);
       }
 
       //The next expected packet is lastPacketReceived + 1
       packet.setHeaderSetting(HeaderField.ACK_NUMBER, lastPacketRec + 1);
 
-      System.out.println(String.format("Send packet (seq: %d, ack %d)",
+      printDebug(String.format("Send packet (seq: %d, ack %d)",
           packet.getSequenceNumber(),packet.getAckNumber()));
     }
 
@@ -87,7 +90,7 @@ public class SlidingWindowProtocol extends Protocol {
   public void run() {
     timeOutHandler.start();
     setStatus(Status.RUNNING);
-    System.out.println("Start sending/receiving.");
+    printDebug("Start sending/receiving.");
 
     while(busy()) {
       Utils.sleep(100);
@@ -98,7 +101,7 @@ public class SlidingWindowProtocol extends Protocol {
       Utils.sleep(TIMEOUT/2);
     }
 
-    System.out.println("Done sending/receiving.");
+    printDebug("Done sending/receiving.");
     timeOutHandler.stopHandler();
   }
 
@@ -128,7 +131,7 @@ public class SlidingWindowProtocol extends Protocol {
   public synchronized void updateLAR(int ack) {
     if(ack > lastAckRec) {
       lastAckRec = ack;
-      System.out.println("Updated lastAckRec to " + lastAckRec);
+      printDebug("Updated lastAckRec to " + lastAckRec);
     }
   }
 
@@ -149,9 +152,9 @@ public class SlidingWindowProtocol extends Protocol {
   @Override
   public boolean isExpected(UDPPacket packet) {
     //Print debug info
-    System.out.println(String.format("Received new packet (seq: %d, ack %d)",
+    printDebug(String.format("Received new packet (seq: %d, ack %d)",
         packet.getSequenceNumber(),packet.getAckNumber()));
-    System.out.println(getInfo());
+    printDebug(getInfo());
 
     //Check if packet lies in receiving window
     if(isInRecWindow(packet.getSequenceNumber())) {
@@ -168,16 +171,21 @@ public class SlidingWindowProtocol extends Protocol {
 
       //If this was the last packet, go to stopping state
       if(packet.isFlagSet(Flag.LAST)) {
-        System.out.println("Receiver: Last packet, so start stopping.");
+        printDebug("Receiver: Last packet, so start stopping.");
         setStatus(Status.STOPPING);
       }
 
-      System.out.println("Status: " + getInfo());
+      printDebug("Status: " + getInfo());
 
       return true;
     }
 
     return false;
+  }
+
+  @Override
+  public int getLastAck() {
+    return lastAckRec;
   }
 
   /** Give status info that the Handler can than represent to the user */
@@ -186,10 +194,10 @@ public class SlidingWindowProtocol extends Protocol {
     if(getStatus().equals(Status.PAUSED)) {
       return Status.PAUSED.toString();
     } else {
-      return String.format("Send window: [%d, %d), Receive window: (%d, %d], Last packet send: %d",
+      return String.format("Send window: [%d, %d), Receive window: (%d, %d], Acked (%d/%d)",
           lastAckRec, lastAckRec + sendWindowSize,
           lastPacketRec, lastPacketRec + receiveWindowSize,
-          lastPacketSend);
+          lastAckRec, getSeqNumber());
     }
   }
 }

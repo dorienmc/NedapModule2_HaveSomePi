@@ -1,12 +1,12 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Flag;
 import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
-import java.io.IOException;
 
 /**
  * Protocol that sends one packet at a time and waits until it is acked.
@@ -20,8 +20,8 @@ public class StopAndWaitProtocol extends Protocol {
   private volatile int lastPacketRec; //All packets (of the other host) with this sequence number or smaller have been received.
   private volatile int lastPacketSend;//Sequence number of the last send packet, all packets with this sequence number or smaller have been send at least once.
 
-  public StopAndWaitProtocol(Sender sender, Receiver receiver, byte requestId) {
-    super(sender, receiver, requestId, TIMEOUT);
+  public StopAndWaitProtocol(Sender sender, Receiver receiver, byte requestId, Handler handler) {
+    super(sender, receiver, requestId, TIMEOUT, handler);
     timeOutHandler = new TimeOutHandler(this, TIMEOUT);
     this.lastAckRec = 0;
     this.lastPacketRec = -1;
@@ -59,15 +59,17 @@ public class StopAndWaitProtocol extends Protocol {
     if(packet != null) {
       //Set timer, except for last packet
       if(!packet.isFlagSet(Flag.LAST)) {
+        printDebug("Create timer for packet with seq " + packet.getSequenceNumber()
+            + " of request " + packet.getRequestId());
         timeOutHandler.addTimer(packet);
       } else {
-        System.out.println("Last packet, so start stopping.");
+        printDebug("Last packet, so start stopping.");
         super.setStatus(Status.STOPPING);
       }
       //Set ack to the next expected packet.
       packet.setHeaderSetting(HeaderField.ACK_NUMBER, getLastPacketRec() + 1);
 
-      System.out.println("Status: " + getInfo());
+      printDebug("Status: " + getInfo());
     }
 
     return packet;
@@ -90,7 +92,7 @@ public class StopAndWaitProtocol extends Protocol {
   public void run() {
     timeOutHandler.start();
     setStatus(Status.RUNNING);
-    System.out.println("Start sending/receiving.");
+    printDebug("Start sending/receiving.");
 
     while(busy()) {
       Utils.sleep(100);
@@ -101,7 +103,7 @@ public class StopAndWaitProtocol extends Protocol {
       Utils.sleep(TIMEOUT/2);
     }
 
-    System.out.println("Done sending/receiving.");
+    printDebug("Done sending/receiving.");
     timeOutHandler.stopHandler();
   }
 
@@ -114,7 +116,7 @@ public class StopAndWaitProtocol extends Protocol {
     //Check if sequence number is expected
     int receivedSeq = packet.getSequenceNumber();
     int receivedAck = packet.getAckNumber();
-    System.out.println(String.format("Packet seq: %d, ack: %d. [LAR: %d, LFS: %d], [LFR: %d, LAF: %d]",
+    printDebug(String.format("Packet seq: %d, ack: %d. [LAR: %d, LFS: %d], [LFR: %d, LAF: %d]",
         receivedSeq, receivedAck, getLastAckRec(), getLastPacketSend(),
         getLastPacketRec(), getLastPacketRec() + 1 ));
 
@@ -126,19 +128,26 @@ public class StopAndWaitProtocol extends Protocol {
       //If so, stop the timer of the packet that this packet acks.
       //Note: ACK tells the next packet that is expected, so the previous packet is acked.
       timeOutHandler.stopTimer(receivedAck - 1);
+      printDebug("Stopping timer of packet with seq: " + (receivedAck - 1));
+
 
       //If this was the last packet, go to stopping state
       if(packet.isFlagSet(Flag.LAST)) {
-        System.out.println("Receiver: Last packet, so start stopping.");
+        printDebug("Receiver: Last packet, so start stopping.");
         setStatus(Status.STOPPING);
       }
 
-      System.out.println("Status: " + getInfo());
+      printDebug("Status: " + getInfo());
 
       return true;
     }
     //Otherwise return false
     return false;
+  }
+
+  @Override
+  public int getLastAck() {
+    return lastAckRec;
   }
 
   /** Give status info that the Handler can than represent to the user */

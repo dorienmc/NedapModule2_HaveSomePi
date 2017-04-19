@@ -18,21 +18,22 @@ public class HelpCommand extends Command {
     List<Command> commands = handler.getCommands();
     Command exit = null;
 
-    System.out.println("--------------");
-    System.out.println("Commands: ");
+    handler.print("--------------");
+    handler.print("Commands: ");
 
     for(Command command : commands) {
       if(command.getKeyword().equals(Keyword.EXIT) ) {
         exit = command;
       } else if (!command.getKeyword().equals(Keyword.HELP)) {
-        System.out.println(command.getAsMenuItem());
+        handler.print(command.getAsMenuItem());
       }
     }
 
-    System.out.println(this.getAsMenuItem());
-    if(exit != null) {System.out.println(exit.getAsMenuItem());}
+    handler.print(this.getAsMenuItem());
+    if(exit != null) {handler.print(exit.getAsMenuItem());}
 
-    System.out.println("--------------");
+    handler.print("--------------");
+    //handler.unPause();
     shutdown(false);
   }
 

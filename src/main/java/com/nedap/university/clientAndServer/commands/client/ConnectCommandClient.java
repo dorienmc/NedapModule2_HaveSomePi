@@ -92,7 +92,7 @@ public class ConnectCommandClient extends Command {
     MDNSdata mdnSdata = new MDNSdata(handler.getInPort(), handler.getOutPort(), hostName);
     multiShout.setData(mdnSdata.getData());
     handler.print("Trying to connect to host " + hostName);
-    handler.print("mDNS data: " + mdnSdata);
+    handler.printDebug("mDNS data: " + mdnSdata);
 
     try {
       DatagramPacket packet = multiShout.toDatagram(broadcastAddress);
@@ -122,7 +122,7 @@ public class ConnectCommandClient extends Command {
     }
 
     //Wait for response from server
-    handler.print("Waiting for response from server on port " + socketIn.getLocalPort());
+    handler.printDebug("Waiting for response from server on port " + socketIn.getLocalPort());
     DatagramPacket response = new DatagramPacket(new byte[UDPPacket.MAX_PACKET_SIZE], UDPPacket.MAX_PACKET_SIZE);
 
     try {

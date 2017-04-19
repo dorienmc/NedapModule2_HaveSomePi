@@ -3,6 +3,7 @@ package com.nedap.university.clientAndServer;
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.commands.client.ConnectCommandClient;
 import com.nedap.university.clientAndServer.commands.client.HelpCommand;
+import java.io.IOException;
 
 /**
  * Client that handles user input on clientside and responds to this.
@@ -10,10 +11,11 @@ import com.nedap.university.clientAndServer.commands.client.HelpCommand;
  */
 public class Client extends Handler {
   public static final String FILEPATH = "./files";
+  public static final String LOGPATH = "./logs";
   public static final int FIRST_CLIENT_UDP_PORT = 9001;
 
   public Client(int inPort, int outPort) {
-    super(inPort, outPort);
+    super(inPort, outPort,LOGPATH);
     super.setCommandFactory(new CommandFactoryClient(this));
   }
 
@@ -91,6 +93,14 @@ public class Client extends Handler {
   public void shutdown() { //TODO add more?
     super.removeChannel();
     setStatus(Status.STOPPED);
+
+    //close logfile
+    try {
+      logFile.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     System.exit(0);
   }
 

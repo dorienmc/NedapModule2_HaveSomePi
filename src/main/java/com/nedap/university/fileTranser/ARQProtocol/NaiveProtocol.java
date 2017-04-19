@@ -1,10 +1,10 @@
 package com.nedap.university.fileTranser.ARQProtocol;
 
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
-import java.io.IOException;
 
 /**
  * Very naive protocol that just send data and does send acks.
@@ -12,8 +12,8 @@ import java.io.IOException;
  * Created by dorien.meijercluwen on 09/04/2017.
  */
 public class NaiveProtocol extends Protocol{
-  public NaiveProtocol(Sender sender, Receiver receiver, byte requestId) {
-    super(sender, receiver, requestId,-1);
+  public NaiveProtocol(Sender sender, Receiver receiver, byte requestId, Handler handler) {
+    super(sender, receiver, requestId,-1, handler);
   }
 
   /**
@@ -25,7 +25,7 @@ public class NaiveProtocol extends Protocol{
     if (getStatus().equals(Status.RUNNING)) {
       if(sendBuffer.size() > 0) {
         UDPPacket packet = sendBuffer.pollFirst();
-        System.out.println("Sending packet " + packet.getSequenceNumber() + ", offset " + packet.getOffset());
+        printDebug("Sending packet " + packet.getSequenceNumber() + ", offset " + packet.getOffset());
         return packet;
       }
     }
@@ -60,6 +60,11 @@ public class NaiveProtocol extends Protocol{
   @Override
   public boolean isExpected(UDPPacket packet) {
     return true;
+  }
+
+  @Override
+  public int getLastAck() {
+    return -1;
   }
 
   /** Give status info that the Handler can than represent to the user */

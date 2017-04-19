@@ -48,7 +48,7 @@ public class CancelCommandServer extends Command {
       }
 
       //Otherwise cancel the running command with the corresponding id
-      System.out.println("Canceled " + handler.removeRunningCommand(id));
+      handler.print("Canceled " + handler.removeRunningCommand(id));
       //TODO log where the command was? So we can restart it?
     } else {
       handler.print("Error expected EOR packet.");

@@ -60,9 +60,8 @@ public class Receiver extends Thread {
       //Check if packet is valid (eg meant for this host, correct checksum and such)
       //Note: a received packet comes from the 'destPort' and is received in the 'sourcePort' of this socket
       if(!packet.isValid(destPort,sourcePort)) {
-        System.out.println("Warning packet not valid!");
+        handler.printDebug("Error: packet not valid!" + packet);
         //Drop packet.
-        //TODO list ignored packets in statistics.
         //continue;
       }
 
@@ -89,7 +88,7 @@ public class Receiver extends Thread {
 
       //Create a new one
       if (requestType != null) {
-        System.out.println("Received an " + requestType + " request.");
+        handler.print("Received an " + requestType + " request.");
         Command command = handler.startNewCommand(requestType, requestId);
         command.addPacketToReceiveBuffer(packet, true);
       } else {
@@ -114,14 +113,6 @@ public class Receiver extends Thread {
 
   public void deregister(Command request) {
     requests.remove(request.getRequestId());
-  }
-
-  /**
-   * Log running commands.
-   */
-  public void log() {
-    //TODO
-    System.out.println("TODO log running commands in Receiver");
   }
 
 

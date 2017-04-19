@@ -3,6 +3,7 @@ package com.nedap.university.clientAndServer;
 
 import com.nedap.university.clientAndServer.commands.*;
 import com.nedap.university.clientAndServer.commands.server.CancelCommandServer;
+import com.nedap.university.clientAndServer.commands.server.DownloadCommandServer;
 import com.nedap.university.clientAndServer.commands.server.ListFilesCommandServer;
 import com.nedap.university.clientAndServer.commands.server.UploadCommandServer;
 

@@ -1,8 +1,10 @@
-package com.nedap.university.clientAndServer.commands;
+package com.nedap.university.clientAndServer.commands.client;
 
 import static com.nedap.university.clientAndServer.commands.helpers.FileSendingHelper.*;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.Utils;
+import com.nedap.university.clientAndServer.commands.Command;
+import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.clientAndServer.commands.client.ListFilesCommandClient;
 import com.nedap.university.clientAndServer.commands.helpers.FileMetaData;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by dorien.meijercluwen on 10/04/2017.
  */
-public class DownloadCommandClient extends Command{
+public class DownloadCommandClient extends Command {
 
   public DownloadCommandClient(Handler handler, Byte requestId) {
     super(Keyword.DOWNLOAD, "Download specific file", handler, requestId, Name.SLIDING_WINDOW);
@@ -38,8 +40,11 @@ public class DownloadCommandClient extends Command{
     //Retrieve file metadata from server
     FileMetaData metaData = retrieveFileMetaData(this);
 
+    //Unpause handler
+    handler.unPause();
+
     //Download requested file and calculate message digest
-    byte[] digest = downloadFile(metaData, protocol, handler.getFilePath());
+    byte[] digest = downloadFile(metaData, protocol, handler.getFilePath(), handler);
 
     //Wait for packet with expected message digest
     try {
@@ -47,7 +52,7 @@ public class DownloadCommandClient extends Command{
           metaData.getNumberOfPackets() * protocol.getTimeOut());
 
       //Check message digest
-      System.out.println(String.format("Expected digest %s, got %s",
+      handler.printDebug(String.format("Expected digest %s, got %s",
           Utils.binaryArrToHexString(md5Packet.getData()),Utils.binaryArrToHexString(digest)));
 
       //Send EOR packet if message digest was correct
@@ -65,11 +70,14 @@ public class DownloadCommandClient extends Command{
       shutdown();
     }
 
-    //Report statistics
+    //Report Statistics
     long endTime = System.currentTimeMillis();
-    handler.print(String.format("Downloaded %d packets in %d ms, speed: %d (packet/s)",
+    String downloadLog = String.format("Downloaded %s (%s) using %d packets in %d ms, speed: %5.2f (KB/s)",
+        metaData.getFileName(), Utils.getFileSize(metaData.getFileLength()),
         metaData.getNumberOfPackets() + 2,(endTime - startTime),
-        1000 * (metaData.getNumberOfPackets() + 2)/(endTime - startTime)));
+        Utils.getSpeed(metaData.getNumberOfPackets() + 2, endTime - startTime));
+    handler.print(downloadLog);
+    handler.getStatistics().addSpeedLog(downloadLog);
 
     //Rename file (delete old if one exists).
     File file = new File(handler.getFilePath() + "/tmp_" + metaData.getFileName());

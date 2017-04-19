@@ -52,5 +52,15 @@ These protocols reside in the Data Link or Transport Layers of the OSI model.
 
 For more info see [Wikipedia](https://en.wikipedia.org/wiki/Automatic_repeat_request)
 
-# Tips
-- Log `System.out()` info to the pi terminal with `tail -f  /var/log/syslog`
+# How to run
+On the clientside, run the 'Main.java' class with 'PC' as argument.
+On the pi side, run using `sudo systemctl restart num2.service` 
+(and optionally log info using `tail -f  /var/log/syslog`).
+
+Files on the clientside reside in `./files`, logs in `./logs`.
+Files on the pi side reside in `/home/pi/files`, logs in `/home/pi/logs`.
+
+The project can be deployed to the pi using, `./gradlew build` and then `./gradlew deploy`
+while in the project source folder. Make sure the 'Security Policy' is disabled and that you
+are on the `NedapUniversity` network.
+Note: the client must use '192.168.40.18' and the pi '192.168.40.8'.

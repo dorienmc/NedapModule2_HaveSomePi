@@ -203,4 +203,22 @@ public class SlidingWindowProtocol extends Protocol {
           lastAckRec, getSeqNumber());
     }
   }
+
+  /** Pause protocol and time out timers. **/
+  @Override
+  public synchronized boolean pause() {
+    if(busy()) {
+      super.pause();
+      timeOutHandler.pause();
+      return true;
+    }
+    return false;
+  }
+
+  /** Un pause protocol and time out timers. **/
+  public synchronized boolean unPause() {
+    super.unPause();
+    timeOutHandler.unPause();
+    return true;
+  }
 }

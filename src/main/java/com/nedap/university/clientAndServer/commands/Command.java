@@ -3,6 +3,7 @@ package com.nedap.university.clientAndServer.commands;
 import com.nedap.university.Utils;
 import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.ARQProtocol.*;
+import com.nedap.university.fileTranser.ARQProtocol.Protocol.Status;
 import com.nedap.university.fileTranser.ARQProtocol.ProtocolFactory.Name;
 import com.nedap.university.fileTranser.UDPPacket;
 
@@ -92,6 +93,26 @@ public abstract class Command extends Thread {
   }
 
   public abstract void execute();
+
+  public boolean pause() {
+    if(protocol != null) {
+      if(protocol.pause()) {
+        handler.print("Paused " + this);
+        return true;
+      } else {
+        handler.print("Could not pause " + this + " its almost done.");
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public void unPause() {
+    if(protocol != null) {
+      protocol.unPause();
+      handler.print("Resumed " + this);
+    }
+  }
 
   public void shutdown() {
     shutdown(true);

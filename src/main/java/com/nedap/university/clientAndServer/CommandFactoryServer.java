@@ -19,8 +19,8 @@ public class CommandFactoryServer extends CommandFactory {
     addCommand(new ListFilesCommandServer(handler, ZERO));
     addCommand(new DownloadCommandServer(handler, ZERO));
     addCommand(new UploadCommandServer(handler, ZERO));
-    addCommand(new PauseCommand(handler, ZERO));
-    addCommand(new ResumeCommand(handler, ZERO));
+    addCommand(new PauseCommandServer(handler, ZERO));
+    addCommand(new ResumeCommandServer(handler, ZERO));
     addCommand(new CancelCommandServer(handler, ZERO));
   }
 
@@ -35,8 +35,8 @@ public class CommandFactoryServer extends CommandFactory {
       case LS:      return new ListFilesCommandServer(handler, requestId);
       case DOWNLOAD:return new DownloadCommandServer(handler, requestId);
       case UPLOAD:  return new UploadCommandServer(handler, requestId);
-      case PAUSE:   return new PauseCommand(handler, requestId);
-      case RESUME:  return new ResumeCommand(handler, requestId);
+      case PAUSE:   return new PauseCommandServer(handler, requestId);
+      case RESUME:  return new ResumeCommandServer(handler, requestId);
       case CANCEL:  return new CancelCommandServer(handler, requestId);
       default:      return null;
     }

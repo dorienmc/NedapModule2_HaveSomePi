@@ -197,6 +197,8 @@ public abstract class Handler extends Thread {
     return result;
   }
 
+  public Command getRunningCommand(Byte id) { return runningCommands.get(id);}
+
   public Command removeRunningCommand(Byte id) {
     return runningCommands.remove(id);
   }

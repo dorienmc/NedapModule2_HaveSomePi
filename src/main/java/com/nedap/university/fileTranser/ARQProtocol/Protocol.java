@@ -199,6 +199,9 @@ public abstract class Protocol extends Thread {
     int time = 0;
     while(receiveBuffer.isEmpty()) {
       //Wait
+      while(getStatus().equals(Status.PAUSED)) {
+        Utils.sleep(100);
+      }
       Utils.sleep(10);
       time += 10;
 
@@ -227,6 +230,9 @@ public abstract class Protocol extends Thread {
     int time = 0;
     while(!receiveBuffer.containsKey(seqNumber)) {
       //Wait
+      while(getStatus().equals(Status.PAUSED)) {
+        Utils.sleep(100);
+      }
       Utils.sleep(10);
       time += 10;
 
@@ -257,6 +263,9 @@ public abstract class Protocol extends Thread {
       }
 
       //Wait
+      while(getStatus().equals(Status.PAUSED)) {
+        Utils.sleep(100);
+      }
       Utils.sleep(10);
       time += 10;
 
@@ -308,6 +317,17 @@ public abstract class Protocol extends Thread {
   public void print(String msg) {
     handler.print(msg);
   }
+
+  public synchronized boolean pause() {
+    setStatus(Status.PAUSED);
+    return true;
+  }
+
+  public synchronized boolean unPause() {
+    setStatus(Status.RUNNING);
+    return true;
+  }
+
 
 }
 

@@ -15,10 +15,12 @@ public class TimeOutHandler extends Thread {
   Protocol protocol;
   long timeOut;
   volatile boolean stop;
+  private boolean paused;
 
   public class Timer {
     long startTime;
     long maxTime;
+    long elapsedTimeBeforePaused;
 
     /* Create timer which starts now and elapses in 'maxTime' ms. */
     public Timer(long maxTime) {
@@ -29,6 +31,14 @@ public class TimeOutHandler extends Thread {
     public boolean hasElapsed() {
       return System.currentTimeMillis() - startTime > maxTime;
     }
+
+    public void pause() {
+      elapsedTimeBeforePaused = System.currentTimeMillis() - startTime;
+    }
+
+    public void unPause() {
+      this.startTime = System.currentTimeMillis() - elapsedTimeBeforePaused;
+    }
   }
 
   public TimeOutHandler(Protocol protocol, long timeOut) {
@@ -36,6 +46,7 @@ public class TimeOutHandler extends Thread {
     this.protocol = protocol;
     this.timeOut = timeOut;
     this.stop = false;
+    this.paused = false;
   }
 
   /** Add new timer for the given packet, overwrites old timer if there is one **/
@@ -44,19 +55,37 @@ public class TimeOutHandler extends Thread {
   }
 
   /* Stop timer of packet with the given sequence number */
-  public boolean stopTimer(int sequenceNumber) {
+  public UDPPacket stopTimer(int sequenceNumber) {
     for(UDPPacket packet: timers.keySet()) {
       if(packet.getSequenceNumber() == sequenceNumber) {
         timers.remove(packet);
-        return true;
+        return packet;
       }
     }
-    return false;
+    return null;
   }
 
   public synchronized void stopHandler() {
     this.stop = true;
   }
+
+  public synchronized void pause() {
+    paused = true;
+    //Pause all timers
+    for(Timer timer: timers.values()) {
+      timer.pause();
+    }
+  }
+
+  public synchronized void unPause() {
+    //Unpause all timers
+    for(Timer timer: timers.values()) {
+      timer.unPause();
+    }
+    paused = false;
+  }
+
+
 
   public int getNumberOfUnackedPackets() {
     return timers.size();
@@ -81,22 +110,15 @@ public class TimeOutHandler extends Thread {
         }
       }
 
+      while(paused) {
+        Utils.sleep(100);
+      }
 
       Utils.sleep(10);
     }
 
-    //Stop all timers
-    Iterator<Entry<UDPPacket,Timer>> iterator = timers.entrySet().iterator();
-    while(iterator.hasNext()) {
-      Map.Entry<UDPPacket,Timer> entry = iterator.next();
-      UDPPacket packet = entry.getKey();
-
-      //Remove entry from map
-      iterator.remove();
-
-      //Add packet to resend buffer
-      protocol.addPacketToResendBuffer(packet);
-    }
+    //Remove all timers
+    timers.clear();
   }
 
 }

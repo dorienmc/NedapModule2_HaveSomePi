@@ -9,6 +9,7 @@ import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
+import com.nedap.university.statistics.Statistics;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +28,7 @@ public abstract class Protocol extends Thread {
   private int seqNumber;          //Sequence number of next packet that is to be start.
   Status status;
   private int timeOut;            //Time out in ms.
+  protected Statistics statistics;
   protected Handler handler;
 
   public enum Status {
@@ -43,6 +45,7 @@ public abstract class Protocol extends Thread {
     this.resendBuffer = new ConcurrentLinkedDeque<>();
     this.status = Status.CREATED;
     this.timeOut = timeOut;
+    this.statistics = handler.getStatistics();
     this.handler = handler;
   }
 

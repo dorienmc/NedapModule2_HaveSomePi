@@ -4,6 +4,7 @@ import com.nedap.university.Main;
 import com.nedap.university.clientAndServer.commands.Command;
 import com.nedap.university.clientAndServer.commands.Keyword;
 import com.nedap.university.fileTranser.ReliableUdpChannel;
+import com.nedap.university.statistics.Statistics;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public abstract class Handler extends Thread {
   int outPort;
   InetAddress address;
   Map<Byte,Command> runningCommands;
+  Statistics statistics;
   byte firstRequestIdToTry = 1;
   FileOutputStream logFile;
 
@@ -39,6 +41,8 @@ public abstract class Handler extends Thread {
     this.outPort = outPort;
     this.runningCommands = new HashMap<>();
     this.status = Status.RUNNING;
+    this.statistics = new Statistics();
+
     try {
       this.logFile = new FileOutputStream(String.format("%s/%s.txt",logPath,
           new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date())));
@@ -86,6 +90,10 @@ public abstract class Handler extends Thread {
 
   public synchronized void setStatus(Status status) {
     this.status = status;
+  }
+
+  public Statistics getStatistics() {
+    return statistics;
   }
 
   //Unpause handler (currenly only usefull for client)

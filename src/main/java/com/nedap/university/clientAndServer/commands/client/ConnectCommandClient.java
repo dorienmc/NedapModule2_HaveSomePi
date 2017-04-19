@@ -138,6 +138,8 @@ public class ConnectCommandClient extends Command {
     //Check if response packet is an mDSN packet
     if(isConnectionPacket(response,handler)) {
       return response;
+    } else {
+      handler.getStatistics().logUnparseableConnectionPacket();
     }
 
     return null;

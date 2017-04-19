@@ -7,6 +7,7 @@ import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
+import com.nedap.university.statistics.Statistics;
 
 /**
  * Protocol that sends one packet at a time and waits until it is acked.
@@ -46,6 +47,8 @@ public class StopAndWaitProtocol extends Protocol {
       //Drop timed out packet if its not in the start window
       if(!isInSendWindow(packet.getSequenceNumber())) {
         packet = null;
+      } else {
+        statistics.logRetransmission();
       }
     } else if(sendBuffer.size() > 0) {
       //Peek at packet and check if we are already allowed to start it

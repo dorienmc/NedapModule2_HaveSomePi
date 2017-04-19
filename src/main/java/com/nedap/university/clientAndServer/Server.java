@@ -60,7 +60,6 @@ public class Server extends Handler {
       } catch (IOException e) {
         print("Lost connection to broadcast socket");
         shutdown();
-        //Drop packet
       }
 
       //Check is packet is a connecting packet and destined for this Server
@@ -68,6 +67,9 @@ public class Server extends Handler {
       if(isConnectionPacket(packet, this)) {
         print("Found client " + packet.getAddress() + ":" + packet.getPort());
         addClientHandler(packet);
+      } else {
+        //Log to statistics
+        getStatistics().logUnparseableConnectionPacket();
       }
     }
   }

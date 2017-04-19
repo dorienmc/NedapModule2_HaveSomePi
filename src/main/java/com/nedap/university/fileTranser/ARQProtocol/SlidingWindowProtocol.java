@@ -7,15 +7,16 @@ import com.nedap.university.fileTranser.MyUDPHeader.HeaderField;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
+import com.nedap.university.statistics.Statistics;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Created by dorien.meijercluwen on 18/04/2017.
  */
 public class SlidingWindowProtocol extends Protocol {
-  public static final int TIMEOUT = 5000; //ms
-  private static final int sendWindowSize = 10;
-  private static final int receiveWindowSize = 10;
+  public static final int TIMEOUT = 2000; //ms
+  private static final int sendWindowSize = 20;
+  private static final int receiveWindowSize = 2 * sendWindowSize;
 
   TimeOutHandler timeOutHandler;
   private volatile int lastAckRec;    //All packets below this sequence number have been acked.
@@ -46,6 +47,7 @@ public class SlidingWindowProtocol extends Protocol {
       if(!isInSendWindow(packet.getSequenceNumber())) {
         packet = null;
       } else {
+        statistics.logRetransmission();
         break;
       }
     }

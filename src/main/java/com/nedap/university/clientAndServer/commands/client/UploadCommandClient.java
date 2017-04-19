@@ -96,11 +96,15 @@ public class UploadCommandClient extends Command {
           +  "ms)");
     }
 
-    //Report statistics
+
+    //Report Statistics
     long endTime = System.currentTimeMillis();
-    handler.print(String.format("Uploaded %d packets in %d ms, speed: %d (packet/s)",
+    String uploadLog = String.format("Uploaded %s (%s) using %d packets in %d ms, speed: %5.2f (KB/s)",
+        metaData.getFileName(), Utils.getFileSize(metaData.getFileLength()),
         metaData.getNumberOfPackets() + 3,(endTime - startTime),
-        1000 * (metaData.getNumberOfPackets() + 3)/(endTime - startTime)));
+        Utils.getSpeed(metaData.getNumberOfPackets() + 3, endTime - startTime));
+    handler.print(uploadLog);
+    handler.getStatistics().addSpeedLog(uploadLog);
 
     shutdown();
   }

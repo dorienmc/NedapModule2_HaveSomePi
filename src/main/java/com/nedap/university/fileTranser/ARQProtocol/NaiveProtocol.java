@@ -5,6 +5,7 @@ import com.nedap.university.clientAndServer.Handler;
 import com.nedap.university.fileTranser.Receiver;
 import com.nedap.university.fileTranser.Sender;
 import com.nedap.university.fileTranser.UDPPacket;
+import com.nedap.university.statistics.Statistics;
 
 /**
  * Very naive protocol that just send data and does send acks.

@@ -80,7 +80,7 @@ public abstract class Command extends Thread {
       protocol.addPacketToReceiverBuffer(packet);
     } else {
       //Drop packet.
-      //TODO list ignored packets in statistics.
+      handler.getStatistics().logPacketOutsideReceiverWindow();
     }
   }
 

@@ -53,7 +53,7 @@ public class Receiver extends Thread {
         packet = new UDPPacket(response);
       } catch (ArrayIndexOutOfBoundsException e) {
         //Drop packet.
-        //TODO list ignored packets in statistics.
+        handler.getStatistics().logUnparseableReceivedPacket();
         continue;
       }
 
@@ -62,7 +62,8 @@ public class Receiver extends Thread {
       if(!packet.isValid(destPort,sourcePort)) {
         handler.printDebug("Error: packet not valid!" + packet);
         //Drop packet.
-        //continue;
+        handler.getStatistics().logInvalidPacket();
+        continue;
       }
 
       //Now send packet to correct Request, or let handler create a new request
@@ -92,8 +93,8 @@ public class Receiver extends Thread {
         Command command = handler.startNewCommand(requestType, requestId);
         command.addPacketToReceiveBuffer(packet, true);
       } else {
-        //Drop packet. //TODO update statistics?
-        //handler.print("Could not parse request type from flags: " + packet.getFlags());
+        //Drop packet.
+        handler.getStatistics().logUnrecognizedRequest();
       }
       return;
     } else {

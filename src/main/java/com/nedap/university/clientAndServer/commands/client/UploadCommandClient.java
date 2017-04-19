@@ -80,16 +80,20 @@ public class UploadCommandClient extends Command {
     protocol.sendData(digest,false);
 
     //Wait for ack of server of the md5 packet, then send End Of Request packet.
-    try {
-      //Note: the sequence number is updated after sending each packet, so it now equals the ack we expect to get.
-      UDPPacket md5Ack = protocol.retrievePacketByAck(protocol.getSeqNumber(),
-          metaData.getNumberOfPackets() * protocol.getTimeOut());
-      System.out.println("File md5 correct");
+    //Note: the sequence number is updated after sending each packet, so it now equals the ack we expect to get.
+    System.out.println("Waiting for md5 ack " + protocol.getSeqNumber());
+    boolean md5Acked = protocol.waitForAck(protocol.getSeqNumber(),
+        metaData.getNumberOfPackets() * protocol.getTimeOut());
+
+    if(md5Acked) {
+      handler.print("MD5 verified. File upload successful!");
 
       //Send eof packet.
       protocol.sendEndOfRequestPacket();
-    } catch (TimeoutException e) {
-      handler.print("Did not receive md5 ack packet from server in given time, " + e.getMessage());
+    } else {
+      handler.print("Did not receive md5 ack packet from server in given time (" +
+          metaData.getNumberOfPackets() * protocol.getTimeOut()
+          +  "ms)");
     }
 
     //Report statistics

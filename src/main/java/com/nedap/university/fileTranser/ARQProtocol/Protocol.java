@@ -228,24 +228,16 @@ public abstract class Protocol extends Thread {
   }
 
   /**
-   * Retrieve packet by ack. (Like 'receivePacket' but then looking at the ack number instead of the seq. number)
-   * @param ackNumber  sequence number of the packet that we wish to retrieve
-   * @param maxTimeOut maximum time the method will wait for a packet
-   *  Set to -1 for infinite time out, set to 0 for default timeout of the protocol.
-   * @throws TimeoutException when the requested packet has not arrived after 'maxTimeOut' ms
+   * Wait for specific ack.
+   * @return true if given ack arrives within time.
    */
-  public UDPPacket retrievePacketByAck(int ackNumber, int maxTimeOut) throws TimeoutException {
+  public boolean waitForAck(int ackNumber, int maxTimeOut) {
     maxTimeOut = (maxTimeOut == -1) ? getTimeOut() : maxTimeOut;
     int time = 0;
 
     while(true) {
-      if(!receiveBuffer.isEmpty()) {
-        //Search for packet
-        for(UDPPacket packet: receiveBuffer.values()) {
-          if(packet.getAckNumber() == ackNumber) {
-            return packet;
-          }
-        }
+      if(getLastAck() >= ackNumber) {
+        return true;
       }
 
       //Wait
@@ -253,8 +245,9 @@ public abstract class Protocol extends Thread {
       time += 10;
 
       if(maxTimeOut > 0 && time > maxTimeOut) {
-        throw new TimeoutException("Protocol.retrievePacketByAck: Exceeded timeOut of " + maxTimeOut + "ms.");
+        return false;
       }
+
     }
   }
 
@@ -270,6 +263,8 @@ public abstract class Protocol extends Thread {
   public int getSeqNumber() {
     return seqNumber;
   }
+
+  public abstract int getLastAck();
 
   Status getStatus() {
     return status;

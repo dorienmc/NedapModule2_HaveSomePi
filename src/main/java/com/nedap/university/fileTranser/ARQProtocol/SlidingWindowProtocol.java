@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class SlidingWindowProtocol extends Protocol {
   public static final int TIMEOUT = 2000; //ms
-  private static final int sendWindowSize = 20;
-  private static final int receiveWindowSize = 2 * sendWindowSize;
+  private static final int sendWindowSize = 40;
+  private static final int receiveWindowSize = sendWindowSize;
 
   TimeOutHandler timeOutHandler;
   private volatile int lastAckRec;    //All packets below this sequence number have been acked.

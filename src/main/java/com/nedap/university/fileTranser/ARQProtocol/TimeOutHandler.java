@@ -3,6 +3,7 @@ package com.nedap.university.fileTranser.ARQProtocol;
 import com.nedap.university.Utils;
 import com.nedap.university.fileTranser.UDPPacket;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -94,7 +95,6 @@ public class TimeOutHandler extends Thread {
       UDPPacket packet = entry.getKey();
       stopTimer(packet);
       protocol.addPacketToReceiverBuffer(packet);
-    }
 
   }
 
